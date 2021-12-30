@@ -82,7 +82,7 @@ add_compile_options(-Wl,-Wno-unused-function)
 if(NOT (MSVC OR (HERALD_TARGET STREQUAL zephyr)) )
   # Use the DEV location (not system location) to pick up OpenSSL v3
   # see .vscode/settings.json for CMake path overrides
-  find_package(OpenSSL 3.1.0 REQUIRED)
+  find_package(OpenSSL 3.0.1 REQUIRED)
   target_link_libraries(herald OpenSSL::Crypto)
 endif()
 

@@ -5,8 +5,6 @@
 #include "herald/data/sensor_logger.h"
 #include "herald/data/devnull_logging_sink.h"
 
-#include <iostream>
-
 namespace herald::data {
 
 DevNullLoggingSink::DevNullLoggingSink() = default;

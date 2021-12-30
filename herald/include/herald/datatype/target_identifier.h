@@ -8,8 +8,7 @@
 #include "data.h"
 
 #include <string>
-#include <memory>
-#include <iosfwd>
+#include <ostream>
 
 namespace herald {
 namespace datatype {

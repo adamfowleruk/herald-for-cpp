@@ -70,6 +70,7 @@ set(HERALD_HEADERS
   ${HERALD_BASE}/include/herald/datatype/sensor_type.h
   ${HERALD_BASE}/include/herald/datatype/sha256.h
   ${HERALD_BASE}/include/herald/datatype/signal_characteristic_data.h
+  ${HERALD_BASE}/include/herald/datatype/string_buffer.h
   ${HERALD_BASE}/include/herald/datatype/subject_parameters.h
   ${HERALD_BASE}/include/herald/datatype/target_identifier.h
   ${HERALD_BASE}/include/herald/datatype/time_interval.h

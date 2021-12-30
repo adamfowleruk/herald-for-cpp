@@ -43,8 +43,8 @@ public:
   // std::vector<PayloadData> payload(const Data& data);
 
 private:
-  uint16_t country;
-  uint16_t state;
+  std::uint16_t country;
+  std::uint16_t state;
   MYUINT32 code;
   ConcreteExtendedDataV1 extendedData;
 

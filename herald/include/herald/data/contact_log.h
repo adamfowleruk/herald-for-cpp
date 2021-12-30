@@ -54,9 +54,9 @@ private:
     return toEscape;
   }
 
-  std::string timestamp() const noexcept {
-    return Date().iso8601DateTime();
-  }
+  // std::string timestamp() const noexcept {
+  //   return Date().iso8601DateTime();
+  // }
 
   ContextT& ctx;
   PayloadDataFormatterT& fmt;

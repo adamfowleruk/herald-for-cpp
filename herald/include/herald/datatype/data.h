@@ -6,7 +6,7 @@
 #define HERALD_DATA_H
 
 #include <string>
-#include <iostream>
+// #include <iostream>
 
 #include "memory_arena.h"
 
@@ -559,11 +559,11 @@ Data DataSections<maxSize>::emptyRef = Data();
 } // end namespace
 
 namespace std {
-  template <typename MemoryArenaT>
-  inline std::ostream& operator<<(std::ostream &os, const herald::datatype::DataRef<MemoryArenaT>& d)
-  {
-    return os << d.hexEncodedString();
-  }
+  // template <typename MemoryArenaT>
+  // inline std::ostream& operator<<(std::ostream &os, const herald::datatype::DataRef<MemoryArenaT>& d)
+  // {
+  //   return os << d.hexEncodedString();
+  // }
 
   inline void hash_combine_impl(std::size_t& seed, std::size_t value)
   {

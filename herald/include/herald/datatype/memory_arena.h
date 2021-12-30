@@ -9,6 +9,9 @@
 #include <bitset>
 #include <array>
 #include <limits>
+#ifndef __ZEPHYR__
+#include <stdexcept>
+#endif
 
 /// \brief Acts as a non-global memory arena for arbitrary classes
 namespace herald {

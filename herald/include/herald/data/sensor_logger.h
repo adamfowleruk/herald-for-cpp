@@ -6,11 +6,12 @@
 #define HERALD_SENSOR_LOGGER_H
 
 #include "../datatype/bluetooth_state.h"
+#include "../datatype/string_buffer.h"
 
 #include <string>
-#include <memory>
-#include <ostream>
-#include <sstream>
+// #include <memory>
+// #include <ostream>
+// #include <sstream>
 
 // Zephyr compile workaround. Not ideal.
 // #ifndef HERALD_LOG_LEVEL
@@ -124,9 +125,11 @@ public:
 // };
 
 namespace {
+  using namespace herald::datatype;
   
-  [[maybe_unused]]
-  void tprintf(std::stringstream& os, const std::string& format) // base function
+  // [[maybe_unused]]
+  template <std::size_t BufSize>
+  void tprintf(StringBuffer<BufSize>& os, const std::string& format) // base function
   {
     std::size_t pos = 0;
     for ( auto c : format ) {
@@ -146,8 +149,8 @@ namespace {
   /// MARK: Individual value streaming support
 
   /// \brief Fallback method that assumes a << operator exists for type T.
-  template <typename T>
-  void tprintValue(std::stringstream& os, T value)
+  template <typename T, std::size_t BufSize>
+  void tprintValue(StringBuffer<BufSize>& os, T value)
   {
     os << value;
   }
@@ -165,15 +168,17 @@ namespace {
   //   os << std::to_string(value);
   // }
   
-  [[maybe_unused]]
-  void tprintValue(std::stringstream& os, std::uint8_t value)
+  // [[maybe_unused]]
+  template <std::size_t BufSize>
+  void tprintValue(StringBuffer<BufSize>& os, std::uint8_t value)
   {
     // only uint16 and above on zephyr has a stream operator
     os << std::uint16_t(value);
   }
   
-  [[maybe_unused]]
-  void tprintValue(std::stringstream& os, std::int8_t value)
+  // [[maybe_unused]]
+  template <std::size_t BufSize>
+  void tprintValue(StringBuffer<BufSize>& os, std::int8_t value)
   {
     // only int16 and above on zephyr has a stream operator
     os << std::int16_t(value);
@@ -181,14 +186,16 @@ namespace {
   
   /// \brief Prints an int value to the stream
   /// \note Also covers int32_t and int64_t
-  [[maybe_unused]]
-  void tprintValue(std::stringstream& os, int value)
+  // [[maybe_unused]]
+  template <std::size_t BufSize>
+  void tprintValue(StringBuffer<BufSize>& os, int value)
   {
     os << std::int64_t(value);
   }
   
-  [[maybe_unused]]
-  void tprintValue(std::stringstream& os, double value)
+  // [[maybe_unused]]
+  template <std::size_t BufSize>
+  void tprintValue(StringBuffer<BufSize>& os, double value)
   {
     // double may not be supported depending on Zephyr compile flags
     // TODO check for support for printf(double) rather than just assume it is not there
@@ -273,8 +280,8 @@ namespace {
  
   // typename std::enable_if_t<std::is_convertible<T, std::string>::value, std::string>
 
-  template<typename T>
-  void tprintf(std::stringstream& os, const std::string& format, T value) // recursive variadic function
+  template<typename T, std::size_t BufSize>
+  void tprintf(StringBuffer<BufSize>& os, const std::string& format, T value) // recursive variadic function
   {
     std::size_t pos = 0;
     for ( auto c : format ) {
@@ -292,8 +299,8 @@ namespace {
     }
   }
 
-  template<typename FirstT, typename SecondT, typename... RestT>
-  void tprintf(std::stringstream& os, const std::string& format, FirstT first, SecondT second, RestT... rest)
+  template<std::size_t BufSize, typename FirstT, typename SecondT, typename... RestT>
+  void tprintf(StringBuffer<BufSize>& os, const std::string& format, FirstT first, SecondT second, RestT... rest)
   {
     std::size_t pos = 0;
     for ( auto c : format ) {
@@ -389,9 +396,9 @@ public:
     if constexpr (0 == size) {
       log(SensorLoggerLevel::debug,message);
     } else {
-      std::stringstream os;
+      StringBuffer<256> os;
       tprintf(os,message,args...);
-      os << std::ends;
+      // os.ends();
       log(SensorLoggerLevel::debug, os.str());
     }
   }
@@ -402,9 +409,9 @@ public:
     if constexpr (0 == size) {
       log(SensorLoggerLevel::debug,message);
     } else {
-      std::stringstream os;
+      StringBuffer<256> os;
       tprintf(os,message,args...);
-      os << std::ends;
+      // os.ends();
       log(SensorLoggerLevel::info, os.str());
     }
   }
@@ -415,9 +422,9 @@ public:
     if constexpr (0 == size) {
       log(SensorLoggerLevel::debug,message);
     } else {
-      std::stringstream os;
+      StringBuffer<256> os;
       tprintf(os,message,args...);
-      os << std::ends;
+      // os.ends();
       log(SensorLoggerLevel::fault, os.str());
     }
   }

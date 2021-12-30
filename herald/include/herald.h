@@ -66,6 +66,7 @@
 #include "herald/datatype/sensor_state.h"
 #include "herald/datatype/sensor_type.h"
 #include "herald/datatype/signal_characteristic_data.h"
+#include "herald/datatype/string_buffer.h"
 #include "herald/datatype/subject_parameters.h"
 #include "herald/datatype/target_identifier.h"
 #include "herald/datatype/time_interval.h"

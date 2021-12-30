@@ -100,18 +100,18 @@ Date::operator+=(const TimeInterval& other) noexcept
   return *this;
 }
 
-std::string
-Date::iso8601DateTime() const noexcept {
-  // time_t t(seconds);
-  // char buf[21];
-  // strftime(buf, sizeof(buf), "%FT%TZ", gmtime(&t));
-  // return std::string(buf);
-  return std::to_string(seconds);
-}
+// std::string
+// Date::iso8601DateTime() const noexcept {
+//   // time_t t(seconds);
+//   // char buf[21];
+//   // strftime(buf, sizeof(buf), "%FT%TZ", gmtime(&t));
+//   // return std::string(buf);
+//   return std::to_string(seconds);
+// }
 
-Date::operator std::string() const noexcept {
-  return iso8601DateTime();
-}
+// Date::operator std::string() const noexcept {
+//   return iso8601DateTime();
+// }
 
 std::uint64_t
 Date::secondsSinceUnixEpoch() const noexcept {

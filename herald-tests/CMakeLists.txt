@@ -17,6 +17,7 @@ add_executable(herald-tests
 	base64string-tests.cpp
 	datetime-tests.cpp
 	randomuuid-tests.cpp
+	stringbuffer-tests.cpp
 	uint8-tests.cpp 
 	uint16-tests.cpp 
 	uint32-tests.cpp 
