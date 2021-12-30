@@ -74,7 +74,7 @@ endif()
 # Generic Zephyr build command below
 cmake_minimum_required(VERSION 3.13.1)
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
-project(herald-wearable VERSION 1.2.0 LANGUAGES CXX)
+project(herald-wearable VERSION 2.1.0 LANGUAGES CXX)
 
 # NOTE: Don't include C library as it bloats the binary beyond DFU max load size (i.e. beyond half of the available flash)
 

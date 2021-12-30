@@ -3,7 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "../../herald/herald.h"
+//#include "../../herald/herald.h" // This is convenient, but leads to large binaries!
+#include "../../herald/include/herald/sensor_array.h"
+#include "../../herald/include/herald/sensor.h"
+#include "../../herald/include/herald/datatype/target_identifier.h"
+#include "../../herald/include/herald/datatype/proximity.h"
+#include "../../herald/include/herald/datatype/date.h"
+#include "../../herald/include/herald/datatype/payload_data.h"
+#include "../../herald/include/herald/datatype/sensor_type.h"
+#include "../../herald/include/herald/datatype/immediate_send_data.h"
+#include "../../herald/include/herald/datatype/location.h"
+#include "../../herald/include/herald/datatype/sensor_state.h"
+#include "../../herald/include/herald/zephyr_context.h"
+#include "../../herald/include/herald/sensor_delegate.h"
+#include "../../herald/include/herald/ble/zephyr/concrete_ble_receiver.h"
+#include "../../herald/include/herald/ble/zephyr/concrete_ble_transmitter.h"
+#include "../../herald/include/herald/ble/zephyr/nordic_uart/nordic_uart_sensor_delegate.h"
+#include "../../herald/include/herald/payload/fixed/fixed_payload_data_supplier.h"
+#include "../../herald/include/herald/ble/ble_sensor_configuration.h"
+
 
 #include <zephyr.h>
 #include <sys/printk.h>
