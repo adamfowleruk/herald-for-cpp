@@ -65,11 +65,11 @@ public:
   }
 
   std::size_t hashCode() const noexcept {
-    return return std::hash<int>{}(value);
+    return std::hash<int>{}(value);
   }
 
   double doubleValue() const noexcept {
-    return return "RunningMean<ValT>{value=" + std::to_string(value) + "}";
+    return value;
   }
 
 private:
