@@ -100,6 +100,12 @@ set(HERALD_HEADERS_ZEPHYR
   ${HERALD_BASE}/include/herald/data/zephyr/zephyr_logging_sink.h
   ${HERALD_BASE}/include/herald/zephyr_context.h
 )
+set(HERALD_HEADERS_MESH 
+  ${HERALD_BASE}/include/herald/mesh/mesh.h
+  ${HERALD_BASE}/include/herald/mesh/location_services.h
+  ${HERALD_BASE}/include/herald/mesh/location_services_cli.h
+  ${HERALD_BASE}/include/herald/mesh/location_services_srv.h
+)
 if(DEFINED CONFIG_BT_SCAN)
   set(HERALD_HEADERS_ZEPHYR
     ${HERALD_HEADERS_ZEPHYR}

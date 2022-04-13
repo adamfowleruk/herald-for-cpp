@@ -21,7 +21,7 @@ static int send_herald_location_services_srv_status(struct bt_mesh_model *model,
 
 	bt_mesh_model_msg_init(&msg, BT_MESH_LINUX_FOUNDATION_OP_STATUS);
 
-  // TODO append data to buffer to send from statuc message
+	// TODO append data to buffer to send from status message
 	// net_buf_simple_add_u8(&msg, model->pub->period_div);
 
 	if (bt_mesh_model_send(model, ctx, &msg, NULL, NULL)) {
@@ -118,3 +118,51 @@ static int herald_location_services_srv_init(struct bt_mesh_model *model)
 const struct bt_mesh_model_cb bt_mesh_herald_location_services_srv_cb = {
 	.init = herald_location_services_srv_init,
 };
+
+
+
+
+// MARK: Server side API for Herald to/from MESH Gateway to call.
+
+int bt_mesh_herald_presence_share(uint8_t *macOfSix, int8_t rssi, enum bt_mesh_herald_location_services_cli_presence presence) {
+	// Ensure our server handle has been initialised
+	if (NULL == herald_location_srv) {
+		return -1;
+	}
+
+	// Fetch model
+	bt_mesh_model *mdl = herald_location_srv->model;
+	BT_DBG("Got base mesh model");
+
+	// Ensure we've been bound to a publishing destination by our provisioner
+	if (mdl->pub->addr == BT_MESH_ADDR_UNASSIGNED) {
+	  BT_DBG("Does not have publication address");
+		return -2;
+	}
+
+	// Fetch model message buffer
+	struct net_buf_simple *msg = mdl->pub->msg;
+  
+	BT_DBG("Max model message size: %d", mdl->pub->msg->size);
+	BT_DBG("Model publish address: %d", mdl->pub->addr);
+	BT_DBG("Model publish key: %d", mdl->pub->key);
+	BT_DBG("Model publish TTL: %d", mdl->pub->ttl);
+
+  // Reset model message buffer
+	bt_mesh_model_msg_init(msg, BT_MESH_LINUX_FOUNDATION_OP_STATUS);
+	BT_DBG("Max model message size now: %d", mdl->pub->msg->size);
+
+	// append data to buffer to send from status message
+	net_buf_simple_add_u8(msg, macOfSix[0]);
+	net_buf_simple_add_u8(msg, macOfSix[1]);
+	net_buf_simple_add_u8(msg, macOfSix[2]);
+	net_buf_simple_add_u8(msg, macOfSix[3]);
+	net_buf_simple_add_u8(msg, macOfSix[4]);
+	net_buf_simple_add_u8(msg, macOfSix[5]);
+	net_buf_simple_add_u8(msg, (uint8_t)rssi);
+	net_buf_simple_add_u8(msg, (uint8_t)presence);
+	BT_DBG("Message length to send: %d", msg->len);
+
+	// share presence
+	return bt_mesh_model_publish(mdl);
+}

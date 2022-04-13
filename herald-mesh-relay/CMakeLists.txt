@@ -104,6 +104,7 @@ endif()
 # gcc arm does not warn about missing defs until runtime
 # add_compile_options(--no-undefined -ffunction-sections -fdata-sections -s -fno-unaligned-access -fno-exceptions -fno-rtti -Wall -Wextra -Wl,-z,defs,norelro,--strict,--strict_symbols,--gc-sections,--hash-style=gnu)
 
+message("HERALD SOURCES MESH: ${HERALD_SOURCES_MESH}")
 target_sources(app PRIVATE
   # ${HERALD_SOURCES}
   # ${HERALD_SOURCES_ZEPHYR}

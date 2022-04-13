@@ -60,6 +60,15 @@ extern const struct bt_mesh_model_cb bt_mesh_herald_location_services_srv_cb;
 
 
 
+
+
+
+// MARK: Server side API for Herald to/from MESH Gateway to call.
+
+int bt_mesh_herald_presence_share(uint8_t *macOfSix, int8_t rssi, 
+	enum bt_mesh_herald_location_services_cli_presence presence);
+
+
 #ifdef __cplusplus
 }
 #endif

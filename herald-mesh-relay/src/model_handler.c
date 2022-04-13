@@ -176,7 +176,7 @@ static struct bt_mesh_health_srv health_srv = {
 };
 
 BT_MESH_HEALTH_PUB_DEFINE(health_pub, 0);
-BT_MESH_HERALD_LOCATION_SERVICES_SRV_PUB_DEFINE(location_pub, 0);
+BT_MESH_HERALD_LOCATION_SERVICES_SRV_PUB_DEFINE(location_pub, 11);
 
 static struct bt_mesh_herald_location_services_srv location_srv = {
 	.cb = &location_handlers
@@ -207,3 +207,4 @@ const struct bt_mesh_comp *model_handler_init(void)
 
 	return &comp;
 }
+

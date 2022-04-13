@@ -11,8 +11,8 @@
 #include "model_handler.h"
 #include "lb_service_handler.h"
 
-// #include "herald/mesh/mesh.h"
-// #include "herald/mesh/location_services_cli.h"
+#include "herald/mesh/mesh.h"
+#include "herald/mesh/location_services_srv.h"
 
 #include <logging/log.h>
 // namespace applogging {
@@ -102,7 +102,10 @@ void main(void)
 		APP_DBG("Bluetooth init failed (err %d)", err);
 	}
 
+	uint8_t dummyMac[6] = {0,1,2,3,4,5};
+
 	// Regular debug output to show the app is still running
+	int iter = 0;
 	while (1) {
 		k_sleep(K_SECONDS(2));
 		gpio_pin_set(dev, PIN, (int)led_is_on);
@@ -113,6 +116,12 @@ void main(void)
 		// TODO Add logic here to detect failure in Herald thread, and restart to resume as necessary
 
 		// Fake presence publishing for now
-		// int err = 
+		++iter;
+		if (iter > 10 && 0 == iter % 5) {
+			APP_DBG("Publishing presence message...");
+			int res = bt_mesh_herald_presence_share(dummyMac, -40, 
+				bt_mesh_herald_location_services_cli_presence::BT_MESH_HERALD_PRESENCE_OBSERVED);
+			APP_DBG("Presence publishing result: %d", res);
+		}
 	}
 }
