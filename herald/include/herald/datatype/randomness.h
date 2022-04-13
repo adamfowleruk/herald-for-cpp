@@ -148,7 +148,7 @@ public:
     std::size_t toXor = 0;
     for (std::size_t i = 0;i < multiple;i++) {
       if (0 != i) {
-        toXor << size;
+        toXor = toXor << size;
       }
       toXor += entropy;
     }

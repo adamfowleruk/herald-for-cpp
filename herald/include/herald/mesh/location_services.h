@@ -8,6 +8,7 @@
 #define HERALD_MESH_LOCATION_SERVICES_H
 
 #include "mesh.h"
+#include "location_services_cli.h"
 #include <bluetooth/mesh/model_types.h>
 
 #ifdef __cplusplus

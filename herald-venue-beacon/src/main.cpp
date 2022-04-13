@@ -53,12 +53,12 @@ LOG_MODULE_REGISTER(app, CONFIG_APP_LOG_LEVEL);
 #define FLAGS	0
 #endif
 
-void k_sys_fatal_error_handler(unsigned int reason, const z_arch_esf_t *esf) {
-	// LOG_PANIC();
-	while (1) {
-		// do nothing
-	}
-}
+// void k_sys_fatal_error_handler(unsigned int reason, const z_arch_esf_t *esf) {
+// 	// LOG_PANIC();
+// 	while (1) {
+// 		// do nothing
+// 	}
+// }
 
 struct k_thread herald_thread;
 constexpr int stackMaxSize = 

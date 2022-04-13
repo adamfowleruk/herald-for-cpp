@@ -11,8 +11,8 @@
 #include "model_handler.h"
 #include "lb_service_handler.h"
 
-#include "herald/mesh/mesh.h"
-#include "herald/mesh/location_services_cli.h"
+// #include "herald/mesh/mesh.h"
+// #include "herald/mesh/location_services_cli.h"
 
 #include <logging/log.h>
 // namespace applogging {
@@ -113,6 +113,6 @@ void main(void)
 		// TODO Add logic here to detect failure in Herald thread, and restart to resume as necessary
 
 		// Fake presence publishing for now
-		int err = 
+		// int err = 
 	}
 }
