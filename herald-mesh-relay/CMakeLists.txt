@@ -30,35 +30,35 @@ set(BASE_CONFIG ../config/zephyr)
 set(OVERLAY_CONFIG
   ${BASE_CONFIG}/base-mesh.conf
   ${BASE_CONFIG}/usb.conf
-#   ${BASE_CONFIG}/receiver.conf
-#   ${BASE_CONFIG}/transmitter.conf
+  ${BASE_CONFIG}/receiver.conf
+  ${BASE_CONFIG}/transmitter.conf
 )
 
-# if($ENV{BOARD} MATCHES .*nrf5340.*)
-#   set(OVERLAY_CONFIG 
-#     ${OVERLAY_CONFIG} 
-#     ${BASE_CONFIG}/nrf5340.conf
-#   )
-#   add_definitions(-DHERALD_MEMORYARENA_MAX=4096)
-# elseif($ENV{BOARD} MATCHES .*nrf52840.*)
-#   set(OVERLAY_CONFIG 
-#     ${OVERLAY_CONFIG} 
-#     ${BASE_CONFIG}/nrf52840.conf
-#   )
-#   add_definitions(-DHERALD_MEMORYARENA_MAX=4096)
-# elseif($ENV{BOARD} MATCHES .*nrf52832.*)
-  # set(OVERLAY_CONFIG 
-  #   ${OVERLAY_CONFIG} 
-  #   ${BASE_CONFIG}/nrf52832.conf
-  # )
-  # add_definitions(-DHERALD_MEMORYARENA_MAX=512)
-# elseif($ENV{BOARD} MATCHES .*nrf52833.*)
-#   set(OVERLAY_CONFIG 
-#     ${OVERLAY_CONFIG} 
-#     ${BASE_CONFIG}/nrf52833.conf
-#   )
-#   add_definitions(-DHERALD_MEMORYARENA_MAX=4096)
-# endif()
+if($ENV{BOARD} MATCHES .*nrf5340.*)
+  set(OVERLAY_CONFIG 
+    ${OVERLAY_CONFIG} 
+    ${BASE_CONFIG}/nrf5340.conf
+  )
+  add_definitions(-DHERALD_MEMORYARENA_MAX=4096)
+elseif($ENV{BOARD} MATCHES .*nrf52840.*)
+  set(OVERLAY_CONFIG 
+    ${OVERLAY_CONFIG} 
+    ${BASE_CONFIG}/nrf52840.conf
+  )
+  add_definitions(-DHERALD_MEMORYARENA_MAX=4096)
+elseif($ENV{BOARD} MATCHES .*nrf52832.*)
+  set(OVERLAY_CONFIG 
+    ${OVERLAY_CONFIG} 
+    ${BASE_CONFIG}/nrf52832.conf
+  )
+  add_definitions(-DHERALD_MEMORYARENA_MAX=512)
+elseif($ENV{BOARD} MATCHES .*nrf52833.*)
+  set(OVERLAY_CONFIG 
+    ${OVERLAY_CONFIG} 
+    ${BASE_CONFIG}/nrf52833.conf
+  )
+  add_definitions(-DHERALD_MEMORYARENA_MAX=4096)
+endif()
 if(CMAKE_BUILD_TYPE MATCHES Debug)
   set(OVERLAY_CONFIG 
     ${OVERLAY_CONFIG} 
@@ -106,9 +106,9 @@ endif()
 
 message("HERALD SOURCES MESH: ${HERALD_SOURCES_MESH}")
 target_sources(app PRIVATE
-  # ${HERALD_SOURCES}
-  # ${HERALD_SOURCES_ZEPHYR}
-  # ${HERALD_SOURCES_TINYCRYPT}
+  ${HERALD_SOURCES}
+  ${HERALD_SOURCES_ZEPHYR}
+  ${HERALD_SOURCES_TINYCRYPT}
   #${HERALD_SOURCES_MBEDTLS}
   ${HERALD_SOURCES_MESH}
   src/main.cpp

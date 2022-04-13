@@ -7,6 +7,7 @@
 
 #include "ble_database.h"
 #include "ble_receiver.h"
+#include "ble_device.h"
 #include "ble_sensor.h"
 #include "ble_transmitter.h"
 #include "ble_concrete.h"
@@ -20,6 +21,7 @@
 #include "ble_sensor_configuration.h"
 #include "ble_coordinator.h"
 #include "../datatype/bluetooth_state.h"
+#include "../datatype/target_identifier.h"
 
 #include <array>
 #include <algorithm>
