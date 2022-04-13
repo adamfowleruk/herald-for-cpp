@@ -89,7 +89,8 @@ const struct bt_mesh_model_op bt_mesh_herald_location_services_srv_op[] = {
 
 static int herald_location_services_srv_init(struct bt_mesh_model *model)
 {
-	struct bt_mesh_herald_location_services_srv *srv = model->user_data;
+	struct bt_mesh_herald_location_services_srv *srv = 
+		(bt_mesh_herald_location_services_srv*)model->user_data;
 
 	if (!srv) {
 		BT_ERR("No Herald Location Services Server context provided");

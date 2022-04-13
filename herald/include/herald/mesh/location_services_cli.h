@@ -40,9 +40,9 @@ struct bt_mesh_herald_location_services_cli_handlers {
    */
   void (*const start)(struct bt_mesh_herald_location_services_cli *client);
 
-	void (*const presence)(struct bt_mesh_herald_location_services_cli *client,
-			       struct bt_mesh_msg_ctx *ctx,
-			       enum bt_mesh_herald_location_services_cli_presence presence);
+  void (*const presence)(struct bt_mesh_herald_location_services_cli *client,
+                         struct bt_mesh_msg_ctx *ctx,
+                         bt_mesh_herald_location_services_presence presence);
 };
 
 struct bt_mesh_herald_location_services_cli {
@@ -52,11 +52,11 @@ struct bt_mesh_herald_location_services_cli {
   // uint8_t buf[BT_MESH_MODEL_BUG_LEN(BT_MESH_HERALD_LOCATION_SERVICES_CLI_OP_MESSAGE,
   //   BT_MESH_HERALD_LOCATION_SERVICES_CLI_MSG_MAXLEN_MESSAGE)];
   const struct bt_mesh_herald_location_services_cli_handlers *handlers;
-  enum bt_mesh_herald_location_services_cli_presence presence;
+  bt_mesh_herald_location_services_cli_presence presence;
 };
 
 int bt_mesh_herald_location_services_cli_presence_set(struct bt_mesh_herald_location_services_cli *client,
-  enum bt_mesh_herald_location_services_cli_presence presence);
+  bt_mesh_herald_location_services_cli_presence presence);
 
 int bt_mesh_herald_location_services_cli_presence_get(struct bt_mesh_herald_location_services_cli *client,
   uint16_t addr);

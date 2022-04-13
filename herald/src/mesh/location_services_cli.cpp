@@ -5,10 +5,10 @@
  */
 
 #include <bluetooth/mesh.h>
+// #include <bluetooth/mesh/net.h>
+// #include <bluetooth/mesh/transport.h>
 #include "herald/mesh/mesh.h"
 #include "herald/mesh/location_services_cli.h"
-#include "mesh/net.h"
-#include "mesh/transport.h"
 #include <string.h>
 
 #include <logging/log.h>
@@ -33,10 +33,18 @@ static void encode_presence(struct net_buf_simple *buf,
 static int handle_presence(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx,
 			   struct net_buf_simple *buf)
 {
-	struct bt_mesh_herald_location_services_cli *client = model->user_data;
-	enum bt_mesh_herald_location_services_cli_presence presence;
+	struct bt_mesh_herald_location_services_cli *client =
+			(bt_mesh_herald_location_services_cli *)model->user_data;
+	bt_mesh_herald_location_services_presence presence;
 
-	presence = net_buf_simple_pull_u8(buf);
+	presence.address[0] = net_buf_simple_pull_u8(buf);
+	presence.address[1] = net_buf_simple_pull_u8(buf);
+	presence.address[2] = net_buf_simple_pull_u8(buf);
+	presence.address[3] = net_buf_simple_pull_u8(buf);
+	presence.address[4] = net_buf_simple_pull_u8(buf);
+	presence.address[5] = net_buf_simple_pull_u8(buf);
+	presence.rssi = (int8_t)net_buf_simple_pull_u8(buf);
+	presence.status = (bt_mesh_herald_location_services_cli_presence)net_buf_simple_pull_u8(buf);
 
 	if (client->handlers->presence) {
 		client->handlers->presence(client, ctx, presence);
@@ -48,10 +56,11 @@ static int handle_presence(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *
 static int handle_presence_get(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx,
 			       struct net_buf_simple *buf)
 {
-	struct bt_mesh_herald_location_services_cli *client = model->user_data;
+	struct bt_mesh_herald_location_services_cli *client = 
+	  (bt_mesh_herald_location_services_cli*)model->user_data;
 
 	BT_MESH_MODEL_BUF_DEFINE(msg, BT_MESH_LINUX_FOUNDATION_OP_SET,
-				 BT_MESH_HERALD_LOCATION_SERVICES_CLI_MSG_LEN_PRESENCE);
+													 BT_MESH_HERALD_LOCATION_SERVICES_MSG_LEN_GET);
 
 	encode_presence(&msg, client->presence);
 
@@ -63,12 +72,12 @@ static int handle_presence_get(struct bt_mesh_model *model, struct bt_mesh_msg_c
 const struct bt_mesh_model_op _bt_mesh_herald_location_services_cli_op[] = {
 	{
 		BT_MESH_LINUX_FOUNDATION_OP_SET,
-		BT_MESH_LEN_EXACT(BT_MESH_HERALD_LOCATION_SERVICES_CLI_MSG_LEN_PRESENCE),
+		BT_MESH_LEN_EXACT(BT_MESH_HERALD_LOCATION_SERVICES_MSG_MAXLEN_SET),
 		handle_presence
 	},
 	{
 		BT_MESH_LINUX_FOUNDATION_OP_GET,
-		BT_MESH_LEN_EXACT(BT_MESH_HERALD_LOCATION_SERVICES_CLI_MSG_LEN_PRESENCE_GET),
+		BT_MESH_LEN_EXACT(BT_MESH_HERALD_LOCATION_SERVICES_MSG_LEN_GET),
 		handle_presence_get
 	},
 	BT_MESH_MODEL_OP_END,
@@ -77,7 +86,8 @@ const struct bt_mesh_model_op _bt_mesh_herald_location_services_cli_op[] = {
 
 static int bt_mesh_herald_location_services_cli_update_handler(struct bt_mesh_model *model)
 {
-	struct bt_mesh_herald_location_services_cli *client = model->user_data;
+	struct bt_mesh_herald_location_services_cli *client =
+			(bt_mesh_herald_location_services_cli *)model->user_data;
 
 	/* Continue publishing current presence. */
 	encode_presence(model->pub->msg, client->presence);
@@ -92,7 +102,8 @@ static int bt_mesh_herald_location_services_cli_settings_set(struct bt_mesh_mode
 					 settings_read_cb read_cb,
 					 void *cb_arg)
 {
-	struct bt_mesh_herald_location_services_cli *client = model->user_data;
+	struct bt_mesh_herald_location_services_cli *client =
+			(bt_mesh_herald_location_services_cli *)model->user_data;
 
 	if (name) {
 		return -ENOENT;
@@ -114,7 +125,8 @@ static int bt_mesh_herald_location_services_cli_settings_set(struct bt_mesh_mode
 
 static int bt_mesh_herald_location_services_cli_init(struct bt_mesh_model *model)
 {
-	struct bt_mesh_herald_location_services_cli *client = model->user_data;
+	struct bt_mesh_herald_location_services_cli *client =
+			(bt_mesh_herald_location_services_cli *)model->user_data;
 
 	client->model = model;
 
@@ -128,7 +140,8 @@ static int bt_mesh_herald_location_services_cli_init(struct bt_mesh_model *model
 
 static int bt_mesh_herald_location_services_cli_start(struct bt_mesh_model *model)
 {
-	struct bt_mesh_herald_location_services_cli *client = model->user_data;
+	struct bt_mesh_herald_location_services_cli *client =
+			(bt_mesh_herald_location_services_cli *)model->user_data;
 
 	if (client->handlers->start) {
 		client->handlers->start(client);
@@ -139,7 +152,8 @@ static int bt_mesh_herald_location_services_cli_start(struct bt_mesh_model *mode
 
 static void bt_mesh_herald_location_services_cli_reset(struct bt_mesh_model *model)
 {
-	struct bt_mesh_herald_location_services_cli *client = model->user_data;
+	struct bt_mesh_herald_location_services_cli *client =
+			(bt_mesh_herald_location_services_cli *)model->user_data;
 
 	client->presence = BT_MESH_HERALD_PRESENCE_OBSERVED;
 
@@ -149,11 +163,11 @@ static void bt_mesh_herald_location_services_cli_reset(struct bt_mesh_model *mod
 }
 
 const struct bt_mesh_model_cb _bt_mesh_herald_location_services_cli_cb = {
-	.init = bt_mesh_herald_location_services_cli_init,
-	.start = bt_mesh_herald_location_services_cli_start,
 #ifdef CONFIG_BT_SETTINGS
 	.settings_set = bt_mesh_herald_location_services_cli_settings_set,
 #endif
+	.start = bt_mesh_herald_location_services_cli_start,
+	.init = bt_mesh_herald_location_services_cli_init,
 	.reset = bt_mesh_herald_location_services_cli_reset,
 };
 
@@ -179,27 +193,22 @@ int bt_mesh_herald_location_services_cli_presence_get(struct bt_mesh_herald_loca
 				  uint16_t addr)
 {
 	struct bt_mesh_msg_ctx ctx = {
-		.addr = addr,
 		.app_idx = client->model->keys[0],
-		.send_ttl = BT_MESH_TTL_DEFAULT,
+		.addr = addr,
 		.send_rel = true,
+		.send_ttl = BT_MESH_TTL_DEFAULT,
 	};
 
 	BT_MESH_MODEL_BUF_DEFINE(buf, BT_MESH_LINUX_FOUNDATION_OP_GET,
-				 BT_MESH_HERALD_LOCATION_SERVICES_CLI_MSG_LEN_PRESENCE_GET);
+													 BT_MESH_HERALD_LOCATION_SERVICES_MSG_LEN_GET);
 	bt_mesh_model_msg_init(&buf, BT_MESH_LINUX_FOUNDATION_OP_GET);
 
 	return bt_mesh_model_send(client->model, &ctx, &buf, NULL, NULL);
 }
 
-
-
-
-
-
-
-int bt_mesh_herald_presence_message_send(struct bt_mesh_chat_cli *chat, struct bt_mesh_herald_location_services_presence *msg) {
-	struct net_buf_simple *buf = chat->model->pub->msg;
+int bt_mesh_herald_presence_message_send(struct bt_mesh_herald_location_services_cli *cli, struct bt_mesh_herald_location_services_presence *msg)
+{
+	struct net_buf_simple *buf = cli->model->pub->msg;
 
 	bt_mesh_model_msg_init(buf, BT_MESH_LINUX_FOUNDATION_OP_MESSAGE);
 
@@ -209,8 +218,8 @@ int bt_mesh_herald_presence_message_send(struct bt_mesh_chat_cli *chat, struct b
 	net_buf_simple_add_u8(buf, msg->address[3]);
 	net_buf_simple_add_u8(buf, msg->address[4]);
 	net_buf_simple_add_u8(buf, msg->address[5]);
-	net_buf_simple_add_i8(buf, msg->rssi);
-	net_buf_simple_add_u8(buf, msg->presence);
+	net_buf_simple_add_u8(buf, msg->rssi);
+	net_buf_simple_add_u8(buf, msg->status);
 
-	return bt_mesh_model_publish(chat->model);
+	return bt_mesh_model_publish(cli->model);
 };

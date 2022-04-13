@@ -171,8 +171,8 @@ set(HERALD_SOURCES_TINYCRYPT
   ${HERALD_BASE}/src/datatype/tinycrypt/sha256.cpp
 )
 set(HERALD_SOURCES_MESH
-  ${HERALD_BASE}/src/mesh/location_services_cli.c
-  ${HERALD_BASE}/src/mesh/location_services_srv.c
+  ${HERALD_BASE}/src/mesh/location_services_cli.cpp
+  ${HERALD_BASE}/src/mesh/location_services_srv.cpp
 )
 set(HERALD_SOURCES_OPENSSL
   ${HERALD_BASE}/src/datatype/openssl/sha256.cpp
