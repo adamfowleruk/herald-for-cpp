@@ -200,24 +200,23 @@ void herald_entry()
 
 	// Disable receiver / scanning mode - we're just transmitting our value
 	BLESensorConfiguration config = ctx.getSensorConfiguration(); // copy ctor
-	config.scanningEnabled = false;
+	config.scanningEnabled = true; // To see other nearby BLE devices
 	// config.advertisingEnabled = true; // default
 	ctx.setSensorConfiguration(config);
 
 	ConcreteExtendedDataV1 extendedData;
 	extendedData.addSection(ExtendedDataSegmentCodesV1::TextPremises, erinsStakehouse.name);
 
+	// TODO get this from configuration of the MESH element (Nav beacon model)
 	payload::beacon::ConcreteBeaconPayloadDataSupplierV1 pds(
 			erinsStakehouse.country,
 			erinsStakehouse.state,
 			erinsStakehouse.code,
 			extendedData);
 
-	herald::ble::nordic_uart::NordicUartSensorDelegate nus(ctx);
-
 	// this is unusual, but required. Really we should log activity to serial BLE or similar
 	DummyDelegate appDelegate;
-	SensorDelegateSet sensorDelegates(appDelegate, nus);
+	SensorDelegateSet sensorDelegates(appDelegate);
 
 	ConcreteBLESensor ble(ctx, ctx.getBluetoothStateManager(), pds, sensorDelegates);
 	SensorArray sa(ctx, pds, ble);
@@ -285,6 +284,8 @@ void main(void)
 	if (err) {
 		APP_DBG("Bluetooth init failed (err %d)", err);
 	}
+
+	// TODO don't start Herald until enrolled and configured via MESH
 
 	// Start herald entry on a new thread in case of errors, or needing to do something on the main thread
 	[[maybe_unused]]
