@@ -9,8 +9,8 @@
 #include <dk_buttons_and_leds.h>
 #include "model_handler.h"
 
-#include "herald/mesh/location_services.h"
-#include "herald/mesh/location_services_srv.h"
+#include "herald/mesh/presence.h"
+#include "herald/mesh/presence_server.h"
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(meshmodel, CONFIG_APP_LOG_LEVEL);
@@ -33,39 +33,31 @@ static const struct bt_mesh_onoff_srv_handlers onoff_handlers = {
 };
 
 struct led_ctx {
-	struct bt_mesh_onoff_srv srv;
+	struct bt_mesh_onoff_srv server;
 	struct k_work_delayable work;
 	uint32_t remaining;
 	bool value;
 };
 
 static struct led_ctx led_ctx = {
-	.srv = BT_MESH_ONOFF_SRV_INIT(&onoff_handlers),
+    .server = BT_MESH_ONOFF_SRV_INIT(&onoff_handlers),
 };
 
 // Define herald location services server handlers
-static int location_updated(struct bt_mesh_herald_location_services_srv *srv, 
-	const struct bt_mesh_herald_location_services_set *set, 
-	struct bt_mesh_herald_location_services_status *rsp);
+static int presence_updated(struct bt_mesh_herald_presence_server* srv,
+                            const struct bt_mesh_herald_presence_set* set,
+                            struct bt_mesh_herald_presence_status* rsp);
 
-static const struct bt_mesh_herald_location_services_srv_cb location_handlers = {
-	.set = location_updated
-};
+static const struct bt_mesh_herald_presence_server_cb presence_handlers =
+    {.set = presence_updated};
 
-
-
-static int location_updated(struct bt_mesh_herald_location_services_srv *srv, 
-	const struct bt_mesh_herald_location_services_set *set, 
-	struct bt_mesh_herald_location_services_status *rsp) {
-	
-	LOG_DBG("location_updated() called");
-	// TODO do work
-	return 0;
+static int presence_updated(struct bt_mesh_herald_presence_server* srv,
+                            const struct bt_mesh_herald_presence_set* set,
+                            struct bt_mesh_herald_presence_status* rsp) {
+  LOG_DBG("presence_updated() called");
+  // TODO do work
+  return 0;
 }
-
-
-
-
 
 static void led_transition_start(void)
 {
@@ -132,7 +124,7 @@ static void led_work(struct k_work *work)
 		struct bt_mesh_onoff_status status;
 
 		led_status(&status);
-		bt_mesh_onoff_srv_pub(&led_ctx.srv, NULL, &status);
+		bt_mesh_onoff_srv_pub(&led_ctx.server, NULL, &status);
 	}
 }
 
@@ -166,33 +158,31 @@ static void attention_off(struct bt_mesh_model *mod)
 	attention = false;
 }
 
-static const struct bt_mesh_health_srv_cb health_srv_cb = {
+static const struct bt_mesh_health_srv_cb health_server_cb = {
 	.attn_on = attention_on,
 	.attn_off = attention_off,
 };
 
-static struct bt_mesh_health_srv health_srv = {
-	.cb = &health_srv_cb,
+static struct bt_mesh_health_srv health_server = {
+	.cb = &health_server_cb,
 };
 
 BT_MESH_HEALTH_PUB_DEFINE(health_pub, 0);
-BT_MESH_HERALD_LOCATION_SERVICES_SRV_PUB_DEFINE(location_pub, 11);
+BT_MESH_HERALD_PRESENCE_SERVER_PUB_DEFINE(presence_pub, 11);
 
-static struct bt_mesh_herald_location_services_srv location_srv = {
-	.cb = &location_handlers
+static struct bt_mesh_herald_presence_server presence_server = {
+	.cb = &presence_handlers
 };
 
-static struct bt_mesh_elem elements[] = {
-	BT_MESH_ELEM(1,
-		BT_MESH_MODEL_LIST(
-			BT_MESH_MODEL_CFG_SRV,
-			BT_MESH_MODEL_HEALTH_SRV(&health_srv, &health_pub),
-			BT_MESH_MODEL_ONOFF_SRV(&led_ctx.srv),
-			BT_MESH_MODEL_HERALD_LOCATION_SERVICES_SRV(&location_srv, &location_pub)
-		),
-		BT_MESH_MODEL_NONE
-	)
-};
+static struct bt_mesh_elem elements[] = {BT_MESH_ELEM(
+    1,
+    BT_MESH_MODEL_LIST(BT_MESH_MODEL_CFG_SRV,
+                       BT_MESH_MODEL_HEALTH_SRV(&health_server, &health_pub),
+                       BT_MESH_MODEL_ONOFF_SRV(&led_ctx.server),
+                       // TODO reconfigure this for beaconing, presence
+                       BT_MESH_MODEL_HERALD_PRESENCE_SERVER(
+                           &presence_server, &presence_pub)),
+    BT_MESH_MODEL_NONE)};
 
 static const struct bt_mesh_comp comp = {
 	.cid = BT_MESH_LINUX_FOUNDATION_VENDOR_COMPANY_ID,

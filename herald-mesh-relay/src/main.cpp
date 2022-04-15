@@ -3,318 +3,131 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// #include "../../herald/herald.h" // This is convenient, but leads to large binaries!
-#include "../../herald/include/herald/sensor_array.h"
-#include "../../herald/include/herald/sensor.h"
-#include "../../herald/include/herald/datatype/target_identifier.h"
-#include "../../herald/include/herald/datatype/proximity.h"
-#include "../../herald/include/herald/datatype/date.h"
-#include "../../herald/include/herald/datatype/payload_data.h"
-#include "../../herald/include/herald/datatype/sensor_type.h"
-#include "../../herald/include/herald/datatype/immediate_send_data.h"
-#include "../../herald/include/herald/datatype/location.h"
-#include "../../herald/include/herald/datatype/sensor_state.h"
-#include "../../herald/include/herald/zephyr_context.h"
-#include "../../herald/include/herald/sensor_delegate.h"
-#include "../../herald/include/herald/ble/zephyr/concrete_ble_receiver.h"
-#include "../../herald/include/herald/ble/zephyr/concrete_ble_transmitter.h"
-#include "../../herald/include/herald/ble/zephyr/nordic_uart/nordic_uart_sensor_delegate.h"
-#include "../../herald/include/herald/payload/beacon/beacon_payload_data_supplier.h"
-#include "../../herald/include/herald/payload/extended/extended_data.h"
-#include "../../herald/include/herald/payload/fixed/fixed_payload_data_supplier.h"
-#include "../../herald/include/herald/ble/ble_sensor_configuration.h"
+#include "herald_handler.h"
+#include "lb_service_handler.h"
+#include "model_handler.h"
 
 #include <bluetooth/bluetooth.h>
-#include <bluetooth/mesh/models.h>
 #include <bluetooth/mesh/dk_prov.h>
-#include <dk_buttons_and_leds.h>
-#include <drivers/gpio.h>
-#include "model_handler.h"
-#include "lb_service_handler.h"
+#include <bluetooth/mesh/models.h>
 
-#include "herald/mesh/mesh.h"
-#include "herald/mesh/location_services_srv.h"
+#include <drivers/gpio.h>
+
+#include <dk_buttons_and_leds.h>
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(app, CONFIG_APP_LOG_LEVEL);
-#define APP_DBG(_msg,...) LOG_DBG(_msg,##__VA_ARGS__);
-#define APP_INF(_msg,...) LOG_INF(_msg,##__VA_ARGS__);
-#define APP_ERR(_msg,...) LOG_ERR(_msg,##__VA_ARGS__);
+#define APP_DBG(_msg, ...) LOG_DBG(_msg, ##__VA_ARGS__);
+#define APP_INF(_msg, ...) LOG_INF(_msg, ##__VA_ARGS__);
+#define APP_ERR(_msg, ...) LOG_ERR(_msg, ##__VA_ARGS__);
 
 /* 1000 msec = 1 sec */
-#define SLEEP_TIME_MS   1000
+#define SLEEP_TIME_MS 1000
 
 /* The devicetree node identifier for the "led0" alias. */
 #define LED0_NODE DT_ALIAS(led0)
 
 #if DT_NODE_HAS_STATUS(LED0_NODE, okay)
-#define LED0	DT_GPIO_LABEL(LED0_NODE, gpios)
-#define PIN	DT_GPIO_PIN(LED0_NODE, gpios)
-#define FLAGS	DT_GPIO_FLAGS(LED0_NODE, gpios)
+#define LED0 DT_GPIO_LABEL(LED0_NODE, gpios)
+#define PIN DT_GPIO_PIN(LED0_NODE, gpios)
+#define FLAGS DT_GPIO_FLAGS(LED0_NODE, gpios)
 #else
 /* A build error here means your board isn't set up to blink an LED. */
 #error "Unsupported board: led0 devicetree alias is not defined"
-#define LED0	""
-#define PIN	0
-#define FLAGS	0
+#define LED0 ""
+#define PIN 0
+#define FLAGS 0
 #endif
 
+static void bt_ready(int err) {
+  if (err) {
+    APP_DBG("Bluetooth init failed (err %d)", err);
+    return;
+  }
 
-static void bt_ready(int err)
-{
-	if (err) {
-		APP_DBG("Bluetooth init failed (err %d)", err);
-		return;
-	}
+  APP_DBG("Bluetooth initialised");
 
-	APP_DBG("Bluetooth initialised");
+  dk_leds_init();
+  dk_buttons_init(NULL);
 
-	dk_leds_init();
-	dk_buttons_init(NULL);
+  err = bt_mesh_init(bt_mesh_dk_prov_init(), model_handler_init());
+  if (err) {
+    APP_DBG("Initializing mesh failed (err %d)", err);
+    return;
+  }
 
-	err = bt_mesh_init(bt_mesh_dk_prov_init(), model_handler_init());
-	if (err) {
-		APP_DBG("Initializing mesh failed (err %d)", err);
-		return;
-	}
+  if (IS_ENABLED(CONFIG_SETTINGS)) {
+    settings_load();
+  }
 
-	if (IS_ENABLED(CONFIG_SETTINGS)) {
-		settings_load();
-	}
+  // To reset provisioning status
+  // bt_mesh_prov_reset(); // prov.h - NOT accessible from an app
+  // bt_mesh_reset();
 
-	// To reset provisioning status
-	//bt_mesh_prov_reset(); // prov.h - NOT accessible from an app
-	// bt_mesh_reset();
+  // Set that we want both MESH and GATT for MESH
+  bt_mesh_prov_enable(bt_mesh_prov_bearer_t(unsigned(BT_MESH_PROV_ADV) |
+                                            unsigned(BT_MESH_PROV_GATT)));
 
-	// Set that we want both MESH and GATT for MESH
-	bt_mesh_prov_enable(bt_mesh_prov_bearer_t(unsigned(BT_MESH_PROV_ADV) | unsigned(BT_MESH_PROV_GATT)));
+  APP_DBG("Mesh started");
 
-	APP_DBG("Mesh started");
-
-	lbs_handler_init();
+  lbs_handler_init();
 }
 
-struct k_thread herald_thread;
-constexpr int stackMaxSize =
-#ifdef CONFIG_BT_MAX_CONN
-		2048 + (CONFIG_BT_MAX_CONN * 512)
-// Was 12288 + (CONFIG_BT_MAX_CONN * 512), but this starved newlibc of HEAP (used in handling BLE connections/devices)
-#else
-		9192
-#endif
-// Since v2.1 - MEMORY ARENA extra stack reservation - See herald/datatype/data.h
-#ifdef HERALD_MEMORYARENA_MAX
-		+ HERALD_MEMORYARENA_MAX
-#else
-		+ 8192
-#endif
-		;
-K_THREAD_STACK_DEFINE(herald_stack,
-											stackMaxSize); // Was 9192 for nRF5340 (10 conns), 2048 for nRF52832 (3 conns)
+void main(void) {
+  k_sleep(K_SECONDS(6));
 
-struct DummyDelegate
-{
-};
+  const struct device* dev;
+  bool led_is_on = true;
+  int ret;
 
-using MYUINT32 = unsigned long;
+  dev = device_get_binding(LED0);
+  if (dev == NULL) {
+    return;
+  }
 
-struct basic_venue
-{
-	std::uint16_t country;
-	std::uint16_t state;
-	MYUINT32 code; // C++ linker may balk, confusing unsigned int with unsigned long
-	std::string name;
-};
+  ret = gpio_pin_configure(dev, PIN, GPIO_OUTPUT_ACTIVE | FLAGS);
+  if (ret < 0) {
+    return;
+  }
 
-static struct basic_venue joesPizza = {
-		.country = 826,
-		.state = 4,
-		.code = 12345,
-		.name = "Joe's Pizza"};
+  int err;
 
-static struct basic_venue adamsFishShop = {
-		.country = 826,
-		.state = 3,
-		.code = 22334,
-		.name = "Adam's Fish Shop"};
+  APP_DBG("Initialising...");
 
-static struct basic_venue maxsFineDining = {
-		.country = 832,
-		.state = 1,
-		.code = 55566,
-		.name = "Max's Fine Dining"};
+  err = bt_enable(bt_ready);
+  if (err) {
+    APP_DBG("Bluetooth init failed (err %d)", err);
+  }
 
-static struct basic_venue erinsStakehouse = {
-		.country = 826,
-		.state = 4,
-		.code = 123123,
-		.name = "Erin's Stakehouse"};
+  // TODO don't start Herald until enrolled and configured via MESH
 
-// TODO replace the below with sub-venue extended data, with same venue code
-static struct basic_venue adamsKitchen = {
-		.country = 826,
-		.state = 4,
-		.code = 1234,
-		.name = "Adam's Kitchen"};
-static struct basic_venue adamsOffice = {
-		.country = 826,
-		.state = 4,
-		.code = 2345,
-		.name = "Adam's Office"};
-static struct basic_venue adamsBedroom = {
-		.country = 826,
-		.state = 4,
-		.code = 3456,
-		.name = "Adam's Bedroom"};
-static struct basic_venue adamsLanding = {
-		.country = 826,
-		.state = 4,
-		.code = 5678,
-		.name = "Adam's Landing"};
-static struct basic_venue adamsPond = {
-		.country = 826,
-		.state = 4,
-		.code = 6789,
-		.name = "Adam's Pond"};
-static struct basic_venue adamsLounge = {
-		.country = 826,
-		.state = 4,
-		.code = 7890,
-		.name = "Adam's Lounge"};
+  // Start herald entry on a new thread in case of errors, or needing to do
+  // something on the main thread
+  herald_initialise();
 
-void herald_entry()
-{
-	APP_DBG("Herald entry");
-	k_sleep(K_MSEC(10000)); // pause so we have time to see Herald initialisation log messages. Don't do this in production!
-	APP_DBG("Herald setup begins");
+  uint8_t dummyMac[6] = {0, 1, 2, 3, 4, 5};
 
-	using namespace herald;
-	using namespace herald::payload;
-	using namespace herald::payload::beacon;
-	using namespace herald::payload::extended;
+  // Regular debug output to show the app is still running
+  int iter = 0;
+  while (1) {
+    k_sleep(K_SECONDS(2));
+    gpio_pin_set(dev, PIN, (int)led_is_on);
+    led_is_on = !led_is_on;
 
-	// Create Herald sensor array
-	ZephyrContextProvider zcp;
-	Context ctx(zcp, zcp.getLoggingSink(), zcp.getBluetoothStateManager());
-	// using CT = Context<ZephyrContextProvider,ZephyrLoggingSink,BluetoothStateManager>;
+    APP_DBG("Herald Relay main thread still running");
 
-	// Disable receiver / scanning mode - we're just transmitting our value
-	BLESensorConfiguration config = ctx.getSensorConfiguration(); // copy ctor
-	config.scanningEnabled = true; // To see other nearby BLE devices
-	// config.advertisingEnabled = true; // default
-	ctx.setSensorConfiguration(config);
+    // TODO Add logic here to detect failure in Herald thread, and restart to
+    // resume as necessary
 
-	ConcreteExtendedDataV1 extendedData;
-	extendedData.addSection(ExtendedDataSegmentCodesV1::TextPremises, erinsStakehouse.name);
-
-	// TODO get this from configuration of the MESH element (Nav beacon model)
-	payload::beacon::ConcreteBeaconPayloadDataSupplierV1 pds(
-			erinsStakehouse.country,
-			erinsStakehouse.state,
-			erinsStakehouse.code,
-			extendedData);
-
-	// this is unusual, but required. Really we should log activity to serial BLE or similar
-	DummyDelegate appDelegate;
-	SensorDelegateSet sensorDelegates(appDelegate);
-
-	ConcreteBLESensor ble(ctx, ctx.getBluetoothStateManager(), pds, sensorDelegates);
-	SensorArray sa(ctx, pds, ble);
-
-	// Start array (and thus start advertising)
-	sa.start();
-
-	int iter = 0;
-	// APP_DBG("got iter!");
-	// k_sleep(K_SECONDS(2));
-	Date last;
-	// APP_DBG("got last!");
-	// k_sleep(K_SECONDS(2));
-	int delay = 250; // KEEP THIS SMALL!!! This is how often we check to see if anything needs to happen over a connection.
-
-	APP_DBG("Entering herald iteration loop");
-	k_sleep(K_SECONDS(2));
-	while (1)
-	{
-		k_sleep(K_MSEC(delay));
-		Date now;
-		if (iter > 40 /* && iter < 44 */)
-		{ // some delay to allow us to see advertising output
-			// You could only do first 3 iterations so we can see the older log messages without continually scrolling through log messages
-			APP_DBG("Calling Sensor Array iteration");
-			// k_sleep(K_SECONDS(2));
-			sa.iteration(now - last);
-		}
-
-		if (0 == iter % (5000 / delay))
-		{
-			APP_DBG("herald thread still running. Iteration: %d", iter);
-			// runner.run(Date()); // Note: You may want to do this less or more regularly depending on your requirements
-			APP_ERR("Memory pages free in Data Arena: %d", herald::datatype::Data::getArena().pagesFree());
-		}
-
-		last = now;
-		++iter;
-	}
-}
-
-void main(void)
-{
-	k_sleep(K_SECONDS(6));
-
-	const struct device *dev;
-	bool led_is_on = true;
-	int ret;
-
-	dev = device_get_binding(LED0);
-	if (dev == NULL) {
-		return;
-	}
-
-	ret = gpio_pin_configure(dev, PIN, GPIO_OUTPUT_ACTIVE | FLAGS);
-	if (ret < 0) {
-		return;
-	}
-
-	int err;
-
-	APP_DBG("Initialising...");
-
-	err = bt_enable(bt_ready);
-	if (err) {
-		APP_DBG("Bluetooth init failed (err %d)", err);
-	}
-
-	// TODO don't start Herald until enrolled and configured via MESH
-
-	// Start herald entry on a new thread in case of errors, or needing to do something on the main thread
-	[[maybe_unused]]
-	k_tid_t herald_pid = k_thread_create(&herald_thread, herald_stack, stackMaxSize,
-			(k_thread_entry_t)herald_entry, NULL, NULL, NULL,
-			-1, K_USER,
-			K_NO_WAIT);
-
-
-	uint8_t dummyMac[6] = {0,1,2,3,4,5};
-
-	// Regular debug output to show the app is still running
-	int iter = 0;
-	while (1) {
-		k_sleep(K_SECONDS(2));
-		gpio_pin_set(dev, PIN, (int)led_is_on);
-		led_is_on = !led_is_on;
-
-		APP_DBG("Herald Relay main thread still running");
-
-		// TODO Add logic here to detect failure in Herald thread, and restart to resume as necessary
-
-		// Fake presence publishing for now
-		++iter;
-		if (iter > 10 && 0 == iter % 5) {
-			APP_DBG("Publishing presence message...");
-			int res = bt_mesh_herald_presence_share(dummyMac, -40, 
-				bt_mesh_herald_location_services_cli_presence::BT_MESH_HERALD_PRESENCE_OBSERVED);
-			APP_DBG("Presence publishing result: %d", res);
-		}
-	}
+    // Fake presence publishing for now
+    ++iter;
+    if (iter > 10 && 0 == iter % 5) {
+      APP_DBG("Publishing presence message...");
+      // int res = bt_mesh_herald_presence_share(
+      //     dummyMac, -40,
+      //     bt_mesh_model_herald_presence_status::
+      //         BT_MESH_HERALD_PRESENCE_OBSERVED);
+      // APP_DBG("Presence publishing result: %d", res);
+    }
+  }
 }

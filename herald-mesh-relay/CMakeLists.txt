@@ -114,5 +114,6 @@ target_sources(app PRIVATE
   src/main.cpp
 	src/lb_service_handler.c
 	src/model_handler.c
+	src/herald_handler.cpp
 )
 target_include_directories(app PRIVATE include)

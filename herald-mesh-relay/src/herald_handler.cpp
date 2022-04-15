@@ -1,0 +1,205 @@
+/*
+ * Copyright 2020-2022 Herald Project Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#include "herald_handler.h"
+
+// #include "../../herald/herald.h" // This is convenient, but leads to large
+// binaries!
+#include "herald/ble/ble_sensor_configuration.h"
+#include "herald/ble/zephyr/concrete_ble_receiver.h"
+#include "herald/ble/zephyr/concrete_ble_transmitter.h"
+#include "herald/ble/zephyr/nordic_uart/nordic_uart_sensor_delegate.h"
+#include "herald/datatype/date.h"
+#include "herald/datatype/immediate_send_data.h"
+#include "herald/datatype/location.h"
+#include "herald/datatype/payload_data.h"
+#include "herald/datatype/proximity.h"
+#include "herald/datatype/sensor_state.h"
+#include "herald/datatype/sensor_type.h"
+#include "herald/datatype/target_identifier.h"
+#include "herald/mesh/mesh.h"
+#include "herald/mesh/presence.h"
+#include "herald/mesh/presence_server.h"
+#include "herald/payload/beacon/beacon_payload_data_supplier.h"
+#include "herald/payload/extended/extended_data.h"
+#include "herald/payload/fixed/fixed_payload_data_supplier.h"
+#include "herald/sensor.h"
+#include "herald/sensor_array.h"
+#include "herald/sensor_delegate.h"
+#include "herald/zephyr_context.h"
+
+#include <logging/log.h>
+LOG_MODULE_REGISTER(app_herald, CONFIG_APP_LOG_LEVEL);
+#define APP_DBG(_msg, ...) LOG_DBG(_msg, ##__VA_ARGS__);
+#define APP_INF(_msg, ...) LOG_INF(_msg, ##__VA_ARGS__);
+#define APP_ERR(_msg, ...) LOG_ERR(_msg, ##__VA_ARGS__);
+
+struct k_thread herald_thread;
+constexpr int stackMaxSize =
+#ifdef CONFIG_BT_MAX_CONN
+    2048 + (CONFIG_BT_MAX_CONN * 512)
+// Was 12288 + (CONFIG_BT_MAX_CONN * 512), but this starved newlibc of HEAP
+// (used in handling BLE connections/devices)
+#else
+    9192
+#endif
+// Since v2.1 - MEMORY ARENA extra stack reservation - See
+// herald/datatype/data.h
+#ifdef HERALD_MEMORYARENA_MAX
+    + HERALD_MEMORYARENA_MAX
+#else
+    + 8192
+#endif
+    ;
+K_THREAD_STACK_DEFINE(herald_stack,
+                      stackMaxSize);  // Was 9192 for nRF5340 (10 conns), 2048
+                                      // for nRF52832 (3 conns)
+
+struct DummyDelegate {};
+
+using MYUINT32 = unsigned long;
+
+struct basic_venue {
+  std::uint16_t country;
+  std::uint16_t state;
+  MYUINT32
+      code;  // C++ linker may balk, confusing unsigned int with unsigned long
+  std::string name;
+};
+
+static struct basic_venue joesPizza = {
+    .country = 826, .state = 4, .code = 12345, .name = "Joe's Pizza"};
+
+static struct basic_venue adamsFishShop = {
+    .country = 826, .state = 3, .code = 22334, .name = "Adam's Fish Shop"};
+
+static struct basic_venue maxsFineDining = {
+    .country = 832, .state = 1, .code = 55566, .name = "Max's Fine Dining"};
+
+static struct basic_venue erinsStakehouse = {
+    .country = 826, .state = 4, .code = 123123, .name = "Erin's Stakehouse"};
+
+// TODO replace the below with sub-venue extended data, with same venue code
+static struct basic_venue adamsKitchen = {
+    .country = 826, .state = 4, .code = 1234, .name = "Adam's Kitchen"};
+static struct basic_venue adamsOffice = {
+    .country = 826, .state = 4, .code = 2345, .name = "Adam's Office"};
+static struct basic_venue adamsBedroom = {
+    .country = 826, .state = 4, .code = 3456, .name = "Adam's Bedroom"};
+static struct basic_venue adamsLanding = {
+    .country = 826, .state = 4, .code = 5678, .name = "Adam's Landing"};
+static struct basic_venue adamsPond = {
+    .country = 826, .state = 4, .code = 6789, .name = "Adam's Pond"};
+static struct basic_venue adamsLounge = {
+    .country = 826, .state = 4, .code = 7890, .name = "Adam's Lounge"};
+
+void herald_entry() {
+  APP_DBG("Herald entry");
+  k_sleep(K_MSEC(10000));  // pause so we have time to see Herald initialisation
+                           // log messages. Don't do this in production!
+  APP_DBG("Herald setup begins");
+
+  using namespace herald;
+  using namespace herald::payload;
+  using namespace herald::payload::beacon;
+  using namespace herald::payload::extended;
+
+  // Create Herald sensor array
+  ZephyrContextProvider zcp;
+  Context ctx(zcp, zcp.getLoggingSink(), zcp.getBluetoothStateManager());
+  // using CT =
+  // Context<ZephyrContextProvider,ZephyrLoggingSink,BluetoothStateManager>;
+
+  // Disable receiver / scanning mode - we're just transmitting our value
+  BLESensorConfiguration config = ctx.getSensorConfiguration();  // copy ctor
+  config.scanningEnabled = true;  // To see other nearby BLE devices
+  // config.advertisingEnabled = true; // default
+  ctx.setSensorConfiguration(config);
+
+  ConcreteExtendedDataV1 extendedData;
+  extendedData.addSection(ExtendedDataSegmentCodesV1::TextPremises,
+                          erinsStakehouse.name);
+
+  // TODO get this from configuration of the MESH element (Nav beacon model)
+  payload::beacon::ConcreteBeaconPayloadDataSupplierV1 pds(
+      erinsStakehouse.country, erinsStakehouse.state, erinsStakehouse.code,
+      extendedData);
+
+  // this is unusual, but required. Really we should log activity to serial BLE
+  // or similar
+  DummyDelegate appDelegate;
+  SensorDelegateSet sensorDelegates(appDelegate);
+
+  ConcreteBLESensor ble(ctx, ctx.getBluetoothStateManager(), pds,
+                        sensorDelegates);
+  SensorArray sa(ctx, pds, ble);
+
+  // Start array (and thus start advertising)
+  sa.start();
+
+  int iter = 0;
+  // APP_DBG("got iter!");
+  // k_sleep(K_SECONDS(2));
+  Date last;
+  // APP_DBG("got last!");
+  // k_sleep(K_SECONDS(2));
+  int delay = 250;  // KEEP THIS SMALL!!! This is how often we check to see if
+                    // anything needs to happen over a connection.
+
+  APP_DBG("Entering herald iteration loop");
+  k_sleep(K_SECONDS(2));
+  while (1) {
+    k_sleep(K_MSEC(delay));
+    Date now;
+    if (iter > 40 /* && iter < 44 */) {  // some delay to allow us to see
+                                         // advertising output
+      // You could only do first 3 iterations so we can see the older log
+      // messages without continually scrolling through log messages
+      APP_DBG("Calling Sensor Array iteration");
+      // k_sleep(K_SECONDS(2));
+      sa.iteration(now - last);
+    }
+
+    if (0 == iter % (5000 / delay)) {
+      APP_DBG("herald thread still running. Iteration: %d", iter);
+      // runner.run(Date()); // Note: You may want to do this less or more
+      // regularly depending on your requirements
+      APP_ERR("Memory pages free in Data Arena: %d",
+              herald::datatype::Data::getArena().pagesFree());
+    }
+
+    last = now;
+    ++iter;
+  }
+}
+
+/** MARK: HERALD HANDLER PUBLIC HEADER METHODS **/
+[[maybe_unused]]
+k_tid_t herald_pid;
+
+void herald_initialise() {
+  herald_pid = k_thread_create(
+      &herald_thread, herald_stack, stackMaxSize,
+      (k_thread_entry_t)herald_entry, NULL, NULL, NULL, -1, K_USER, K_NO_WAIT);
+}
+
+void herald_healthcheck() {
+  // TODO implement this
+}
+
+bool herald_configure() {
+  // TODO implement this
+  return true;
+}
+
+bool herald_start() {
+  // TODO implement this
+  return true;
+}
+
+bool herald_stop() {
+  // TODO implement this
+  return true;
+}

@@ -51,10 +51,10 @@ extern "C" {
  * and density information (E.g. for COVID gathering safety monitoring).
  */
 
-#define BT_MESH_HERALD_LOCATION_SERVICES_CLI_VENDOR_MODEL_ID 0x2001
+#define BT_MESH_HERALD_PRESENCE_CLI_VENDOR_MODEL_ID 0x2001
 
 /** \brief Presence message length - 6 byte Mac address, 1 int8_t Last RSSI, 1 uint8_t presence flag. Does not include mesh header sizes **/
-#define BT_MESH_HERALD_LOCATION_SERVICES_PRESENCE_MSG_LEN 8
+#define BT_MESH_HERALD_PRESENCE_MSG_LEN 8
 
 // Note we re-use the generic get,set,status op codes from the Linux Foundation
 
@@ -67,18 +67,18 @@ extern "C" {
  */
 
 /** Location Services / Herald Venue Beacon interlink **/
-#define BT_MESH_HERALD_LOCATION_SERVICES_SVR_VENDOR_MODEL_ID 0x2002
+#define BT_MESH_HERALD_PRESENCE_SERVER_VENDOR_MODEL_ID 0x2002
 
 // Note we re-use the generic get,set,status op codes from the Linux Foundation
 // Now set the minimum/maximum lengths for various operations
 // Fetch status length
-#define BT_MESH_HERALD_LOCATION_SERVICES_MSG_LEN_GET 0
+#define BT_MESH_HERALD_PRESENCE_MSG_LEN_GET 0
 // Set status message min/max length
-#define BT_MESH_HERALD_LOCATION_SERVICES_MSG_MINLEN_SET 3
-#define BT_MESH_HERALD_LOCATION_SERVICES_MSG_MAXLEN_SET 5
+#define BT_MESH_HERALD_PRESENCE_MSG_MINLEN_SET 3
+#define BT_MESH_HERALD_PRESENCE_MSG_MAXLEN_SET 5
 // Get status (model) response / published message length
-#define BT_MESH_HERALD_LOCATION_SERVICES_MSG_MINLEN_STATUS 2 // just mesh overhead
-#define BT_MESH_HERALD_LOCATION_SERVICES_MSG_MAXLEN_STATUS 11 // 8 bytes message + operation overhead (2) + tail (1)
+#define BT_MESH_HERALD_PRESENCE_MSG_MINLEN_STATUS 2 // just mesh overhead
+#define BT_MESH_HERALD_PRESENCE_MSG_MAXLEN_STATUS 11 // 8 bytes message + operation overhead (2) + tail (1)
 
 /// MARK: END HERALD PROJECT SECTION
 

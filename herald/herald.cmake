@@ -102,9 +102,10 @@ set(HERALD_HEADERS_ZEPHYR
 )
 set(HERALD_HEADERS_MESH 
   ${HERALD_BASE}/include/herald/mesh/mesh.h
-  ${HERALD_BASE}/include/herald/mesh/location_services.h
-  ${HERALD_BASE}/include/herald/mesh/location_services_cli.h
-  ${HERALD_BASE}/include/herald/mesh/location_services_srv.h
+  ${HERALD_BASE}/include/herald/mesh/presence.h
+  ${HERALD_BASE}/include/herald/mesh/presence_client.h
+  ${HERALD_BASE}/include/herald/mesh/presence_server.h
+  ${HERALD_BASE}/include/herald/mesh/location.h
 )
 if(DEFINED CONFIG_BT_SCAN)
   set(HERALD_HEADERS_ZEPHYR
@@ -120,6 +121,7 @@ endif()
 set(HERALD_HEADERS_WINDOWS
 
 )
+# TODO HERALD_HEADERS for MAC OS if required too (SHA256 etc.)
 set(HERALD_SOURCES
   ${HERALD_BASE}/src/ble/ble.cpp
   ${HERALD_BASE}/src/ble/ble_mac_address.cpp
@@ -162,7 +164,6 @@ set(HERALD_SOURCES
   ${HERALD_BASE}/src/payload/simple/simple_payload_data_supplier.cpp
   ${HERALD_BASE}/src/payload/extended/extended_data.cpp
   ${HERALD_BASE}/src/default_sensor_delegate.cpp
-  #${HERALD_BASE}/src/context.cpp
   ${HERALD_BASE}/src/sensor_array.cpp
 )
 set(HERALD_SOURCES_ZEPHYR
@@ -177,8 +178,8 @@ set(HERALD_SOURCES_TINYCRYPT
   ${HERALD_BASE}/src/datatype/tinycrypt/sha256.cpp
 )
 set(HERALD_SOURCES_MESH
-  ${HERALD_BASE}/src/mesh/location_services_cli.cpp
-  ${HERALD_BASE}/src/mesh/location_services_srv.cpp
+  ${HERALD_BASE}/src/mesh/presence_client.c
+  ${HERALD_BASE}/src/mesh/presence_server.c
 )
 set(HERALD_SOURCES_OPENSSL
   ${HERALD_BASE}/src/datatype/openssl/sha256.cpp

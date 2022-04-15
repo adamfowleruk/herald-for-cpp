@@ -4,8 +4,8 @@
 
 // This file holds models common to location services server and client headers
 
-#ifndef HERALD_MESH_LOCATION_SERVICES_H
-#define HERALD_MESH_LOCATION_SERVICES_H
+#ifndef HERALD_MESH_PRESENCE_H
+#define HERALD_MESH_PRESENCE_H
 
 #include "mesh.h"
 #include <bluetooth/mesh/model_types.h>
@@ -85,7 +85,7 @@ struct bt_mesh_model_herald_location_beacon {
 
 
 /** Mandatory parameters for the Herald Location Services Set message. **/
-struct bt_mesh_herald_location_services_set {
+struct bt_mesh_herald_presence_set {
 	/** Whether to advertise this beacon as a Herald Venue Beacon over BLE **/
 	bool advertise_beacon;
   /** Whether to publish Bluetooth LE presence information over the MESH **/
@@ -107,7 +107,7 @@ struct bt_mesh_herald_location_services_set {
 };
 
 /** Parameters for the Generic OnOff Status message. */
-struct bt_mesh_herald_location_services_status {
+struct bt_mesh_herald_presence_status {
 	/** The present value of the Generic OnOff state. */
 	bool present_advertising;
   // bool present_share_presence;
@@ -128,4 +128,4 @@ struct bt_mesh_herald_location_services_status {
 }
 #endif
 
-#endif /* HERALD_MESH_LOCATION_SERVICES_H */
+#endif /* HERALD_MESH_PRESENCE_H */
