@@ -41,17 +41,17 @@ struct bt_mesh_herald_presence_server {
 	/** Publication message. */
 	struct net_buf_simple pub_msg;
 	/** Publication message buffer. */
-	uint8_t buf[BT_MESH_MODEL_BUF_LEN(BT_MESH_LINUX_FOUNDATION_OP_SET,
-					  BT_MESH_HERALD_PRESENCE_MSG_LEN)];
-  const struct bt_mesh_herald_presence_server_cb *cb;
+        uint8_t buf[BT_MESH_MODEL_BUF_LEN(
+            BT_MESH_LINUX_FOUNDATION_OP_SET,
+            BT_MESH_HERALD_PRESENCE_MSG_MAXLEN_STATUS)];
+        const struct bt_mesh_herald_presence_server_cb* cb;
 };
 
-
-
-#define BT_MESH_MODEL_HERALD_PRESENCE_SERVER(srv, _pub) \
-  BT_MESH_MODEL_CB(BT_MESH_HERALD_PRESENCE_SERVER_VENDOR_MODEL_ID, \
-    bt_mesh_herald_presence_server_op, _pub, srv, &bt_mesh_herald_presence_server_cb)
-
+#define BT_MESH_MODEL_HERALD_PRESENCE_SERVER(srv, _pub)            \
+  BT_MESH_MODEL_VND_CB(BT_MESH_LINUX_FOUNDATION_VENDOR_COMPANY_ID, \
+			BT_MESH_HERALD_PRESENCE_SERVER_VENDOR_MODEL_ID,              \
+      bt_mesh_herald_presence_server_op, _pub, srv,                \
+      &bt_mesh_herald_presence_server_cb)
 
 /** @cond INTERNAL_HIDDEN */
 extern const struct bt_mesh_model_op bt_mesh_herald_presence_server_op[];

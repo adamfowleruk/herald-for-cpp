@@ -16,6 +16,12 @@
 #include <logging/log.h>
 LOG_MODULE_DECLARE(presence);
 
+/**
+ * @file Herald Presence MESH Model Client. Used by the Modem to communicate
+ * with the Herald Presence Servers (herald-mesh-relay app instances)
+ */
+
+
 // BUILD_ASSERT(BT_MESH_MODEL_BUF_LEN(BT_MESH_HERALD_PRESENCE_CLI_OP_MESSAGE,
 // 				   BT_MESH_HERALD_PRESENCE_CLI_MSG_MAXLEN_MESSAGE) <=
 // 		    BT_MESH_RX_SDU_MAX,

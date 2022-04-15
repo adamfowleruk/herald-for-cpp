@@ -10,6 +10,12 @@
 #include "herald/mesh/presence.h"
 #include "herald/mesh/presence_server.h"
 
+/**
+ * @file Herald Presence MESH Model Server. Used by Herald Presence 
+ * Servers (herald-mesh-relay app instances) to provide a Herald
+ * Presence reporting function via MESH message publishing.
+ */
+
 /* Location Services Server context of the primary element */
 struct bt_mesh_herald_presence_server *herald_presence_server;
 
@@ -88,8 +94,15 @@ const struct bt_mesh_model_op bt_mesh_herald_presence_server_op[] = {
 	BT_MESH_MODEL_OP_END,
 };
 
+static int herald_presence_server_start(struct bt_mesh_model *model)
+{
+  BT_DBG("herald_presence_server_start called");
+  return 0;
+}
+
 static int herald_presence_server_init(struct bt_mesh_model *model)
 {
+	BT_DBG("herald_presence_server_init called");
 	struct bt_mesh_herald_presence_server *srv = 
 		(struct bt_mesh_herald_presence_server*)model->user_data;
 
@@ -118,12 +131,15 @@ static int herald_presence_server_init(struct bt_mesh_model *model)
 
 const struct bt_mesh_model_cb bt_mesh_herald_presence_server_cb = {
 	.init = herald_presence_server_init,
+	.start = herald_presence_server_start,
 };
 
 
 
 
-// MARK: Server side API for Herald to/from MESH Gateway to call.
+/**
+ * MARK: Server side API for a Herald Presence Server app to call.
+ **/
 
 int bt_mesh_herald_presence_share(uint8_t *macOfSix, int8_t rssi, enum bt_mesh_model_herald_presence_status status) {
 	// Ensure our server handle has been initialised
@@ -137,7 +153,7 @@ int bt_mesh_herald_presence_share(uint8_t *macOfSix, int8_t rssi, enum bt_mesh_m
 
 	// Ensure we've been bound to a publishing destination by our provisioner
 	if (mdl->pub->addr == BT_MESH_ADDR_UNASSIGNED) {
-	  BT_DBG("Does not have publication address");
+	  BT_ERR("Does not have publication address");
 		return -2;
 	}
 

@@ -112,7 +112,7 @@ target_sources(app PRIVATE
   #${HERALD_SOURCES_MBEDTLS}
   ${HERALD_SOURCES_MESH}
   src/main.cpp
-	src/lb_service_handler.c
+	# src/lb_service_handler.c
 	src/model_handler.c
 	src/herald_handler.cpp
 )

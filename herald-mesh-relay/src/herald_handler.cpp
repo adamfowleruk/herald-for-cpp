@@ -8,9 +8,9 @@
 // #include "../../herald/herald.h" // This is convenient, but leads to large
 // binaries!
 #include "herald/ble/ble_sensor_configuration.h"
-#include "herald/ble/zephyr/concrete_ble_receiver.h"
-#include "herald/ble/zephyr/concrete_ble_transmitter.h"
-#include "herald/ble/zephyr/nordic_uart/nordic_uart_sensor_delegate.h"
+// #include "herald/ble/zephyr/concrete_ble_receiver.h"
+// #include "herald/ble/zephyr/concrete_ble_transmitter.h"
+// #include "herald/ble/zephyr/nordic_uart/nordic_uart_sensor_delegate.h"
 #include "herald/datatype/date.h"
 #include "herald/datatype/immediate_send_data.h"
 #include "herald/datatype/location.h"
@@ -107,72 +107,72 @@ void herald_entry() {
   using namespace herald::payload::extended;
 
   // Create Herald sensor array
-  ZephyrContextProvider zcp;
-  Context ctx(zcp, zcp.getLoggingSink(), zcp.getBluetoothStateManager());
-  // using CT =
-  // Context<ZephyrContextProvider,ZephyrLoggingSink,BluetoothStateManager>;
+//   ZephyrContextProvider zcp;
+//   Context ctx(zcp, zcp.getLoggingSink(), zcp.getBluetoothStateManager());
+//   // using CT =
+//   // Context<ZephyrContextProvider,ZephyrLoggingSink,BluetoothStateManager>;
 
-  // Disable receiver / scanning mode - we're just transmitting our value
-  BLESensorConfiguration config = ctx.getSensorConfiguration();  // copy ctor
-  config.scanningEnabled = true;  // To see other nearby BLE devices
-  // config.advertisingEnabled = true; // default
-  ctx.setSensorConfiguration(config);
+//   // Disable receiver / scanning mode - we're just transmitting our value
+//   BLESensorConfiguration config = ctx.getSensorConfiguration();  // copy ctor
+//   config.scanningEnabled = true;  // To see other nearby BLE devices
+//   // config.advertisingEnabled = true; // default
+//   ctx.setSensorConfiguration(config);
 
-  ConcreteExtendedDataV1 extendedData;
-  extendedData.addSection(ExtendedDataSegmentCodesV1::TextPremises,
-                          erinsStakehouse.name);
+//   ConcreteExtendedDataV1 extendedData;
+//   extendedData.addSection(ExtendedDataSegmentCodesV1::TextPremises,
+//                           erinsStakehouse.name);
 
-  // TODO get this from configuration of the MESH element (Nav beacon model)
-  payload::beacon::ConcreteBeaconPayloadDataSupplierV1 pds(
-      erinsStakehouse.country, erinsStakehouse.state, erinsStakehouse.code,
-      extendedData);
+//   // TODO get this from configuration of the MESH element (Nav beacon model)
+//   payload::beacon::ConcreteBeaconPayloadDataSupplierV1 pds(
+//       erinsStakehouse.country, erinsStakehouse.state, erinsStakehouse.code,
+//       extendedData);
 
-  // this is unusual, but required. Really we should log activity to serial BLE
-  // or similar
-  DummyDelegate appDelegate;
-  SensorDelegateSet sensorDelegates(appDelegate);
+//   // this is unusual, but required. Really we should log activity to serial BLE
+//   // or similar
+//   DummyDelegate appDelegate;
+//   SensorDelegateSet sensorDelegates(appDelegate);
 
-  ConcreteBLESensor ble(ctx, ctx.getBluetoothStateManager(), pds,
-                        sensorDelegates);
-  SensorArray sa(ctx, pds, ble);
+//   ConcreteBLESensor ble(ctx, ctx.getBluetoothStateManager(), pds,
+//                         sensorDelegates);
+//   SensorArray sa(ctx, pds, ble);
 
-  // Start array (and thus start advertising)
-  sa.start();
+//   // Start array (and thus start advertising)
+//   sa.start();
 
-  int iter = 0;
-  // APP_DBG("got iter!");
-  // k_sleep(K_SECONDS(2));
-  Date last;
-  // APP_DBG("got last!");
-  // k_sleep(K_SECONDS(2));
-  int delay = 250;  // KEEP THIS SMALL!!! This is how often we check to see if
-                    // anything needs to happen over a connection.
+//   int iter = 0;
+//   // APP_DBG("got iter!");
+//   // k_sleep(K_SECONDS(2));
+//   Date last;
+//   // APP_DBG("got last!");
+//   // k_sleep(K_SECONDS(2));
+//   int delay = 250;  // KEEP THIS SMALL!!! This is how often we check to see if
+//                     // anything needs to happen over a connection.
 
-  APP_DBG("Entering herald iteration loop");
-  k_sleep(K_SECONDS(2));
-  while (1) {
-    k_sleep(K_MSEC(delay));
-    Date now;
-    if (iter > 40 /* && iter < 44 */) {  // some delay to allow us to see
-                                         // advertising output
-      // You could only do first 3 iterations so we can see the older log
-      // messages without continually scrolling through log messages
-      APP_DBG("Calling Sensor Array iteration");
-      // k_sleep(K_SECONDS(2));
-      sa.iteration(now - last);
-    }
+//   APP_DBG("Entering herald iteration loop");
+//   k_sleep(K_SECONDS(2));
+//   while (1) {
+//     k_sleep(K_MSEC(delay));
+//     Date now;
+//     if (iter > 40 /* && iter < 44 */) {  // some delay to allow us to see
+//                                          // advertising output
+//       // You could only do first 3 iterations so we can see the older log
+//       // messages without continually scrolling through log messages
+//       APP_DBG("Calling Sensor Array iteration");
+//       // k_sleep(K_SECONDS(2));
+//       sa.iteration(now - last);
+//     }
 
-    if (0 == iter % (5000 / delay)) {
-      APP_DBG("herald thread still running. Iteration: %d", iter);
-      // runner.run(Date()); // Note: You may want to do this less or more
-      // regularly depending on your requirements
-      APP_ERR("Memory pages free in Data Arena: %d",
-              herald::datatype::Data::getArena().pagesFree());
-    }
+//     if (0 == iter % (5000 / delay)) {
+//       APP_DBG("herald thread still running. Iteration: %d", iter);
+//       // runner.run(Date()); // Note: You may want to do this less or more
+//       // regularly depending on your requirements
+//       APP_ERR("Memory pages free in Data Arena: %d",
+//               herald::datatype::Data::getArena().pagesFree());
+//     }
 
-    last = now;
-    ++iter;
-  }
+//     last = now;
+//     ++iter;
+//   }
 }
 
 /** MARK: HERALD HANDLER PUBLIC HEADER METHODS **/

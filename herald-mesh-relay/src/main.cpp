@@ -4,11 +4,11 @@
  */
 
 #include "herald_handler.h"
-#include "lb_service_handler.h"
+// #include "lb_service_handler.h"
 #include "model_handler.h"
 
 #include <bluetooth/bluetooth.h>
-#include <bluetooth/mesh/dk_prov.h>
+#include <bluetooth/mesh/dk_prov.h> // TODO replace this with a new herald mesh provisioning configuration rather than the dev kit one
 #include <bluetooth/mesh/models.h>
 
 #include <drivers/gpio.h>
@@ -50,6 +50,9 @@ static void bt_ready(int err) {
   dk_leds_init();
   dk_buttons_init(NULL);
 
+  // Note: The following model_handler_init will initialise Herald
+  //       once the mesh beacon has been correctly provisioned.
+  //       This is done via the init() callback of bt_mesh_model_cb.
   err = bt_mesh_init(bt_mesh_dk_prov_init(), model_handler_init());
   if (err) {
     APP_DBG("Initializing mesh failed (err %d)", err);
@@ -60,7 +63,7 @@ static void bt_ready(int err) {
     settings_load();
   }
 
-  // To reset provisioning status
+  // To reset provisioning status -> You have to do a full Erase & Write
   // bt_mesh_prov_reset(); // prov.h - NOT accessible from an app
   // bt_mesh_reset();
 
@@ -70,7 +73,7 @@ static void bt_ready(int err) {
 
   APP_DBG("Mesh started");
 
-  lbs_handler_init();
+  // lbs_handler_init();
 }
 
 void main(void) {
@@ -103,7 +106,7 @@ void main(void) {
 
   // Start herald entry on a new thread in case of errors, or needing to do
   // something on the main thread
-  herald_initialise();
+  // herald_initialise();
 
   uint8_t dummyMac[6] = {0, 1, 2, 3, 4, 5};
 

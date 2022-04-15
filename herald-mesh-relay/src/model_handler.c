@@ -19,29 +19,29 @@ LOG_MODULE_REGISTER(meshmodel, CONFIG_APP_LOG_LEVEL);
 #error "Unsupported board: led0 devicetree alias is not defined"
 #endif
 
-#define MESH_LED DK_LED1
+// #define MESH_LED DK_LED1
 
-static void led_set(struct bt_mesh_onoff_srv *srv, struct bt_mesh_msg_ctx *ctx,
-		    const struct bt_mesh_onoff_set *set, struct bt_mesh_onoff_status *rsp);
+// static void led_set(struct bt_mesh_onoff_srv *srv, struct bt_mesh_msg_ctx *ctx,
+// 		    const struct bt_mesh_onoff_set *set, struct bt_mesh_onoff_status *rsp);
 
-static void led_get(struct bt_mesh_onoff_srv *srv, struct bt_mesh_msg_ctx *ctx,
-		    struct bt_mesh_onoff_status *rsp);
+// static void led_get(struct bt_mesh_onoff_srv *srv, struct bt_mesh_msg_ctx *ctx,
+// 		    struct bt_mesh_onoff_status *rsp);
 
-static const struct bt_mesh_onoff_srv_handlers onoff_handlers = {
-	.set = led_set,
-	.get = led_get,
-};
+// static const struct bt_mesh_onoff_srv_handlers onoff_handlers = {
+// 	.set = led_set,
+// 	.get = led_get,
+// };
 
-struct led_ctx {
-	struct bt_mesh_onoff_srv server;
-	struct k_work_delayable work;
-	uint32_t remaining;
-	bool value;
-};
+// struct led_ctx {
+// 	struct bt_mesh_onoff_srv server;
+// 	struct k_work_delayable work;
+// 	uint32_t remaining;
+// 	bool value;
+// };
 
-static struct led_ctx led_ctx = {
-    .server = BT_MESH_ONOFF_SRV_INIT(&onoff_handlers),
-};
+// static struct led_ctx led_ctx = {
+//     .server = BT_MESH_ONOFF_SRV_INIT(&onoff_handlers),
+// };
 
 // Define herald location services server handlers
 static int presence_updated(struct bt_mesh_herald_presence_server* srv,
@@ -59,74 +59,74 @@ static int presence_updated(struct bt_mesh_herald_presence_server* srv,
   return 0;
 }
 
-static void led_transition_start(void)
-{
-	/* As long as the transition is in progress, the onoff
-	 * state is "on":
-	 */
-	dk_set_led(MESH_LED, true);
-	k_work_reschedule(&led_ctx.work, K_MSEC(led_ctx.remaining));
-	led_ctx.remaining = 0;
-}
+// static void led_transition_start(void)
+// {
+// 	/* As long as the transition is in progress, the onoff
+// 	 * state is "on":
+// 	 */
+// 	dk_set_led(MESH_LED, true);
+// 	k_work_reschedule(&led_ctx.work, K_MSEC(led_ctx.remaining));
+// 	led_ctx.remaining = 0;
+// }
 
-static void led_status(struct bt_mesh_onoff_status *status)
-{
-	status->remaining_time =
-		k_ticks_to_ms_ceil32(k_work_delayable_remaining_get(&led_ctx.work)) +
-		led_ctx.remaining;
-	status->target_on_off = led_ctx.value;
-	/* As long as the transition is in progress, the onoff state is "on": */
-	status->present_on_off = led_ctx.value || status->remaining_time;
-}
+// static void led_status(struct bt_mesh_onoff_status *status)
+// {
+// 	status->remaining_time =
+// 		k_ticks_to_ms_ceil32(k_work_delayable_remaining_get(&led_ctx.work)) +
+// 		led_ctx.remaining;
+// 	status->target_on_off = led_ctx.value;
+// 	/* As long as the transition is in progress, the onoff state is "on": */
+// 	status->present_on_off = led_ctx.value || status->remaining_time;
+// }
 
-static void led_set(struct bt_mesh_onoff_srv *srv, struct bt_mesh_msg_ctx *ctx,
-		    const struct bt_mesh_onoff_set *set, struct bt_mesh_onoff_status *rsp)
-{
-	if (set->on_off == led_ctx.value) {
-		goto respond;
-	}
+// static void led_set(struct bt_mesh_onoff_srv *srv, struct bt_mesh_msg_ctx *ctx,
+// 		    const struct bt_mesh_onoff_set *set, struct bt_mesh_onoff_status *rsp)
+// {
+// 	if (set->on_off == led_ctx.value) {
+// 		goto respond;
+// 	}
 
-	led_ctx.value = set->on_off;
-	if (!bt_mesh_model_transition_time(set->transition)) {
-		led_ctx.remaining = 0;
-		dk_set_led(MESH_LED, set->on_off);
-		goto respond;
-	}
+// 	led_ctx.value = set->on_off;
+// 	if (!bt_mesh_model_transition_time(set->transition)) {
+// 		led_ctx.remaining = 0;
+// 		dk_set_led(MESH_LED, set->on_off);
+// 		goto respond;
+// 	}
 
-	led_ctx.remaining = set->transition->time;
+// 	led_ctx.remaining = set->transition->time;
 
-	if (set->transition->delay) {
-		k_work_reschedule(&led_ctx.work, K_MSEC(set->transition->delay));
-	} else {
-		led_transition_start();
-	}
+// 	if (set->transition->delay) {
+// 		k_work_reschedule(&led_ctx.work, K_MSEC(set->transition->delay));
+// 	} else {
+// 		led_transition_start();
+// 	}
 
-respond:
-	if (rsp) {
-		led_status(rsp);
-	}
-}
+// respond:
+// 	if (rsp) {
+// 		led_status(rsp);
+// 	}
+// }
 
-static void led_get(struct bt_mesh_onoff_srv *srv, struct bt_mesh_msg_ctx *ctx,
-		    struct bt_mesh_onoff_status *rsp)
-{
-	led_status(rsp);
-}
+// static void led_get(struct bt_mesh_onoff_srv *srv, struct bt_mesh_msg_ctx *ctx,
+// 		    struct bt_mesh_onoff_status *rsp)
+// {
+// 	led_status(rsp);
+// }
 
-static void led_work(struct k_work *work)
-{
-	if (led_ctx.remaining) {
-		led_transition_start();
-	} else {
-		dk_set_led(MESH_LED, led_ctx.value);
+// static void led_work(struct k_work *work)
+// {
+// 	if (led_ctx.remaining) {
+// 		led_transition_start();
+// 	} else {
+// 		dk_set_led(MESH_LED, led_ctx.value);
 
-		/* Publish the new value at the end of the transition */
-		struct bt_mesh_onoff_status status;
+// 		/* Publish the new value at the end of the transition */
+// 		struct bt_mesh_onoff_status status;
 
-		led_status(&status);
-		bt_mesh_onoff_srv_pub(&led_ctx.server, NULL, &status);
-	}
-}
+// 		led_status(&status);
+// 		bt_mesh_onoff_srv_pub(&led_ctx.server, NULL, &status);
+// 	}
+// }
 
 /* Set up a repeating delayed work to blink the DK's LEDs when attention is
  * requested.
@@ -178,7 +178,7 @@ static struct bt_mesh_elem elements[] = {BT_MESH_ELEM(
     1,
     BT_MESH_MODEL_LIST(BT_MESH_MODEL_CFG_SRV,
                        BT_MESH_MODEL_HEALTH_SRV(&health_server, &health_pub),
-                       BT_MESH_MODEL_ONOFF_SRV(&led_ctx.server),
+                      //  BT_MESH_MODEL_ONOFF_SRV(&led_ctx.server),
                        // TODO reconfigure this for beaconing, presence
                        BT_MESH_MODEL_HERALD_PRESENCE_SERVER(
                            &presence_server, &presence_pub)),
@@ -193,7 +193,7 @@ static const struct bt_mesh_comp comp = {
 const struct bt_mesh_comp *model_handler_init(void)
 {
 	k_work_init_delayable(&attention_blink_work, attention_blink);
-	k_work_init_delayable(&led_ctx.work, led_work);
+	// k_work_init_delayable(&led_ctx.work, led_work);
 
 	return &comp;
 }
