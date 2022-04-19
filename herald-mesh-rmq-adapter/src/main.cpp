@@ -46,29 +46,18 @@ void signalHandler(int signum) {
 }
 
 int main(int argc, char *argv[]) {
+  std::cout << "herald-mesh-adapter launched" << std::endl;
   // The app name, plus:-
   //  - 5 arguments for RabbitMQ
-  //  - 1 optional argument for --no-openssl
   if (6 > argc) {
     std::cerr << "Usage: herald-mesh-adapter <amqpurl> <exchangeName> <commandQueueName> <routingKey> <modemTtyFilePath>" << std::endl;
     return EXIT_FAILURE;
   }
-  // if (7 == argc) {
-  //   // If we've not been told to not initialise openssl dynamically, then do it!
-  //   if (0 != strcmp("--no-openssl",argv[6])) {
-  //     // dynamically open the openssl library
-  //     // TODO allow this to be dynamically specified via --openssldir and --prefix (for '/lib/')
-  //     void* handle = dlopen("/usr/local/ssl/lib/openssl-3.so", RTLD_LAZY);
 
-  //     // tell AMQP-CPP library where the handle to openssl can be found
-  //     AMQP::openssl(handle);
-
-  //     OPENSSL_init_ssl(0, NULL);
-  //   }
-  // }
-
+  std::cout << "Creating event loop" << std::endl;
   auto* loop = uv_default_loop();
 
+  std::cout << "Configuring RabbitMQ" << std::endl;
   // Configure the RabbitMQ Adapter
   bool configured = adapter.configure(loop, argv[1], argv[2], argv[3], 
                                       argv[4], argv[5]);
@@ -84,23 +73,21 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
-  // TODO Dynamic RMQ library and OpenSSL library detection.
-  //      Quit if either is not detected.
-
+  std::cout << "Connecting" << std::endl;
   // Now connect to RMQ so we can send all status information
   bool connected = adapter.connect();
   if (!connected) {
     std::cerr << "Could not connect to RabbitMQ so failing" << std::endl;
     return EXIT_FAILURE;
   }
+  std::cout << "Connected to RabbitMQ and Herald MESH Modem" << std::endl;
 
-  // TODO try to connect to tty specified too
-
-  // TODO pass initial MESH network connection info
-
+  // TODO pass initial MESH network authentication and connection info
 
   // Enter an infinite loop until we get a SIGTERM
+  std::cout << "Running event loop" << std::endl;
   uv_run(loop, UV_RUN_DEFAULT);
 
+  std::cout << "Exiting" << std::endl;
   return EXIT_SUCCESS;
 }

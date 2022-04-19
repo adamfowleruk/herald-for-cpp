@@ -46,105 +46,14 @@ RmqHandler::~RmqHandler() = default;
 void
 RmqHandler::onError(AMQP::TcpConnection* connection, const char* message)
 {
-  std::cout << "error: " << message << std::endl;
+  std::cout << " (async from rmq) error: " << message << std::endl;
 }
 
 void 
 RmqHandler::onConnected(AMQP::TcpConnection* connection)
 {
-  std::cout << "connected" << std::endl;
+  std::cout << " (async from rmq) connected" << std::endl;
 }
-
-// void
-// MeshAdapterTcpHandler::onAttached(AMQP::TcpConnection* connection) {
-//   // @todo
-//   //  add your own implementation, for example initialize things
-//   //  to handle the connection.
-// }
-
-// void
-// MeshAdapterTcpHandler::onConnected(AMQP::TcpConnection* connection) {
-//   // @todo
-//   //  add your own implementation (probably not needed)
-// }
-
-// bool
-// MeshAdapterTcpHandler::onSecured(AMQP::TcpConnection* connection,
-//                                  const SSL* ssl) {
-//   // @todo
-//   //  add your own implementation, for example by reading out the
-//   //  certificate and check if it is indeed yours
-
-//   // TODO WE MUST IMPLEMENT THIS!!! AMQP CPP DOESNT DO IT FOR US!
-//   //      See SSL_get_peer_certificate() or SSL_get_verify_result()
-
-//   return true;
-// }
-
-// uint16_t
-// MeshAdapterTcpHandler::onNegotiate(AMQP::TcpConnection *connection, uint16_t interval)
-// {
-//   // we accept the suggestion from the server, but if the interval is smaller
-//   // that one minute, we will use a one minute interval instead
-//   if (interval < 60) interval = 60;
-
-//   // @todo
-//   //  set a timer in your event loop, and make sure that you call
-//   //  connection->heartbeat() every _interval_ seconds if no other
-//   //  instruction was sent in that period.
-
-//   // return the interval that we want to use
-//   return interval;
-// }
-
-// void
-// MeshAdapterTcpHandler::onReady(AMQP::TcpConnection* connection) {
-//   // @todo
-//   //  add your own implementation, for example by creating a channel
-//   //  instance, and start publishing or consuming
-// }
-
-// void
-// MeshAdapterTcpHandler::onError(AMQP::TcpConnection* connection,
-//                                const char* message) {
-//   // @todo
-//   //  add your own implementation, for example by reporting the error
-//   //  to the user of your program and logging the error
-// }
-
-// void
-// MeshAdapterTcpHandler::onClosed(AMQP::TcpConnection* connection) {
-//   // @todo
-//   //  add your own implementation (probably not necessary, but it could
-//   //  be useful if you want to do some something immediately after the
-//   //  amqp connection is over, but do not want to wait for the tcp
-//   //  connection to shut down
-// }
-
-// void
-// MeshAdapterTcpHandler::onLost(AMQP::TcpConnection* connection) {
-//   // @todo
-//   //  add your own implementation (probably not necessary)
-// }
-
-// void
-// MeshAdapterTcpHandler::onDetached(AMQP::TcpConnection* connection) {
-//   // @todo
-//   //  add your own implementation, like cleanup resources or exit the
-//   //  application
-// }
-
-// void
-// MeshAdapterTcpHandler::monitor(AMQP::TcpConnection* connection, int fd,
-//                                int flags) {
-//   // @todo
-//   //  add your own implementation, for example by adding the file
-//   //  descriptor to the main application event loop (like the select() or
-//   //  poll() loop). When the event loop reports that the descriptor becomes
-//   //  readable and/or writable, it is up to you to inform the AMQP-CPP
-//   //  library that the filedescriptor is active by calling the
-//   //  connection->process(fd, flags) method.
-// }
 
 } // end internal namespace
 
@@ -208,6 +117,7 @@ MeshModemRabbitMQAdapter::connect()
 
   // create a AMQP connection object
 
+  std::cout << "  - Creating connection" << std::endl;
   AMQP::Address address(rmqUrl);
   rmqConnection.emplace(
     &*rmqHandler,
@@ -215,19 +125,24 @@ MeshModemRabbitMQAdapter::connect()
   );
 
   // and create a channel
+  std::cout << "  - Creating channel" << std::endl;
   rmqChannel.emplace(&*rmqConnection);
 
+  std::cout << "  - Creating exchange" << std::endl;
   // use the channel object to call the AMQP method you like
   rmqChannel->declareExchange(rmqExchangeName,
                              AMQP::fanout);  // TODO verify exchange type
+
+  std::cout << "  - Creating queue" << std::endl;
   rmqChannel
     ->declareQueue(rmqCommandQueueName,
                    AMQP::durable + AMQP::autodelete + AMQP::exclusive)
     .onSuccess([](const std::string& name, uint32_t messagecount,
                   uint32_t consumercount) {
       // report the name of the temporary queue
-      std::cout << "declared queue " << name << std::endl;
+      std::cout << " (async from rmq) declared queue " << name << std::endl;
     });
+  std::cout << "  - Binding queue" << std::endl;
   rmqChannel->bindQueue(rmqExchangeName, rmqCommandQueueName, rmqRoutingKey);
 
   // TODO set up heartbeat for RabbitMQ
@@ -235,9 +150,16 @@ MeshModemRabbitMQAdapter::connect()
   // 2. Attempt to connect to the local modem device
 
   // Open the serial port
-  mdmPortNumber = open(mdmFilePath.c_str(), O_RDWR);  // read and write
+  std::cout << "  - Opening modem port" << std::endl;
+  int sp = open(mdmFilePath.c_str(), O_RDWR);  // read and write
+  if (sp < 0) {
+    printf("Error %i opening modem port file: %s\n", errno, strerror(errno));
+    return false;
+  }
+  mdmPortNumber = sp;
 
   // Read in existing settings, and handle any error
+  std::cout << "  - Reconfiguring modem port" << std::endl;
   if (0 != tcgetattr(mdmPortNumber, &tty)) {
     printf("Error %i from tcgetattr: %s\n", errno, strerror(errno));
     return false;
@@ -285,6 +207,7 @@ MeshModemRabbitMQAdapter::connect()
   }
 
   // Now finally pass this open file to the MeshModem class
+  std::cout << "  - Creating MeshModem wrapper" << std::endl;
   modem.emplace(mdmPortNumber, 
     bt_mesh_modem_client_cb {
       .read = &herald::mesh::internal::global_read_fn
@@ -294,23 +217,25 @@ MeshModemRabbitMQAdapter::connect()
   ready = true;
 
   // Now both sides are ready, start processing
+  std::cout << "  - Resuming modem" << std::endl;
   modem->resume();
 
   // callback function that is called when the consume operation starts
   auto startCb = [](const std::string& consumertag) {
-    std::cout << "RabbitMQ consume operation started" << std::endl;
+    std::cout << " (async from rmq) RabbitMQ consume operation started"
+              << std::endl;
   };
 
   // callback function that is called when the consume operation failed
   auto errorCb = [](const char* message) {
-    std::cout << "RabbitMQ consume operation failed" << std::endl;
+    std::cout << " (async from rmq) RabbitMQ consume operation failed"
+              << std::endl;
   };
 
   // callback operation when a message was received
-  auto messageCb = [this](const AMQP::Message& message,
-                          uint64_t deliveryTag, 
+  auto messageCb = [this](const AMQP::Message& message, uint64_t deliveryTag,
                           bool redelivered) {
-    std::cout << "RabbitMQ message received" << std::endl;
+    std::cout << " (async from rmq) RabbitMQ message received" << std::endl;
 
     // TODO pass this along to the MeshModem as a write()
 
@@ -319,18 +244,21 @@ MeshModemRabbitMQAdapter::connect()
   };
 
   // start consuming from the queue, and install the callbacks
+  std::cout << "  - Subscribing to modem commands" << std::endl;
   rmqChannel->consume(rmqCommandQueueName)
     .onReceived(messageCb)
     .onSuccess(startCb)
     .onError(errorCb);
 
+  std::cout << "  - Connected!" << std::endl;
   return true;
 }
 
 int
 MeshModemRabbitMQAdapter::read(uint8_t* buffer, size_t sz)
 {
-  std::cout << "Reading " << sz << " bytes of data" << std::endl;
+  std::cout << " (async from rmq) Reading " << sz << " bytes of data"
+            << std::endl;
   // TODO read something from serial port
   // TODO determine protobuf message type
   // TODO send to appropriate queue
