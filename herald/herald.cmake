@@ -181,6 +181,10 @@ set(HERALD_SOURCES_MESH
   ${HERALD_BASE}/src/mesh/presence_client.c
   ${HERALD_BASE}/src/mesh/presence_server.c
 )
+set(HERALD_SOURCES_MESH_CLIENT
+  ${HERALD_BASE}/src/mesh/modem_rabbitmq.cpp
+  ${HERALD_BASE}/src/mesh/modem_client.cpp
+)
 set(HERALD_SOURCES_OPENSSL
   ${HERALD_BASE}/src/datatype/openssl/sha256.cpp
 )
