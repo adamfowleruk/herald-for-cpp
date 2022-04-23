@@ -2,26 +2,43 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "../../herald/herald.h"
-
-#include <zephyr/types.h>
-#include <stddef.h>
-#include <string.h>
-#include <errno.h>
-#include <sys/printk.h>
-#include <sys/byteorder.h>
-#include <zephyr.h>
-
-#include <settings/settings.h>
+// #include "../../herald/herald.h"
+#include "herald/ble/ble_sensor_configuration.h"
+#include "herald/ble/zephyr/concrete_ble_transmitter.h"
+// #include "herald/ble/zephyr/nordic_uart/nordic_uart_sensor_delegate.h"
+#include "herald/datatype/date.h"
+#include "herald/datatype/immediate_send_data.h"
+#include "herald/datatype/location.h"
+#include "herald/datatype/payload_data.h"
+#include "herald/datatype/proximity.h"
+#include "herald/datatype/sensor_state.h"
+#include "herald/datatype/sensor_type.h"
+#include "herald/datatype/target_identifier.h"
+#include "herald/payload/beacon/beacon_payload_data_supplier.h"
+#include "herald/payload/extended/extended_data.h"
+#include "herald/payload/fixed/fixed_payload_data_supplier.h"
+#include "herald/sensor.h"
+#include "herald/sensor_array.h"
+#include "herald/sensor_delegate.h"
+#include "herald/zephyr_context.h"
 
 #include <bluetooth/bluetooth.h>
-#include <bluetooth/hci.h>
 #include <bluetooth/conn.h>
-#include <bluetooth/uuid.h>
 #include <bluetooth/gatt.h>
+#include <bluetooth/hci.h>
 #include <bluetooth/services/bas.h>
+#include <bluetooth/uuid.h>
 
+#include <settings/settings.h>
+#include <sys/byteorder.h>
+#include <sys/printk.h>
+#include <zephyr/types.h>
+
+#include <errno.h>
 #include <kernel_structs.h>
+#include <stddef.h>
+#include <string.h>
+#include <zephyr.h>
 // #include <sys/thread_stack.h>
 #include <drivers/gpio.h>
 #include <drivers/hwinfo.h>
@@ -188,11 +205,11 @@ void herald_entry() {
 		extendedData
 	);
 	
-	herald::ble::nordic_uart::NordicUartSensorDelegate nus(ctx);
+	// herald::ble::nordic_uart::NordicUartSensorDelegate nus(ctx);
 
   // this is unusual, but required. Really we should log activity to serial BLE or similar
 	DummyDelegate appDelegate;
-	SensorDelegateSet sensorDelegates(appDelegate, nus);
+	SensorDelegateSet sensorDelegates(appDelegate);//, nus);
 	
 	ConcreteBLESensor ble(ctx, ctx.getBluetoothStateManager(), pds, sensorDelegates);
 	SensorArray sa(ctx,pds,ble);

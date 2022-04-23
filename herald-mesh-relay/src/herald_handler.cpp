@@ -8,8 +8,8 @@
 // #include "../../herald/herald.h" // This is convenient, but leads to large
 // binaries!
 #include "herald/ble/ble_sensor_configuration.h"
-// #include "herald/ble/zephyr/concrete_ble_receiver.h"
-// #include "herald/ble/zephyr/concrete_ble_transmitter.h"
+#include "herald/ble/zephyr/concrete_ble_receiver.h"
+#include "herald/ble/zephyr/concrete_ble_transmitter.h"
 // #include "herald/ble/zephyr/nordic_uart/nordic_uart_sensor_delegate.h"
 #include "herald/datatype/date.h"
 #include "herald/datatype/immediate_send_data.h"
@@ -57,7 +57,86 @@ K_THREAD_STACK_DEFINE(herald_stack,
                       stackMaxSize);  // Was 9192 for nRF5340 (10 conns), 2048
                                       // for nRF52832 (3 conns)
 
-struct DummyDelegate {};
+class AppLoggingDelegate {
+ public:
+  AppLoggingDelegate() = default;
+  ~AppLoggingDelegate() = default;
+
+  void sensor(SensorType sensor, const TargetIdentifier& didDetect) {
+    // LOG_DBG("sensor didDetect");
+    APP_DBG("sensor didDetect: %s",
+            str(didDetect));  // May want to disable this - logs A LOT of info
+  }
+
+  /// Read payload data from target, e.g. encrypted device identifier from BLE
+  /// peripheral after successful connection.
+  void sensor(SensorType sensor, const PayloadData& didRead,
+              const TargetIdentifier& fromTarget) {
+    // LOG_DBG("sensor didRead");
+    APP_DBG("sensor didRead: %s with payload: %s", str(fromTarget),
+            log_strdup(didRead.hexEncodedString().c_str()));
+  }
+
+  /// Receive written immediate send data from target, e.g. important timing
+  /// signal.
+  void sensor(SensorType sensor, const ImmediateSendData& didReceive,
+              const TargetIdentifier& fromTarget) {
+    // LOG_DBG("sensor didReceive");
+    APP_DBG("sensor didReceive: %s with immediate send data: %s",
+            str(fromTarget), log_strdup(didReceive.hexEncodedString().c_str()));
+  }
+
+  /// Read payload data of other targets recently acquired by a target, e.g.
+  /// Android peripheral sharing payload data acquired from nearby iOS
+  /// peripherals.
+  void sensor(SensorType sensor, const std::vector<PayloadData>& didShare,
+              const TargetIdentifier& fromTarget) {
+    APP_DBG("sensor didShare");
+    // LOG_DBG("sensor didShare: %s", str(fromTarget) );
+    // for (auto& p : didShare) {
+    // 	LOG_DBG(" - %s", log_strdup(p.hexEncodedString().c_str()));
+    // }
+  }
+
+  /// Measure proximity to target, e.g. a sample of RSSI values from BLE
+  /// peripheral.
+  void sensor(SensorType sensor, const Proximity& didMeasure,
+              const TargetIdentifier& fromTarget) {
+    APP_DBG(
+        "didMeasure: %s, fromTarget: %s",
+        log_strdup(didMeasure.description().c_str()),
+        log_strdup(
+            ((std::string)BLEMacAddress(fromTarget.underlyingData())).c_str()));
+    // LOG_DBG("sensor didMeasure: %s with proximity: %d", str(fromTarget),
+    // didMeasure.value);
+  }
+
+  /// Detection of time spent at location, e.g. at specific restaurant between
+  /// 02/06/2020 19:00 and 02/06/2020 21:00
+  template <typename LocationT>
+  void sensor(SensorType sensor, const Location<LocationT>& didVisit) {
+    APP_DBG("sensor didVisit");
+  }
+
+  /// Measure proximity to target with payload data. Combines didMeasure and
+  /// didRead into a single convenient delegate method
+  void sensor(SensorType sensor, const Proximity& didMeasure,
+              const TargetIdentifier& fromTarget,
+              const PayloadData& withPayload) {
+    // ERR so it stands out in the logging!
+    APP_ERR(
+        "didMeasure=%s, fromTarget=%s, withPayload=%s",
+        log_strdup(didMeasure.description().c_str()),
+        log_strdup(
+            ((std::string)BLEMacAddress(fromTarget.underlyingData())).c_str()),
+        log_strdup(withPayload.hexEncodedString().c_str()));
+  }
+
+  /// Sensor state update
+  void sensor(SensorType sensor, const SensorState& didUpdateState) {
+    APP_DBG("sensor didUpdateState");
+  }
+};
 
 using MYUINT32 = unsigned long;
 
@@ -107,72 +186,72 @@ void herald_entry() {
   using namespace herald::payload::extended;
 
   // Create Herald sensor array
-//   ZephyrContextProvider zcp;
-//   Context ctx(zcp, zcp.getLoggingSink(), zcp.getBluetoothStateManager());
-//   // using CT =
-//   // Context<ZephyrContextProvider,ZephyrLoggingSink,BluetoothStateManager>;
+  ZephyrContextProvider zcp;
+  Context ctx(zcp, zcp.getLoggingSink(), zcp.getBluetoothStateManager());
+  // using CT =
+  // Context<ZephyrContextProvider,ZephyrLoggingSink,BluetoothStateManager>;
 
-//   // Disable receiver / scanning mode - we're just transmitting our value
-//   BLESensorConfiguration config = ctx.getSensorConfiguration();  // copy ctor
-//   config.scanningEnabled = true;  // To see other nearby BLE devices
-//   // config.advertisingEnabled = true; // default
-//   ctx.setSensorConfiguration(config);
+  // Disable receiver / scanning mode - we're just transmitting our value
+  BLESensorConfiguration config = ctx.getSensorConfiguration();  // copy ctor
+  config.scanningEnabled = true;  // To see other nearby BLE devices
+  // config.advertisingEnabled = true; // default
+  ctx.setSensorConfiguration(config);
 
-//   ConcreteExtendedDataV1 extendedData;
-//   extendedData.addSection(ExtendedDataSegmentCodesV1::TextPremises,
-//                           erinsStakehouse.name);
+  ConcreteExtendedDataV1 extendedData;
+  extendedData.addSection(ExtendedDataSegmentCodesV1::TextPremises,
+                          erinsStakehouse.name);
 
-//   // TODO get this from configuration of the MESH element (Nav beacon model)
-//   payload::beacon::ConcreteBeaconPayloadDataSupplierV1 pds(
-//       erinsStakehouse.country, erinsStakehouse.state, erinsStakehouse.code,
-//       extendedData);
+  // TODO get this from configuration of the MESH element (Nav beacon model)
+  payload::beacon::ConcreteBeaconPayloadDataSupplierV1 pds(
+      erinsStakehouse.country, erinsStakehouse.state, erinsStakehouse.code,
+      extendedData);
 
-//   // this is unusual, but required. Really we should log activity to serial BLE
-//   // or similar
-//   DummyDelegate appDelegate;
-//   SensorDelegateSet sensorDelegates(appDelegate);
+  // this is unusual, but required. Really we should log activity to serial BLE
+  // or similar
+  AppLoggingDelegate appDelegate;
+  SensorDelegateSet sensorDelegates(appDelegate);
 
-//   ConcreteBLESensor ble(ctx, ctx.getBluetoothStateManager(), pds,
-//                         sensorDelegates);
-//   SensorArray sa(ctx, pds, ble);
+  ConcreteBLESensor ble(ctx, ctx.getBluetoothStateManager(), pds,
+                        sensorDelegates);
+  SensorArray sa(ctx, pds, ble);
 
-//   // Start array (and thus start advertising)
-//   sa.start();
+  // Start array (and thus start advertising)
+  sa.start();
 
-//   int iter = 0;
-//   // APP_DBG("got iter!");
-//   // k_sleep(K_SECONDS(2));
-//   Date last;
-//   // APP_DBG("got last!");
-//   // k_sleep(K_SECONDS(2));
-//   int delay = 250;  // KEEP THIS SMALL!!! This is how often we check to see if
-//                     // anything needs to happen over a connection.
+  int iter = 0;
+  // APP_DBG("got iter!");
+  // k_sleep(K_SECONDS(2));
+  Date last;
+  // APP_DBG("got last!");
+  // k_sleep(K_SECONDS(2));
+  int delay = 250;  // KEEP THIS SMALL!!! This is how often we check to see if
+                    // anything needs to happen over a connection.
 
-//   APP_DBG("Entering herald iteration loop");
-//   k_sleep(K_SECONDS(2));
-//   while (1) {
-//     k_sleep(K_MSEC(delay));
-//     Date now;
-//     if (iter > 40 /* && iter < 44 */) {  // some delay to allow us to see
-//                                          // advertising output
-//       // You could only do first 3 iterations so we can see the older log
-//       // messages without continually scrolling through log messages
-//       APP_DBG("Calling Sensor Array iteration");
-//       // k_sleep(K_SECONDS(2));
-//       sa.iteration(now - last);
-//     }
+  APP_DBG("Entering herald iteration loop");
+  k_sleep(K_SECONDS(2));
+  while (1) {
+    k_sleep(K_MSEC(delay));
+    Date now;
+    if (iter > 40 /* && iter < 44 */) {  // some delay to allow us to see
+                                         // advertising output
+      // You could only do first 3 iterations so we can see the older log
+      // messages without continually scrolling through log messages
+      APP_DBG("Calling Sensor Array iteration");
+      // k_sleep(K_SECONDS(2));
+      sa.iteration(now - last);
+    }
 
-//     if (0 == iter % (5000 / delay)) {
-//       APP_DBG("herald thread still running. Iteration: %d", iter);
-//       // runner.run(Date()); // Note: You may want to do this less or more
-//       // regularly depending on your requirements
-//       APP_ERR("Memory pages free in Data Arena: %d",
-//               herald::datatype::Data::getArena().pagesFree());
-//     }
+    if (0 == iter % (5000 / delay)) {
+      APP_DBG("herald thread still running. Iteration: %d", iter);
+      // runner.run(Date()); // Note: You may want to do this less or more
+      // regularly depending on your requirements
+      APP_ERR("Memory pages free in Data Arena: %d",
+              herald::datatype::Data::getArena().pagesFree());
+    }
 
-//     last = now;
-//     ++iter;
-//   }
+    last = now;
+    ++iter;
+  }
 }
 
 /** MARK: HERALD HANDLER PUBLIC HEADER METHODS **/

@@ -77,6 +77,7 @@ static void bt_ready(int err) {
 }
 
 void main(void) {
+  APP_DBG("App Main");
   k_sleep(K_SECONDS(6));
 
   const struct device* dev;
@@ -85,11 +86,13 @@ void main(void) {
 
   dev = device_get_binding(LED0);
   if (dev == NULL) {
+    APP_DBG("No LED0 device");
     return;
   }
 
   ret = gpio_pin_configure(dev, PIN, GPIO_OUTPUT_ACTIVE | FLAGS);
   if (ret < 0) {
+    APP_DBG("No GPIO PIN");
     return;
   }
 
@@ -101,12 +104,13 @@ void main(void) {
   if (err) {
     APP_DBG("Bluetooth init failed (err %d)", err);
   }
+  APP_DBG("Bluetooth MESH initialised");
 
   // TODO don't start Herald until enrolled and configured via MESH
 
   // Start herald entry on a new thread in case of errors, or needing to do
   // something on the main thread
-  // herald_initialise();
+  herald_initialise();
 
   uint8_t dummyMac[6] = {0, 1, 2, 3, 4, 5};
 

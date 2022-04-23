@@ -26,50 +26,50 @@ else()
 endif()
 
 # Specify additional PROJ settings based on build settings
-set(BASE_CONFIG ../config/zephyr)
-set(OVERLAY_CONFIG
-  ${BASE_CONFIG}/base-mesh.conf
-  ${BASE_CONFIG}/usb.conf
-  ${BASE_CONFIG}/receiver.conf
-  ${BASE_CONFIG}/transmitter.conf
-)
+# set(BASE_CONFIG ../config/zephyr)
+# set(OVERLAY_CONFIG
+#   ${BASE_CONFIG}/base-mesh.conf
+#   # ${BASE_CONFIG}/usb.conf
+#   # ${BASE_CONFIG}/receiver.conf
+#   # ${BASE_CONFIG}/transmitter.conf
+# )
 
-if($ENV{BOARD} MATCHES .*nrf5340.*)
-  set(OVERLAY_CONFIG 
-    ${OVERLAY_CONFIG} 
-    ${BASE_CONFIG}/nrf5340.conf
-  )
-  add_definitions(-DHERALD_MEMORYARENA_MAX=4096)
-elseif($ENV{BOARD} MATCHES .*nrf52840.*)
-  set(OVERLAY_CONFIG 
-    ${OVERLAY_CONFIG} 
-    ${BASE_CONFIG}/nrf52840.conf
-  )
-  add_definitions(-DHERALD_MEMORYARENA_MAX=4096)
-elseif($ENV{BOARD} MATCHES .*nrf52832.*)
-  set(OVERLAY_CONFIG 
-    ${OVERLAY_CONFIG} 
-    ${BASE_CONFIG}/nrf52832.conf
-  )
-  add_definitions(-DHERALD_MEMORYARENA_MAX=512)
-elseif($ENV{BOARD} MATCHES .*nrf52833.*)
-  set(OVERLAY_CONFIG 
-    ${OVERLAY_CONFIG} 
-    ${BASE_CONFIG}/nrf52833.conf
-  )
-  add_definitions(-DHERALD_MEMORYARENA_MAX=4096)
-endif()
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-  set(OVERLAY_CONFIG 
-    ${OVERLAY_CONFIG} 
-    ${BASE_CONFIG}/debug.conf
-  )
-else()
-  set(OVERLAY_CONFIG 
-    ${OVERLAY_CONFIG} 
-    ${BASE_CONFIG}/release.conf
-  )
-endif()
+# if($ENV{BOARD} MATCHES .*nrf5340.*)
+#   set(OVERLAY_CONFIG 
+#     ${OVERLAY_CONFIG} 
+#     ${BASE_CONFIG}/nrf5340.conf
+#   )
+#   add_definitions(-DHERALD_MEMORYARENA_MAX=4096)
+# elseif($ENV{BOARD} MATCHES .*nrf52840.*)
+#   set(OVERLAY_CONFIG 
+#     ${OVERLAY_CONFIG} 
+#     ${BASE_CONFIG}/nrf52840.conf
+#   )
+#   add_definitions(-DHERALD_MEMORYARENA_MAX=4096)
+# elseif($ENV{BOARD} MATCHES .*nrf52832.*)
+#   set(OVERLAY_CONFIG 
+#     ${OVERLAY_CONFIG} 
+#     ${BASE_CONFIG}/nrf52832.conf
+#   )
+#   add_definitions(-DHERALD_MEMORYARENA_MAX=512)
+# elseif($ENV{BOARD} MATCHES .*nrf52833.*)
+#   set(OVERLAY_CONFIG 
+#     ${OVERLAY_CONFIG} 
+#     ${BASE_CONFIG}/nrf52833.conf
+#   )
+#   add_definitions(-DHERALD_MEMORYARENA_MAX=4096)
+# endif()
+# if(CMAKE_BUILD_TYPE MATCHES Debug)
+#   set(OVERLAY_CONFIG 
+#     ${OVERLAY_CONFIG} 
+#     ${BASE_CONFIG}/debug.conf
+#   )
+# else()
+#   set(OVERLAY_CONFIG 
+#     ${OVERLAY_CONFIG} 
+#     ${BASE_CONFIG}/release.conf
+#   )
+# endif()
 
 
 # Generic Zephyr build command below
