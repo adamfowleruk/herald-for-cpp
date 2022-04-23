@@ -56,87 +56,88 @@ constexpr int stackMaxSize =
 K_THREAD_STACK_DEFINE(herald_stack,
                       stackMaxSize);  // Was 9192 for nRF5340 (10 conns), 2048
                                       // for nRF52832 (3 conns)
+struct DummyDelegate{};
+// using namespace herald::datatype;
+// class AppLoggingDelegate {
+//  public:
+//   AppLoggingDelegate() = default;
+//   ~AppLoggingDelegate() = default;
 
-class AppLoggingDelegate {
- public:
-  AppLoggingDelegate() = default;
-  ~AppLoggingDelegate() = default;
+//   void sensor(SensorType sensor, const TargetIdentifier& didDetect) {
+//     // LOG_DBG("sensor didDetect");
+//     APP_DBG("sensor didDetect: %s",
+//             str(didDetect));  // May want to disable this - logs A LOT of info
+//   }
 
-  void sensor(SensorType sensor, const TargetIdentifier& didDetect) {
-    // LOG_DBG("sensor didDetect");
-    APP_DBG("sensor didDetect: %s",
-            str(didDetect));  // May want to disable this - logs A LOT of info
-  }
+//   /// Read payload data from target, e.g. encrypted device identifier from BLE
+//   /// peripheral after successful connection.
+//   void sensor(SensorType sensor, const PayloadData& didRead,
+//               const TargetIdentifier& fromTarget) {
+//     // LOG_DBG("sensor didRead");
+//     APP_DBG("sensor didRead: %s with payload: %s", str(fromTarget),
+//             log_strdup(didRead.hexEncodedString().c_str()));
+//   }
 
-  /// Read payload data from target, e.g. encrypted device identifier from BLE
-  /// peripheral after successful connection.
-  void sensor(SensorType sensor, const PayloadData& didRead,
-              const TargetIdentifier& fromTarget) {
-    // LOG_DBG("sensor didRead");
-    APP_DBG("sensor didRead: %s with payload: %s", str(fromTarget),
-            log_strdup(didRead.hexEncodedString().c_str()));
-  }
+//   /// Receive written immediate send data from target, e.g. important timing
+//   /// signal.
+//   void sensor(SensorType sensor, const ImmediateSendData& didReceive,
+//               const TargetIdentifier& fromTarget) {
+//     // LOG_DBG("sensor didReceive");
+//     APP_DBG("sensor didReceive: %s with immediate send data: %s",
+//             str(fromTarget), log_strdup(didReceive.hexEncodedString().c_str()));
+//   }
 
-  /// Receive written immediate send data from target, e.g. important timing
-  /// signal.
-  void sensor(SensorType sensor, const ImmediateSendData& didReceive,
-              const TargetIdentifier& fromTarget) {
-    // LOG_DBG("sensor didReceive");
-    APP_DBG("sensor didReceive: %s with immediate send data: %s",
-            str(fromTarget), log_strdup(didReceive.hexEncodedString().c_str()));
-  }
+//   /// Read payload data of other targets recently acquired by a target, e.g.
+//   /// Android peripheral sharing payload data acquired from nearby iOS
+//   /// peripherals.
+//   void sensor(SensorType sensor, const std::vector<PayloadData>& didShare,
+//               const TargetIdentifier& fromTarget) {
+//     APP_DBG("sensor didShare");
+//     // LOG_DBG("sensor didShare: %s", str(fromTarget) );
+//     // for (auto& p : didShare) {
+//     // 	LOG_DBG(" - %s", log_strdup(p.hexEncodedString().c_str()));
+//     // }
+//   }
 
-  /// Read payload data of other targets recently acquired by a target, e.g.
-  /// Android peripheral sharing payload data acquired from nearby iOS
-  /// peripherals.
-  void sensor(SensorType sensor, const std::vector<PayloadData>& didShare,
-              const TargetIdentifier& fromTarget) {
-    APP_DBG("sensor didShare");
-    // LOG_DBG("sensor didShare: %s", str(fromTarget) );
-    // for (auto& p : didShare) {
-    // 	LOG_DBG(" - %s", log_strdup(p.hexEncodedString().c_str()));
-    // }
-  }
+//   /// Measure proximity to target, e.g. a sample of RSSI values from BLE
+//   /// peripheral.
+//   void sensor(SensorType sensor, const Proximity& didMeasure,
+//               const TargetIdentifier& fromTarget) {
+//     APP_DBG(
+//         "didMeasure: %s, fromTarget: %s",
+//         log_strdup(didMeasure.description().c_str()),
+//         log_strdup(
+//             ((std::string)BLEMacAddress(fromTarget.underlyingData())).c_str()));
+//     // LOG_DBG("sensor didMeasure: %s with proximity: %d", str(fromTarget),
+//     // didMeasure.value);
+//   }
 
-  /// Measure proximity to target, e.g. a sample of RSSI values from BLE
-  /// peripheral.
-  void sensor(SensorType sensor, const Proximity& didMeasure,
-              const TargetIdentifier& fromTarget) {
-    APP_DBG(
-        "didMeasure: %s, fromTarget: %s",
-        log_strdup(didMeasure.description().c_str()),
-        log_strdup(
-            ((std::string)BLEMacAddress(fromTarget.underlyingData())).c_str()));
-    // LOG_DBG("sensor didMeasure: %s with proximity: %d", str(fromTarget),
-    // didMeasure.value);
-  }
+//   /// Detection of time spent at location, e.g. at specific restaurant between
+//   /// 02/06/2020 19:00 and 02/06/2020 21:00
+//   template <typename LocationT>
+//   void sensor(SensorType sensor, const Location<LocationT>& didVisit) {
+//     APP_DBG("sensor didVisit");
+//   }
 
-  /// Detection of time spent at location, e.g. at specific restaurant between
-  /// 02/06/2020 19:00 and 02/06/2020 21:00
-  template <typename LocationT>
-  void sensor(SensorType sensor, const Location<LocationT>& didVisit) {
-    APP_DBG("sensor didVisit");
-  }
+//   /// Measure proximity to target with payload data. Combines didMeasure and
+//   /// didRead into a single convenient delegate method
+//   void sensor(SensorType sensor, const Proximity& didMeasure,
+//               const TargetIdentifier& fromTarget,
+//               const PayloadData& withPayload) {
+//     // ERR so it stands out in the logging!
+//     APP_ERR(
+//         "didMeasure=%s, fromTarget=%s, withPayload=%s",
+//         log_strdup(didMeasure.description().c_str()),
+//         log_strdup(
+//             ((std::string)BLEMacAddress(fromTarget.underlyingData())).c_str()),
+//         log_strdup(withPayload.hexEncodedString().c_str()));
+//   }
 
-  /// Measure proximity to target with payload data. Combines didMeasure and
-  /// didRead into a single convenient delegate method
-  void sensor(SensorType sensor, const Proximity& didMeasure,
-              const TargetIdentifier& fromTarget,
-              const PayloadData& withPayload) {
-    // ERR so it stands out in the logging!
-    APP_ERR(
-        "didMeasure=%s, fromTarget=%s, withPayload=%s",
-        log_strdup(didMeasure.description().c_str()),
-        log_strdup(
-            ((std::string)BLEMacAddress(fromTarget.underlyingData())).c_str()),
-        log_strdup(withPayload.hexEncodedString().c_str()));
-  }
-
-  /// Sensor state update
-  void sensor(SensorType sensor, const SensorState& didUpdateState) {
-    APP_DBG("sensor didUpdateState");
-  }
-};
+//   /// Sensor state update
+//   void sensor(SensorType sensor, const SensorState& didUpdateState) {
+//     APP_DBG("sensor didUpdateState");
+//   }
+// };
 
 using MYUINT32 = unsigned long;
 
@@ -208,7 +209,7 @@ void herald_entry() {
 
   // this is unusual, but required. Really we should log activity to serial BLE
   // or similar
-  AppLoggingDelegate appDelegate;
+  DummyDelegate appDelegate;
   SensorDelegateSet sensorDelegates(appDelegate);
 
   ConcreteBLESensor ble(ctx, ctx.getBluetoothStateManager(), pds,

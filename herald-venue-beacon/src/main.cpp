@@ -196,12 +196,12 @@ void herald_entry() {
 	ctx.setSensorConfiguration(config);
 
 	ConcreteExtendedDataV1 extendedData;
-	extendedData.addSection(ExtendedDataSegmentCodesV1::TextPremises, erinsStakehouse.name);
+	extendedData.addSection(ExtendedDataSegmentCodesV1::TextPremises, adamsOffice.name);
 
 	payload::beacon::ConcreteBeaconPayloadDataSupplierV1 pds(
-		erinsStakehouse.country,
-		erinsStakehouse.state,
-		erinsStakehouse.code,
+		adamsOffice.country,
+		adamsOffice.state,
+		adamsOffice.code,
 		extendedData
 	);
 	
