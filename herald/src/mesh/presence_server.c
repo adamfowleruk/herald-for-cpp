@@ -1,6 +1,7 @@
 
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/mesh.h>
+#include <bluetooth/mesh/models.h>
 
 #define BT_DBG_ENABLED IS_ENABLED(CONFIG_BT_MESH_DEBUG_MODEL)
 #define LOG_MODULE_NAME bt_mesh_herald_presence_server
@@ -122,6 +123,7 @@ static int herald_presence_server_init(struct bt_mesh_model *model)
 
 	srv->model = model;
 
+	// TODO change this to a secondary as it's now separated out
 	if (bt_mesh_model_in_primary(model)) {
 		herald_presence_server = srv;
 	}
@@ -134,36 +136,119 @@ const struct bt_mesh_model_cb bt_mesh_herald_presence_server_cb = {
 	.start = herald_presence_server_start,
 };
 
+// FWD DECL
+static void presence_onoff_set(struct bt_mesh_onoff_srv* srv,
+                               struct bt_mesh_msg_ctx* ctx,
+                               const struct bt_mesh_onoff_set* set,
+                               struct bt_mesh_onoff_status* rsp);
 
+// FWD DECL
+static void presence_onoff_get(struct bt_mesh_onoff_srv* srv,
+                               struct bt_mesh_msg_ctx* ctx,
+                               struct bt_mesh_onoff_status* rsp);
 
+static const struct bt_mesh_onoff_srv_handlers onoff_handlers = {
+    .set = presence_onoff_set,
+    .get = presence_onoff_get,
+};
 
 /**
- * MARK: Server side API for a Herald Presence Server app to call.
- **/
+ * MARK: Presence on off server callbacks
+ */
 
-int bt_mesh_herald_presence_share(uint8_t *macOfSix, int8_t rssi, enum bt_mesh_model_herald_presence_status status) {
-	// Ensure our server handle has been initialised
-	if (NULL == herald_presence_server) {
-		return -1;
+struct bt_mesh_herald_presence_server_onoff_ctx presence_onoff_ctx = {
+	.server  = BT_MESH_ONOFF_SRV_INIT(&onoff_handlers),
+  .enabled = false,
+};
+
+static void presence_onoff_status(struct bt_mesh_onoff_status *status)
+{
+	// We always immediately change, so report the current status
+  status->remaining_time = 0;
+  status->target_on_off = presence_onoff_ctx.enabled;
+  status->present_on_off = presence_onoff_ctx.enabled;
+}
+
+static void presence_onoff_set(struct bt_mesh_onoff_srv* srv,
+                               struct bt_mesh_msg_ctx* ctx,
+                               const struct bt_mesh_onoff_set* set,
+                               struct bt_mesh_onoff_status* rsp)
+{
+  struct bt_mesh_herald_presence_server_onoff_ctx* presence_ctx =
+		CONTAINER_OF(srv, struct bt_mesh_herald_presence_server_onoff_ctx, server);
+
+  // Copy over value
+  bool wasEnabled = presence_ctx->enabled;
+  presence_ctx->enabled = set->on_off;
+
+  // TODO handle specified transition time
+
+  // respond if an ack requested
+  if (rsp) {
+    presence_onoff_status(rsp);
 	}
 
-	// Fetch model
-	struct bt_mesh_model *mdl = herald_presence_server->model;
-	BT_DBG("Got base mesh model");
-
-	// Ensure we've been bound to a publishing destination by our provisioner
-	if (mdl->pub->addr == BT_MESH_ADDR_UNASSIGNED) {
-	  BT_ERR("Does not have publication address");
-		return -2;
+	// check if status has changed, and thus an application event needs firing
+	if (wasEnabled != set->on_off && presence_ctx->callbacks) {
+		if (set->on_off) {
+			// if (NULL != presence_ctx->callbacks->on) {
+				presence_ctx->callbacks->on();
+			// }
+		} else {
+			// if (NULL != presence_ctx->callbacks->off) {
+				presence_ctx->callbacks->off();
+			// }
+		}
 	}
+}
 
-	// Fetch model message buffer
-	struct net_buf_simple *msg = mdl->pub->msg;
-  
-	BT_DBG("Max model message size: %d", mdl->pub->msg->size);
-	BT_DBG("Model publish address: %d", mdl->pub->addr);
-	BT_DBG("Model publish key: %d", mdl->pub->key);
-	BT_DBG("Model publish TTL: %d", mdl->pub->ttl);
+static void presence_onoff_get(struct bt_mesh_onoff_srv* srv,
+                               struct bt_mesh_msg_ctx* ctx,
+                               struct bt_mesh_onoff_status* rsp)
+{
+  presence_onoff_status(rsp);
+}
+
+/*
+ * Server side API for a Herald Presence Server app to call.
+ */
+void bt_mesh_herald_presence_register_callbacks(
+	const struct bt_mesh_herald_presence_server_onoff_cb* cbs)
+{
+  presence_onoff_ctx.callbacks = cbs;
+}
+
+bool bt_mesh_herald_presence_enabled()
+{
+  return presence_onoff_ctx.enabled;
+}
+
+int bt_mesh_herald_presence_share(
+	uint8_t* macOfSix, int8_t rssi,
+	enum bt_mesh_model_herald_presence_status status)
+{
+  // Ensure our server handle has been initialised
+  if (NULL == herald_presence_server) {
+    return -1;
+  }
+
+  // Fetch model
+  struct bt_mesh_model* mdl = herald_presence_server->model;
+  BT_DBG("Got base mesh model");
+
+  // Ensure we've been bound to a publishing destination by our provisioner
+  if (mdl->pub->addr == BT_MESH_ADDR_UNASSIGNED) {
+    BT_ERR("Does not have publication address");
+    return -2;
+  }
+
+  // Fetch model message buffer
+  struct net_buf_simple* msg = mdl->pub->msg;
+
+  BT_DBG("Max model message size: %d", mdl->pub->msg->size);
+  BT_DBG("Model publish address: %d", mdl->pub->addr);
+  BT_DBG("Model publish key: %d", mdl->pub->key);
+  BT_DBG("Model publish TTL: %d", mdl->pub->ttl);
 
   // Reset model message buffer
 	bt_mesh_model_msg_init(msg, BT_MESH_LINUX_FOUNDATION_OP_STATUS);

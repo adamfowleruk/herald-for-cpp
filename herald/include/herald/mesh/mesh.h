@@ -23,6 +23,8 @@ extern "C" {
 // TODO Verify that having the same opp in multiple models in the same
 //      element is allowed. Some Zephyr documentation indicates it is not.
 
+// TODO refactor the below into all-platform OPCODEs and a separate Zephyr OP definition file
+
 /** \brief Get a server model's whole data **/
 #define BT_MESH_LINUX_FOUNDATION_OP_GET BT_MESH_MODEL_OP_3(0x01, \
   BT_MESH_LINUX_FOUNDATION_VENDOR_COMPANY_ID)

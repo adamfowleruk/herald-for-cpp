@@ -7,9 +7,6 @@
 #ifndef HERALD_MESH_PRESENCE_H
 #define HERALD_MESH_PRESENCE_H
 
-#include "mesh.h"
-#include <bluetooth/mesh/model_types.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif

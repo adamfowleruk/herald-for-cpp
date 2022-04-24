@@ -33,10 +33,10 @@ struct bt_mesh_herald_presence_client;
 						_herald_presence), \
 			&_bt_mesh_herald_presence_client_cb)
 
-/** Bluetooth MESH location services client handlers **/
+/** Bluetooth MESH presence services client handlers **/
 struct bt_mesh_herald_presence_client_handlers {
   /** \brief Called when the node is provisioned or loaded from storage
-   * \param[in] cli Location Services Client instance that has been started
+   * \param[in] cli Presence Services Client instance that has been started
    */
   void (*const start)(struct bt_mesh_herald_presence_client *client);
 

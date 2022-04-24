@@ -13,6 +13,7 @@
 
 #include <bluetooth/mesh.h>
 #include <bluetooth/mesh/model_types.h>
+#include <bluetooth/mesh/models.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,10 +42,10 @@ struct bt_mesh_herald_presence_server {
 	/** Publication message. */
 	struct net_buf_simple pub_msg;
 	/** Publication message buffer. */
-        uint8_t buf[BT_MESH_MODEL_BUF_LEN(
-            BT_MESH_LINUX_FOUNDATION_OP_SET,
-            BT_MESH_HERALD_PRESENCE_MSG_MAXLEN_STATUS)];
-        const struct bt_mesh_herald_presence_server_cb* cb;
+	uint8_t buf[BT_MESH_MODEL_BUF_LEN(
+			BT_MESH_LINUX_FOUNDATION_OP_SET,
+			BT_MESH_HERALD_PRESENCE_MSG_MAXLEN_STATUS)];
+	const struct bt_mesh_herald_presence_server_cb* cb;
 };
 
 #define BT_MESH_MODEL_HERALD_PRESENCE_SERVER(srv, _pub)            \
@@ -62,9 +63,59 @@ extern const struct bt_mesh_model_cb bt_mesh_herald_presence_server_cb;
 
 
 
+/// MARK: BT MESH herald presence server on/off details
+
+struct bt_mesh_herald_presence_server_onoff_cb {
+	void (*on)();
+	void (*off)();
+};
+
+/** @cond INTERNAL_HIDDEN */
+struct bt_mesh_herald_presence_server_onoff_ctx {
+  struct bt_mesh_onoff_srv server;
+  const struct bt_mesh_herald_presence_server_onoff_cb* callbacks;
+  bool enabled;
+};
+
+extern struct bt_mesh_herald_presence_server_onoff_ctx presence_onoff_ctx;
+
+//  TODO FIND AN EXAMPLE WITH JUST AN ON OFF MODEL, AND COPY THIS INTO PRESENCE
+//       LINK CALLBACKS (On, Off) TO OTHER EXISTING PRESENCE CALLBACKS
+
+
+// THEN CREATE A HERALD_PRESENCE_SERVER_ELEM element MACRO for ease of definition
+
+/** @endcond */
+
+#define BT_MESH_MODEL_HERALD_PRESENCE_ONOFF_SERVER \
+  BT_MESH_MODEL_ONOFF_SRV(&presence_onoff_ctx.server)
 
 // MARK: Server side API for Herald to/from MESH Gateway to call.
 
+/**
+ * @brief Is the presence server on off model set to on?
+ *
+ * @return true If presence server is enabled
+ * @return false If presence server is disabled
+ */
+bool bt_mesh_herald_presence_enabled();
+
+/**
+ * @brief Register a set of herald presence server application level callbacks
+ * 
+ * @param cbs The application callbacks to register (may be partially populated)
+ */
+void bt_mesh_herald_presence_register_callbacks(
+	const struct bt_mesh_herald_presence_server_onoff_cb* cbs);
+
+/**
+ * @brief Publish a nearby device message
+ * 
+ * @param macOfSix 6 byte ble mac address
+ * @param rssi RSSI value (mean over last period)
+ * @param status Whether a new update, or the device is out of range
+ * @return int 0 for success if message send accepted, negative otherwise
+ */
 int bt_mesh_herald_presence_share(uint8_t *macOfSix, int8_t rssi, 
 	enum bt_mesh_model_herald_presence_status status);
 

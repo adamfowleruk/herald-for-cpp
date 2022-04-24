@@ -6,13 +6,15 @@
 #include "herald_handler.h"
 // #include "lb_service_handler.h"
 #include "model_handler.h"
+#include "no_oob_prov.h"
 
 #include <bluetooth/bluetooth.h>
-#include <bluetooth/mesh/dk_prov.h> // TODO replace this with a new herald mesh provisioning configuration rather than the dev kit one
+// #include <bluetooth/mesh/dk_prov.h> // TODO replace this with a new herald mesh provisioning configuration rather than the dev kit one
 #include <bluetooth/mesh/models.h>
 
 #include <drivers/gpio.h>
 
+#include <kernel.h>
 #include <dk_buttons_and_leds.h>
 
 #include <logging/log.h>
@@ -39,6 +41,28 @@ LOG_MODULE_REGISTER(app, CONFIG_APP_LOG_LEVEL);
 #define FLAGS 0
 #endif
 
+static void prov_complete(uint16_t net_idx, uint16_t src) {
+  // Called when provisioning is finished (successfully)
+
+  // Start herald entry on a new thread in case of errors, or needing to do
+  // something on the main thread
+  // herald_initialise();
+
+  // TODO split the above into general scanning for nearby
+  // and advertising a beacon if (and only if) the mesh model
+  // configuration has that data
+}
+
+static void prov_reset() {
+  // Stop Herald and other items, to allow the caller to restart provisioning
+  herald_stop();
+}
+
+static const struct no_oob_prov_cb prov_cbs = {
+  .provisioned = prov_complete,
+  .reset = prov_reset
+};
+
 static void bt_ready(int err) {
   if (err) {
     APP_DBG("Bluetooth init failed (err %d)", err);
@@ -53,7 +77,7 @@ static void bt_ready(int err) {
   // Note: The following model_handler_init will initialise Herald
   //       once the mesh beacon has been correctly provisioned.
   //       This is done via the init() callback of bt_mesh_model_cb.
-  err = bt_mesh_init(bt_mesh_dk_prov_init(), model_handler_init());
+  err = bt_mesh_init(bt_mesh_no_oob_prov_init(&prov_cbs), model_handler_init());
   if (err) {
     APP_DBG("Initializing mesh failed (err %d)", err);
     return;
@@ -106,16 +130,8 @@ void main(void) {
   }
   APP_DBG("Bluetooth MESH initialised");
 
-  // TODO don't start Herald until enrolled and configured via MESH
-
-  // Start herald entry on a new thread in case of errors, or needing to do
-  // something on the main thread
-  herald_initialise();
-
-  uint8_t dummyMac[6] = {0, 1, 2, 3, 4, 5};
-
   // Regular debug output to show the app is still running
-  int iter = 0;
+  // int iter = 0;
   while (1) {
     k_sleep(K_SECONDS(2));
     gpio_pin_set(dev, PIN, (int)led_is_on);
@@ -127,14 +143,9 @@ void main(void) {
     // resume as necessary
 
     // Fake presence publishing for now
-    ++iter;
-    if (iter > 10 && 0 == iter % 5) {
-      APP_DBG("Publishing presence message...");
-      // int res = bt_mesh_herald_presence_share(
-      //     dummyMac, -40,
-      //     bt_mesh_model_herald_presence_status::
-      //         BT_MESH_HERALD_PRESENCE_OBSERVED);
-      // APP_DBG("Presence publishing result: %d", res);
-    }
+    // ++iter;
+    // if (iter > 10 && 0 == iter % 5) {
+    //   APP_DBG("Publishing presence message...");
+    // }
   }
 }

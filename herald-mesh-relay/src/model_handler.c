@@ -174,15 +174,30 @@ static struct bt_mesh_herald_presence_server presence_server = {
 	.cb = &presence_handlers
 };
 
-static struct bt_mesh_elem elements[] = {BT_MESH_ELEM(
-    1,
-    BT_MESH_MODEL_LIST(BT_MESH_MODEL_CFG_SRV,
-                       BT_MESH_MODEL_HEALTH_SRV(&health_server, &health_pub),
-                      //  BT_MESH_MODEL_ONOFF_SRV(&led_ctx.server),
-                       // TODO reconfigure this for beaconing, presence
-                       BT_MESH_MODEL_HERALD_PRESENCE_SERVER(
-                           &presence_server, &presence_pub)),
-    BT_MESH_MODEL_NONE)};
+static struct bt_mesh_elem elements[] = {
+	BT_MESH_ELEM(
+		1,
+		BT_MESH_MODEL_LIST(
+			BT_MESH_MODEL_CFG_SRV,
+			BT_MESH_MODEL_HEALTH_SRV(&health_server, &health_pub),
+			// BT_MESH_MODEL_ONOFF_SRV(&led_ctx.server),),
+		),
+		BT_MESH_MODEL_LIST(
+		)
+  ),
+	BT_MESH_ELEM(
+		2,
+		BT_MESH_MODEL_LIST(
+			BT_MESH_MODEL_HERALD_PRESENCE_ONOFF_SERVER,
+		),
+		BT_MESH_MODEL_LIST(
+			// TODO reconfigure this for beaconing, presence
+			BT_MESH_MODEL_HERALD_PRESENCE_SERVER(
+					&presence_server, &presence_pub
+			),
+		)
+	),
+};
 
 static const struct bt_mesh_comp comp = {
 	.cid = BT_MESH_LINUX_FOUNDATION_VENDOR_COMPANY_ID,

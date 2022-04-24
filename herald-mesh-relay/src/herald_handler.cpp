@@ -9,7 +9,7 @@
 // binaries!
 #include "herald/ble/ble_sensor_configuration.h"
 #include "herald/ble/zephyr/concrete_ble_receiver.h"
-#include "herald/ble/zephyr/concrete_ble_transmitter.h"
+// #include "herald/ble/zephyr/concrete_ble_transmitter.h"
 // #include "herald/ble/zephyr/nordic_uart/nordic_uart_sensor_delegate.h"
 #include "herald/datatype/date.h"
 #include "herald/datatype/immediate_send_data.h"
@@ -22,13 +22,15 @@
 #include "herald/mesh/mesh.h"
 #include "herald/mesh/presence.h"
 #include "herald/mesh/presence_server.h"
-#include "herald/payload/beacon/beacon_payload_data_supplier.h"
-#include "herald/payload/extended/extended_data.h"
+// #include "herald/payload/beacon/beacon_payload_data_supplier.h"
+// #include "herald/payload/extended/extended_data.h"
 #include "herald/payload/fixed/fixed_payload_data_supplier.h"
 #include "herald/sensor.h"
 #include "herald/sensor_array.h"
 #include "herald/sensor_delegate.h"
 #include "herald/zephyr_context.h"
+
+#include <kernel.h>
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(app_herald, CONFIG_APP_LOG_LEVEL);
@@ -56,96 +58,126 @@ constexpr int stackMaxSize =
 K_THREAD_STACK_DEFINE(herald_stack,
                       stackMaxSize);  // Was 9192 for nRF5340 (10 conns), 2048
                                       // for nRF52832 (3 conns)
-struct DummyDelegate{};
-// using namespace herald::datatype;
-// class AppLoggingDelegate {
-//  public:
-//   AppLoggingDelegate() = default;
-//   ~AppLoggingDelegate() = default;
 
-//   void sensor(SensorType sensor, const TargetIdentifier& didDetect) {
-//     // LOG_DBG("sensor didDetect");
-//     APP_DBG("sensor didDetect: %s",
-//             str(didDetect));  // May want to disable this - logs A LOT of info
-//   }
+// When did we last send nearby presence data over mesh (TODO REPLACE THIS)
+int lastShared = 0;
 
-//   /// Read payload data from target, e.g. encrypted device identifier from BLE
-//   /// peripheral after successful connection.
-//   void sensor(SensorType sensor, const PayloadData& didRead,
-//               const TargetIdentifier& fromTarget) {
-//     // LOG_DBG("sensor didRead");
-//     APP_DBG("sensor didRead: %s with payload: %s", str(fromTarget),
-//             log_strdup(didRead.hexEncodedString().c_str()));
-//   }
+using namespace herald::datatype;
+using namespace herald::ble;
 
-//   /// Receive written immediate send data from target, e.g. important timing
-//   /// signal.
-//   void sensor(SensorType sensor, const ImmediateSendData& didReceive,
-//               const TargetIdentifier& fromTarget) {
-//     // LOG_DBG("sensor didReceive");
-//     APP_DBG("sensor didReceive: %s with immediate send data: %s",
-//             str(fromTarget), log_strdup(didReceive.hexEncodedString().c_str()));
-//   }
+char* str(const TargetIdentifier& ti) {
+  return log_strdup(((std::string)ti).c_str());
+}
+// struct DummyDelegate{};
+class AppLoggingDelegate {
+ public:
+  AppLoggingDelegate() = default;
+  ~AppLoggingDelegate() = default;
 
-//   /// Read payload data of other targets recently acquired by a target, e.g.
-//   /// Android peripheral sharing payload data acquired from nearby iOS
-//   /// peripherals.
-//   void sensor(SensorType sensor, const std::vector<PayloadData>& didShare,
-//               const TargetIdentifier& fromTarget) {
-//     APP_DBG("sensor didShare");
-//     // LOG_DBG("sensor didShare: %s", str(fromTarget) );
-//     // for (auto& p : didShare) {
-//     // 	LOG_DBG(" - %s", log_strdup(p.hexEncodedString().c_str()));
-//     // }
-//   }
+  void sensor(SensorType sensor, const TargetIdentifier& didDetect) {
+    // LOG_DBG("sensor didDetect");
+    APP_DBG("sensor didDetect: %s",
+            str(didDetect));  // May want to disable this - logs A LOT of info
+  }
 
-//   /// Measure proximity to target, e.g. a sample of RSSI values from BLE
-//   /// peripheral.
-//   void sensor(SensorType sensor, const Proximity& didMeasure,
-//               const TargetIdentifier& fromTarget) {
-//     APP_DBG(
-//         "didMeasure: %s, fromTarget: %s",
-//         log_strdup(didMeasure.description().c_str()),
-//         log_strdup(
-//             ((std::string)BLEMacAddress(fromTarget.underlyingData())).c_str()));
-//     // LOG_DBG("sensor didMeasure: %s with proximity: %d", str(fromTarget),
-//     // didMeasure.value);
-//   }
+  /// Read payload data from target, e.g. encrypted device identifier from BLE
+  /// peripheral after successful connection.
+  void sensor(SensorType sensor, const PayloadData& didRead,
+              const TargetIdentifier& fromTarget) {
+    // LOG_DBG("sensor didRead");
+    APP_DBG("sensor didRead: %s with payload: %s", str(fromTarget),
+            log_strdup(didRead.hexEncodedString().c_str()));
+  }
 
-//   /// Detection of time spent at location, e.g. at specific restaurant between
-//   /// 02/06/2020 19:00 and 02/06/2020 21:00
-//   template <typename LocationT>
-//   void sensor(SensorType sensor, const Location<LocationT>& didVisit) {
-//     APP_DBG("sensor didVisit");
-//   }
+  /// Receive written immediate send data from target, e.g. important timing
+  /// signal.
+  void sensor(SensorType sensor, const ImmediateSendData& didReceive,
+              const TargetIdentifier& fromTarget) {
+    // LOG_DBG("sensor didReceive");
+    APP_DBG("sensor didReceive: %s with immediate send data: %s",
+            str(fromTarget), log_strdup(didReceive.hexEncodedString().c_str()));
+  }
 
-//   /// Measure proximity to target with payload data. Combines didMeasure and
-//   /// didRead into a single convenient delegate method
-//   void sensor(SensorType sensor, const Proximity& didMeasure,
-//               const TargetIdentifier& fromTarget,
-//               const PayloadData& withPayload) {
-//     // ERR so it stands out in the logging!
-//     APP_ERR(
-//         "didMeasure=%s, fromTarget=%s, withPayload=%s",
-//         log_strdup(didMeasure.description().c_str()),
-//         log_strdup(
-//             ((std::string)BLEMacAddress(fromTarget.underlyingData())).c_str()),
-//         log_strdup(withPayload.hexEncodedString().c_str()));
-//   }
+  /// Read payload data of other targets recently acquired by a target, e.g.
+  /// Android peripheral sharing payload data acquired from nearby iOS
+  /// peripherals.
+  void sensor(SensorType sensor, const std::vector<PayloadData>& didShare,
+              const TargetIdentifier& fromTarget) {
+    APP_DBG("sensor didShare");
+    // LOG_DBG("sensor didShare: %s", str(fromTarget) );
+    // for (auto& p : didShare) {
+    // 	LOG_DBG(" - %s", log_strdup(p.hexEncodedString().c_str()));
+    // }
+  }
 
-//   /// Sensor state update
-//   void sensor(SensorType sensor, const SensorState& didUpdateState) {
-//     APP_DBG("sensor didUpdateState");
-//   }
-// };
+  /// Measure proximity to target, e.g. a sample of RSSI values from BLE
+  /// peripheral.
+  void sensor(SensorType sensor, const Proximity& didMeasure,
+              const TargetIdentifier& fromTarget) {
+    APP_DBG(
+        "didMeasure: %s, fromTarget: %s",
+        log_strdup(didMeasure.description().c_str()),
+        log_strdup(
+            ((std::string)BLEMacAddress(fromTarget.underlyingData())).c_str()));
+    // LOG_DBG("sensor didMeasure: %s with proximity: %d", str(fromTarget),
+    // didMeasure.value);
+
+    // Now send a did detect message over mesh
+    // Note: This frequency is managed by BLESensorConfiguration
+    // For now, delay so many seconds
+    int now = 0.001 * k_uptime_get();
+    if (lastShared + 5 < now) {
+      lastShared = now;
+      uint8_t seenMac[6] = {0, 1, 2, 3, 4, 5};
+    //   const auto& d = fromTarget.underlyingData();
+    //   bool ok = d.uint8(0, *seenMac);
+    //   ok = d.uint8(1, *(seenMac + 1));
+    //   ok = d.uint8(2, *(seenMac + 2));
+    //   ok = d.uint8(3, *(seenMac + 3));
+    //   ok = d.uint8(4, *(seenMac + 4));
+    //   ok = d.uint8(5, *(seenMac + 5));
+      // TODO check the above return values
+      int res = bt_mesh_herald_presence_share(
+          seenMac, -40,
+          bt_mesh_model_herald_presence_status::
+              BT_MESH_HERALD_PRESENCE_OBSERVED);
+      APP_DBG("Presence publishing result: %d", res);
+    }
+  }
+
+  /// Detection of time spent at location, e.g. at specific restaurant between
+  /// 02/06/2020 19:00 and 02/06/2020 21:00
+  template <typename LocationT>
+  void sensor(SensorType sensor, const Location<LocationT>& didVisit) {
+    APP_DBG("sensor didVisit");
+  }
+
+  /// Measure proximity to target with payload data. Combines didMeasure and
+  /// didRead into a single convenient delegate method
+  void sensor(SensorType sensor, const Proximity& didMeasure,
+              const TargetIdentifier& fromTarget,
+              const PayloadData& withPayload) {
+    // ERR so it stands out in the logging!
+    APP_ERR(
+        "didMeasure=%s, fromTarget=%s, withPayload=%s",
+        log_strdup(didMeasure.description().c_str()),
+        log_strdup(
+            ((std::string)BLEMacAddress(fromTarget.underlyingData())).c_str()),
+        log_strdup(withPayload.hexEncodedString().c_str()));
+  }
+
+  /// Sensor state update
+  void sensor(SensorType sensor, const SensorState& didUpdateState) {
+    APP_DBG("sensor didUpdateState");
+  }
+};
 
 using MYUINT32 = unsigned long;
 
 struct basic_venue {
   std::uint16_t country;
   std::uint16_t state;
-  MYUINT32
-      code;  // C++ linker may balk, confusing unsigned int with unsigned long
+  MYUINT32 code;  // C++ linker may balk, confusing uint with unsigned long
   std::string name;
 };
 
@@ -177,14 +209,14 @@ static struct basic_venue adamsLounge = {
 
 void herald_entry() {
   APP_DBG("Herald entry");
-  k_sleep(K_MSEC(10000));  // pause so we have time to see Herald initialisation
-                           // log messages. Don't do this in production!
+  k_sleep(K_MSEC(2000));  // pause so we have time to see Herald initialisation
+                          // log messages. Don't do this in production!
   APP_DBG("Herald setup begins");
 
   using namespace herald;
   using namespace herald::payload;
-  using namespace herald::payload::beacon;
-  using namespace herald::payload::extended;
+//   using namespace herald::payload::beacon;
+//   using namespace herald::payload::extended;
 
   // Create Herald sensor array
   ZephyrContextProvider zcp;
@@ -195,21 +227,21 @@ void herald_entry() {
   // Disable receiver / scanning mode - we're just transmitting our value
   BLESensorConfiguration config = ctx.getSensorConfiguration();  // copy ctor
   config.scanningEnabled = true;  // To see other nearby BLE devices
-  // config.advertisingEnabled = true; // default
+  config.advertisingEnabled = false; // TODO For now, until internal nav created
   ctx.setSensorConfiguration(config);
 
-  ConcreteExtendedDataV1 extendedData;
-  extendedData.addSection(ExtendedDataSegmentCodesV1::TextPremises,
-                          erinsStakehouse.name);
+//   ConcreteExtendedDataV1 extendedData;
+//   extendedData.addSection(ExtendedDataSegmentCodesV1::TextPremises,
+//                           erinsStakehouse.name);
 
-  // TODO get this from configuration of the MESH element (Nav beacon model)
-  payload::beacon::ConcreteBeaconPayloadDataSupplierV1 pds(
-      erinsStakehouse.country, erinsStakehouse.state, erinsStakehouse.code,
-      extendedData);
+//   // TODO get this from configuration of the MESH element (Nav beacon model)
+//   payload::beacon::ConcreteBeaconPayloadDataSupplierV1 pds(
+//       erinsStakehouse.country, erinsStakehouse.state, erinsStakehouse.code,
+//       extendedData);
 
-  // this is unusual, but required. Really we should log activity to serial BLE
-  // or similar
-  DummyDelegate appDelegate;
+  payload::fixed::ConcreteFixedPayloadDataSupplierV1 pds(0,0,0);
+  
+  AppLoggingDelegate appDelegate;
   SensorDelegateSet sensorDelegates(appDelegate);
 
   ConcreteBLESensor ble(ctx, ctx.getBluetoothStateManager(), pds,
@@ -225,7 +257,7 @@ void herald_entry() {
   Date last;
   // APP_DBG("got last!");
   // k_sleep(K_SECONDS(2));
-  int delay = 250;  // KEEP THIS SMALL!!! This is how often we check to see if
+  int delay = 2500;  // KEEP THIS SMALL!!! This is how often we check to see if
                     // anything needs to happen over a connection.
 
   APP_DBG("Entering herald iteration loop");
@@ -233,7 +265,7 @@ void herald_entry() {
   while (1) {
     k_sleep(K_MSEC(delay));
     Date now;
-    if (iter > 40 /* && iter < 44 */) {  // some delay to allow us to see
+    if (iter > 4 /* && iter < 44 */) {  // some delay to allow us to see
                                          // advertising output
       // You could only do first 3 iterations so we can see the older log
       // messages without continually scrolling through log messages
@@ -270,16 +302,16 @@ void herald_healthcheck() {
 }
 
 bool herald_configure() {
-  // TODO implement this
+  // TODO implement this - from mesh configuration
   return true;
 }
 
 bool herald_start() {
-  // TODO implement this
+  // TODO implement this - put sa.start here
   return true;
 }
 
 bool herald_stop() {
-  // TODO implement this
+  // TODO implement this - put sa.stop here
   return true;
 }
