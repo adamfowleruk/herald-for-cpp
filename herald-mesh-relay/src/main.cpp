@@ -4,12 +4,11 @@
  */
 
 #include "herald_handler.h"
-// #include "lb_service_handler.h"
 #include "model_handler.h"
-#include "no_oob_prov.h"
+#include "no_oob_prov.h" // TODO replace me with something secure
 
 #include <bluetooth/bluetooth.h>
-// #include <bluetooth/mesh/dk_prov.h> // TODO replace this with a new herald mesh provisioning configuration rather than the dev kit one
+// #include <bluetooth/mesh/dk_prov.h> // TODO replace this with a new herald mesh provisioning configuration rather than the dev kit or no_oob_prov one
 #include <bluetooth/mesh/models.h>
 
 #include <drivers/gpio.h>
@@ -51,6 +50,9 @@ static void prov_complete(uint16_t net_idx, uint16_t src) {
   // TODO split the above into general scanning for nearby
   // and advertising a beacon if (and only if) the mesh model
   // configuration has that data
+
+  // Now start any configured functionality
+  // herald_start();
 }
 
 static void prov_reset() {
@@ -74,9 +76,8 @@ static void bt_ready(int err) {
   dk_leds_init();
   dk_buttons_init(NULL);
 
-  // Note: The following model_handler_init will initialise Herald
-  //       once the mesh beacon has been correctly provisioned.
-  //       This is done via the init() callback of bt_mesh_model_cb.
+  // Note: Following provisioning the prov_complete function is called
+  //       After which, if configured, the Herald LE gateway is enabled
   err = bt_mesh_init(bt_mesh_no_oob_prov_init(&prov_cbs), model_handler_init());
   if (err) {
     APP_DBG("Initializing mesh failed (err %d)", err);
@@ -87,17 +88,11 @@ static void bt_ready(int err) {
     settings_load();
   }
 
-  // To reset provisioning status -> You have to do a full Erase & Write
-  // bt_mesh_prov_reset(); // prov.h - NOT accessible from an app
-  // bt_mesh_reset();
-
   // Set that we want both MESH and GATT for MESH
   bt_mesh_prov_enable(bt_mesh_prov_bearer_t(unsigned(BT_MESH_PROV_ADV) |
                                             unsigned(BT_MESH_PROV_GATT)));
 
   APP_DBG("Mesh started");
-
-  // lbs_handler_init();
 }
 
 void main(void) {
@@ -131,7 +126,7 @@ void main(void) {
   APP_DBG("Bluetooth MESH initialised");
 
   // Regular debug output to show the app is still running
-  // int iter = 0;
+  int iter = 0;
   while (1) {
     k_sleep(K_SECONDS(2));
     gpio_pin_set(dev, PIN, (int)led_is_on);
@@ -142,10 +137,11 @@ void main(void) {
     // TODO Add logic here to detect failure in Herald thread, and restart to
     // resume as necessary
 
-    // Fake presence publishing for now
-    // ++iter;
-    // if (iter > 10 && 0 == iter % 5) {
-    //   APP_DBG("Publishing presence message...");
-    // }
+    // Regular health checks
+    ++iter;
+    if (iter > 10 && 0 == iter % 5) {
+      APP_DBG("Performing Herald Healthcheck...");
+      herald_healthcheck();
+    }
   }
 }

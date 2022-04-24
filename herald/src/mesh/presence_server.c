@@ -21,78 +21,78 @@
 struct bt_mesh_herald_presence_server *herald_presence_server;
 
 static int send_herald_presence_server_status(struct bt_mesh_model *model,
-				     struct bt_mesh_msg_ctx *ctx)
+             struct bt_mesh_msg_ctx *ctx)
 {
-	/* Needed size: opcode (2 bytes) + msg + MIC */
-	BT_MESH_MODEL_BUF_DEFINE(msg, BT_MESH_LINUX_FOUNDATION_OP_STATUS, 
+  /* Needed size: opcode (2 bytes) + msg + MIC */
+  BT_MESH_MODEL_BUF_DEFINE(msg, BT_MESH_LINUX_FOUNDATION_OP_STATUS, 
     BT_MESH_HERALD_PRESENCE_MSG_MAXLEN_STATUS);
 
-	bt_mesh_model_msg_init(&msg, BT_MESH_LINUX_FOUNDATION_OP_STATUS);
+  bt_mesh_model_msg_init(&msg, BT_MESH_LINUX_FOUNDATION_OP_STATUS);
 
-	// TODO append data to buffer to send from status message
-	// net_buf_simple_add_u8(&msg, model->pub->period_div);
+  // TODO append data to buffer to send from status message
+  // net_buf_simple_add_u8(&msg, model->pub->period_div);
 
-	if (bt_mesh_model_send(model, ctx, &msg, NULL, NULL)) {
-		BT_ERR("Unable to send Herald Location Services Server Status");
-	}
+  if (bt_mesh_model_send(model, ctx, &msg, NULL, NULL)) {
+    BT_ERR("Unable to send Herald Location Services Server Status");
+  }
 
-	return 0;
+  return 0;
 }
 
 static int herald_presence_server_get(struct bt_mesh_model *model,
-			      struct bt_mesh_msg_ctx *ctx,
-			      struct net_buf_simple *buf)
+            struct bt_mesh_msg_ctx *ctx,
+            struct net_buf_simple *buf)
 {
-	BT_DBG("");
+  BT_DBG("");
 
-	return send_herald_presence_server_status(model, ctx);
+  return send_herald_presence_server_status(model, ctx);
 }
 
 static int herald_presence_server_set_unrel(struct bt_mesh_model *model,
-				    struct bt_mesh_msg_ctx *ctx,
-				    struct net_buf_simple *buf)
+            struct bt_mesh_msg_ctx *ctx,
+            struct net_buf_simple *buf)
 {
-	// uint8_t period;
+  // uint8_t period;
 
   //TODO fetch bool values
 
-	// period = net_buf_simple_pull_u8(buf);
-	// if (period > 15) {
-	// 	BT_WARN("Prohibited period value %u", period);
-	// 	return -EINVAL;
-	// }
+  // period = net_buf_simple_pull_u8(buf);
+  // if (period > 15) {
+  //   BT_WARN("Prohibited period value %u", period);
+  //   return -EINVAL;
+  // }
 
-	// BT_DBG("period %u", period);
+  // BT_DBG("period %u", period);
 
-	// model->pub->period_div = period;
+  // model->pub->period_div = period;
 
-	return 0;
+  return 0;
 }
 
 static int herald_presence_server_set(struct bt_mesh_model *model,
-			     struct bt_mesh_msg_ctx *ctx,
-			     struct net_buf_simple *buf)
+           struct bt_mesh_msg_ctx *ctx,
+           struct net_buf_simple *buf)
 {
-	int err;
+  int err;
 
-	BT_DBG("");
+  BT_DBG("");
 
-	err = herald_presence_server_set_unrel(model, ctx, buf);
-	if (err) {
-		return err;
-	}
+  err = herald_presence_server_set_unrel(model, ctx, buf);
+  if (err) {
+    return err;
+  }
 
-	return send_herald_presence_server_status(model, ctx);
+  return send_herald_presence_server_status(model, ctx);
 }
 
 
 const struct bt_mesh_model_op bt_mesh_herald_presence_server_op[] = {
-	{ BT_MESH_LINUX_FOUNDATION_OP_GET,        BT_MESH_LEN_EXACT(0),   herald_presence_server_get },
-	{ BT_MESH_LINUX_FOUNDATION_OP_SET_UNACK,  BT_MESH_LEN_EXACT(BT_MESH_HERALD_PRESENCE_MSG_MAXLEN_SET), 
+  { BT_MESH_LINUX_FOUNDATION_OP_GET,        BT_MESH_LEN_EXACT(0),   herald_presence_server_get },
+  { BT_MESH_LINUX_FOUNDATION_OP_SET_UNACK,  BT_MESH_LEN_EXACT(BT_MESH_HERALD_PRESENCE_MSG_MAXLEN_SET), 
     herald_presence_server_set_unrel },   
-	{ BT_MESH_LINUX_FOUNDATION_OP_SET,        BT_MESH_LEN_EXACT(BT_MESH_HERALD_PRESENCE_MSG_MINLEN_SET),   
+  { BT_MESH_LINUX_FOUNDATION_OP_SET,        BT_MESH_LEN_EXACT(BT_MESH_HERALD_PRESENCE_MSG_MINLEN_SET),   
     herald_presence_server_set },
-	BT_MESH_MODEL_OP_END,
+  BT_MESH_MODEL_OP_END,
 };
 
 static int herald_presence_server_start(struct bt_mesh_model *model)
@@ -103,37 +103,63 @@ static int herald_presence_server_start(struct bt_mesh_model *model)
 
 static int herald_presence_server_init(struct bt_mesh_model *model)
 {
-	BT_DBG("herald_presence_server_init called");
-	struct bt_mesh_herald_presence_server *srv = 
-		(struct bt_mesh_herald_presence_server*)model->user_data;
+  BT_DBG("herald_presence_server_init called");
+  struct bt_mesh_herald_presence_server *srv = 
+    (struct bt_mesh_herald_presence_server*)model->user_data;
 
-	if (!srv) {
-		BT_ERR("No Herald Location Services Server context provided");
-		return -EINVAL;
-	}
+  if (!srv) {
+    BT_ERR("No Herald Location Services Server context provided");
+    return -EINVAL;
+  }
 
-	if (!model->pub) {
-		BT_ERR("Herald Location Services Server has no publication support");
-		return -EINVAL;
-	}
+  if (!model->pub) {
+    BT_ERR("Herald Location Services Server has no publication support");
+    return -EINVAL;
+  }
 
-	// model->pub->update = herald_presence_pub_update;
+  // model->pub->update = herald_presence_pub_update;
 
-	// k_work_init_delayable(&srv->attn_timer, attention_off);
+  // k_work_init_delayable(&srv->attn_timer, attention_off);
 
-	srv->model = model;
+  srv->model = model;
 
-	// TODO change this to a secondary as it's now separated out
-	if (bt_mesh_model_in_primary(model)) {
-		herald_presence_server = srv;
-	}
+  // TODO change this to a secondary as it's now separated out
+  if (bt_mesh_model_in_primary(model)) {
+    herald_presence_server = srv;
+  }
 
-	return 0;
+  return 0;
 }
 
 const struct bt_mesh_model_cb bt_mesh_herald_presence_server_cb = {
-	.init = herald_presence_server_init,
-	.start = herald_presence_server_start,
+  .init = herald_presence_server_init,
+  .start = herald_presence_server_start,
+};
+
+// TODO MOVE THESE SO THEY ARE HANDLED BY THE PRESENCE SERVER C FILE INSTEAD
+// THEN DEFINE AN APP-LEVEL CALLBACK AS PER
+// bt_mesh_herald_presence_register_callbacks
+
+// Define herald location services server handlers
+static int presence_updated(struct bt_mesh_herald_presence_server* srv,
+                            const struct bt_mesh_herald_presence_set* set,
+                            struct bt_mesh_herald_presence_status* rsp);
+
+static const struct bt_mesh_herald_presence_server_cb presence_handlers = {
+    .set = presence_updated};
+
+static int presence_updated(struct bt_mesh_herald_presence_server* srv,
+                            const struct bt_mesh_herald_presence_set* set,
+                            struct bt_mesh_herald_presence_status* rsp) {
+  LOG_DBG("presence_updated() called");
+  // TODO do work
+  return 0;
+}
+
+BT_MESH_HERALD_PRESENCE_SERVER_PUB_DEFINE(presence_pub, 11);
+
+static struct bt_mesh_herald_presence_server presence_server = {
+  .cb = &presence_handlers
 };
 
 // FWD DECL
@@ -157,13 +183,13 @@ static const struct bt_mesh_onoff_srv_handlers onoff_handlers = {
  */
 
 struct bt_mesh_herald_presence_server_onoff_ctx presence_onoff_ctx = {
-	.server  = BT_MESH_ONOFF_SRV_INIT(&onoff_handlers),
+  .server  = BT_MESH_ONOFF_SRV_INIT(&onoff_handlers),
   .enabled = false,
 };
 
 static void presence_onoff_status(struct bt_mesh_onoff_status *status)
 {
-	// We always immediately change, so report the current status
+  // We always immediately change, so report the current status
   status->remaining_time = 0;
   status->target_on_off = presence_onoff_ctx.enabled;
   status->present_on_off = presence_onoff_ctx.enabled;
@@ -175,7 +201,7 @@ static void presence_onoff_set(struct bt_mesh_onoff_srv* srv,
                                struct bt_mesh_onoff_status* rsp)
 {
   struct bt_mesh_herald_presence_server_onoff_ctx* presence_ctx =
-		CONTAINER_OF(srv, struct bt_mesh_herald_presence_server_onoff_ctx, server);
+    CONTAINER_OF(srv, struct bt_mesh_herald_presence_server_onoff_ctx, server);
 
   // Copy over value
   bool wasEnabled = presence_ctx->enabled;
@@ -186,20 +212,20 @@ static void presence_onoff_set(struct bt_mesh_onoff_srv* srv,
   // respond if an ack requested
   if (rsp) {
     presence_onoff_status(rsp);
-	}
+  }
 
-	// check if status has changed, and thus an application event needs firing
-	if (wasEnabled != set->on_off && presence_ctx->callbacks) {
-		if (set->on_off) {
-			// if (NULL != presence_ctx->callbacks->on) {
-				presence_ctx->callbacks->on();
-			// }
-		} else {
-			// if (NULL != presence_ctx->callbacks->off) {
-				presence_ctx->callbacks->off();
-			// }
-		}
-	}
+  // check if status has changed, and thus an application event needs firing
+  if (wasEnabled != set->on_off && presence_ctx->callbacks) {
+    if (set->on_off) {
+      if (NULL != presence_ctx->callbacks->on) {
+        presence_ctx->callbacks->on();
+      }
+    } else {
+      if (NULL != presence_ctx->callbacks->off) {
+        presence_ctx->callbacks->off();
+      }
+    }
+  }
 }
 
 static void presence_onoff_get(struct bt_mesh_onoff_srv* srv,
@@ -213,7 +239,7 @@ static void presence_onoff_get(struct bt_mesh_onoff_srv* srv,
  * Server side API for a Herald Presence Server app to call.
  */
 void bt_mesh_herald_presence_register_callbacks(
-	const struct bt_mesh_herald_presence_server_onoff_cb* cbs)
+  const struct bt_mesh_herald_presence_server_onoff_cb* cbs)
 {
   presence_onoff_ctx.callbacks = cbs;
 }
@@ -224,8 +250,8 @@ bool bt_mesh_herald_presence_enabled()
 }
 
 int bt_mesh_herald_presence_share(
-	uint8_t* macOfSix, int8_t rssi,
-	enum bt_mesh_model_herald_presence_status status)
+  uint8_t* macOfSix, int8_t rssi,
+  enum bt_mesh_model_herald_presence_status status)
 {
   // Ensure our server handle has been initialised
   if (NULL == herald_presence_server) {
@@ -251,20 +277,20 @@ int bt_mesh_herald_presence_share(
   BT_DBG("Model publish TTL: %d", mdl->pub->ttl);
 
   // Reset model message buffer
-	bt_mesh_model_msg_init(msg, BT_MESH_LINUX_FOUNDATION_OP_STATUS);
-	BT_DBG("Max model message size now: %d", mdl->pub->msg->size);
+  bt_mesh_model_msg_init(msg, BT_MESH_LINUX_FOUNDATION_OP_STATUS);
+  BT_DBG("Max model message size now: %d", mdl->pub->msg->size);
 
-	// append data to buffer to send from status message
-	net_buf_simple_add_u8(msg, macOfSix[0]);
-	net_buf_simple_add_u8(msg, macOfSix[1]);
-	net_buf_simple_add_u8(msg, macOfSix[2]);
-	net_buf_simple_add_u8(msg, macOfSix[3]);
-	net_buf_simple_add_u8(msg, macOfSix[4]);
-	net_buf_simple_add_u8(msg, macOfSix[5]);
-	net_buf_simple_add_u8(msg, (uint8_t)rssi);
-	net_buf_simple_add_u8(msg, (uint8_t)status);
-	BT_DBG("Message length to send: %d", msg->len);
+  // append data to buffer to send from status message
+  net_buf_simple_add_u8(msg, macOfSix[0]);
+  net_buf_simple_add_u8(msg, macOfSix[1]);
+  net_buf_simple_add_u8(msg, macOfSix[2]);
+  net_buf_simple_add_u8(msg, macOfSix[3]);
+  net_buf_simple_add_u8(msg, macOfSix[4]);
+  net_buf_simple_add_u8(msg, macOfSix[5]);
+  net_buf_simple_add_u8(msg, (uint8_t)rssi);
+  net_buf_simple_add_u8(msg, (uint8_t)status);
+  BT_DBG("Message length to send: %d", msg->len);
 
-	// share presence
-	return bt_mesh_model_publish(mdl);
+  // share presence
+  return bt_mesh_model_publish(mdl);
 }

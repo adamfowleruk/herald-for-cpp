@@ -106,7 +106,7 @@ class AppLoggingDelegate {
     APP_DBG("sensor didShare");
     // LOG_DBG("sensor didShare: %s", str(fromTarget) );
     // for (auto& p : didShare) {
-    // 	LOG_DBG(" - %s", log_strdup(p.hexEncodedString().c_str()));
+    //   LOG_DBG(" - %s", log_strdup(p.hexEncodedString().c_str()));
     // }
   }
 

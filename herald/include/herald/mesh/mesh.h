@@ -54,6 +54,15 @@ extern "C" {
 
 /// MARK: BEGIN HERALD PROJECT SECTION
 
+#define BT_MESH_HERALD_MESH_RELAY_PRODUCT_ID 0x0001
+#define BT_MESH_HERALD_MESH_MODEM_PRODUCT_ID 0x0002
+#define BT_MESH_HERALD_MESH_TAG_PRODUCT_ID   0x0003
+
+// The following convert SEMVER Herald releases to BL MESH Product Versions
+// Note: Beta1, 2 etc use the NEXT minor version number
+#define BT_MESH_HERALD_PRODUCT_V121          0x0001
+#define BT_MESH_HERALD_PRODUCT_CURRENT_VERSION BT_MESH_HERALD_PRODUCT_V121
+
 /**
  * @brief A Herald MESH Relay Beacon can also advertise location
  * information to nearby Herald Venue Beacon Bluetooth LE clients.

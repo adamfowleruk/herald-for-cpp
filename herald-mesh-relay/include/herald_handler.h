@@ -4,8 +4,8 @@
  */
 
 /**
- * @file 
- * @brief 
+ * @file Provides application-level coordination for the Herald Bluetooth 
+ * LE and Herald Presence Server functionality
  */
 
 #ifndef HERALD_HANDLER_H__

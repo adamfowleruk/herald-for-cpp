@@ -26,12 +26,12 @@ struct bt_mesh_herald_presence_client;
 
 /** The Mesh Model definition itself **/
 #define BT_MESH_MODEL_HERALD_PRESENCE_CLIENT(_herald_presence) \
-		BT_MESH_MODEL_VND_CB(BT_MESH_LINUX_FOUNDATION_VENDOR_COMPANY_ID, \
-			BT_MESH_HERALD_PRESENCE_CLIENT_VENDOR_MODEL_ID, \
-			_bt_mesh_herald_presence_client_op, &(_herald_presence)->pub, \
-			BT_MESH_MODEL_USER_DATA(struct bt_mesh_herald_presence_client, \
-						_herald_presence), \
-			&_bt_mesh_herald_presence_client_cb)
+    BT_MESH_MODEL_VND_CB(BT_MESH_LINUX_FOUNDATION_VENDOR_COMPANY_ID, \
+      BT_MESH_HERALD_PRESENCE_CLIENT_VENDOR_MODEL_ID, \
+      _bt_mesh_herald_presence_client_op, &(_herald_presence)->pub, \
+      BT_MESH_MODEL_USER_DATA(struct bt_mesh_herald_presence_client, \
+            _herald_presence), \
+      &_bt_mesh_herald_presence_client_cb)
 
 /** Bluetooth MESH presence services client handlers **/
 struct bt_mesh_herald_presence_client_handlers {
