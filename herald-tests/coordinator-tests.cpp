@@ -242,8 +242,11 @@ TEST_CASE("coordinator-complex-iterations", "[coordinator][iterations][complex]"
   DummyBluetoothStateManager dbsm;
   herald::DefaultPlatformType dpt;
   herald::Context ctx(dpt,dls,dbsm); // default context include
-  auto serviceUUID = herald::datatype::UUID::fromString("428132af-4746-42d3-801e-4572d65bfd9b");
-  // INFO("Service UUID " << std::string(serviceUUID));
+  auto serviceUUID = herald::datatype::UUID::fromString(
+      "428132af-4746-42d3-801e-4572d65bfd9b");
+  INFO("Service UUID " << (herald::data::String)serviceUUID);
+  INFO("BLESensorConfiguration Service UUID "
+       << (herald::data::String)ctx.getSensorConfiguration().serviceUUID);
   REQUIRE(ctx.getSensorConfiguration().serviceUUID == serviceUUID);
   auto blankUUID = herald::datatype::UUID::fromString("");
   // INFO("Blank UUID " << std::string(blankUUID));

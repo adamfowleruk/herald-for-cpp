@@ -7,59 +7,60 @@ add_executable(herald-tests
 	test-util.h 
 
 	# Catch all to ensure all files in Herald are included in code coverage reports
-	codecoverage-tests.cpp
+	#codecoverage-tests.cpp
 
   # base data types
-	allocatablearray-tests.cpp
-	bytearrayprinter-tests.cpp
-	memoryarena-tests.cpp
-	datatypes-tests.cpp
-	base64string-tests.cpp
-	datetime-tests.cpp
-	randomuuid-tests.cpp
-	uint8-tests.cpp 
-	uint16-tests.cpp 
-	uint32-tests.cpp 
-	uint64-tests.cpp 
-	sha256-tests.cpp
-	distribution-tests.cpp
+	# allocatablearray-tests.cpp
+	# bytearrayprinter-tests.cpp
+	# memoryarena-tests.cpp
+	# datatypes-tests.cpp
+	# base64string-tests.cpp
+	hexstring-tests.cpp
+	# datetime-tests.cpp
+	# randomuuid-tests.cpp
+	# uint8-tests.cpp 
+	# uint16-tests.cpp 
+	# uint32-tests.cpp 
+	# uint64-tests.cpp 
+	# sha256-tests.cpp
+	# distribution-tests.cpp
 	
 	# Low level
-	sensorlogger-tests.cpp
-	errorcontactlog-tests.cpp
-	data-tests.cpp
-	datatypesdataderived-tests.cpp
-	blemacaddress-tests.cpp
-	targetidentifier-tests.cpp
+	# sensorlogger-tests.cpp
+	# errorcontactlog-tests.cpp
+	# data-tests.cpp
+	# datatypesdataderived-tests.cpp
+	# blemacaddress-tests.cpp
+	# targetidentifier-tests.cpp
  
 	# Low level cross platform 
 	test-util.cpp 
-	crossplatform-tests.cpp 
+	# crossplatform-tests.cpp 
 
   # mid level
-	beaconpayload-tests.cpp
-	extendeddata-tests.cpp
-	fixedpayload-tests.cpp
-	# simplepayload-tests.cpp
-	bledevice-tests.cpp
-	sample-tests.cpp
-	ranges-tests.cpp
-	analysisrunner-tests.cpp
-	analysissensor-tests.cpp
-	gaussian-tests.cpp
+	# beaconpayload-tests.cpp
+	# extendeddata-tests.cpp
+	# fixedpayload-tests.cpp
+	# # simplepayload-tests.cpp
+	# bledevice-tests.cpp
+	# sample-tests.cpp
+	# ranges-tests.cpp
+	# analysisrunner-tests.cpp
+	# analysissensor-tests.cpp
+	# gaussian-tests.cpp
 
   # high level
-	advertparser-tests.cpp
-	bledatabase-tests.cpp
-	blecoordinator-tests.cpp
+	# advertparser-tests.cpp
+	# bledatabase-tests.cpp
+	# blecoordinator-tests.cpp
 	coordinator-tests.cpp
 
 	# App level
-	nordicuart-tests.cpp
+	# nordicuart-tests.cpp
 
 	# Usage level
-	exposure-risk-tests.cpp
-	exposure-manager-tests-new.cpp
+	# exposure-risk-tests.cpp
+	# exposure-manager-tests-new.cpp
 
 	# main test file
 	main.cpp
@@ -70,8 +71,11 @@ include_directories(${herald_SOURCE_DIR})
 # set(THREADS_PREFER_PTHREAD_FLAG ON)
 # find_package(Threads REQUIRED)
 
+# Do this if you want to test string_utils stdlib replacements
+# add_definitions(-DCONFIG_HERALD_NO_STD_STRING=y)
+
 target_link_libraries(herald-tests PRIVATE herald) # Threads::Threads
-target_code_coverage(herald-tests AUTO EXTERNAL EXCLUDE *-tests.cpp test-*.h *ain.cpp *est-util.cpp *est-templates.h *atch.hpp /usr/include/**/*) # EXCLUDE ONLY WORKS WITH PATTERNS
+# target_code_coverage(herald-tests AUTO EXTERNAL EXCLUDE *-tests.cpp test-*.h *ain.cpp *est-util.cpp *est-templates.h *atch.hpp /usr/include/**/*) # EXCLUDE ONLY WORKS WITH PATTERNS
 
 if (WIN32)
   #add_compile_options(-Wl,--stack,100000000)
@@ -81,6 +85,7 @@ if (WIN32)
   set_target_properties(herald-tests PROPERTIES LINK_FLAGS /STACK:1000000000000)
 else()
 	# GCov flags for template classes
-	add_compile_options(--coverage -fno-inline -fno-inline-small-functions -fno-default-inline)
+  # --coverage
+	add_compile_options( -fno-inline -fno-inline-small-functions -fno-default-inline)
 endif ()
 target_compile_features(herald-tests PRIVATE cxx_std_17)

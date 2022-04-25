@@ -146,9 +146,35 @@ TEST_CASE("datatypes-uuid-notblank", "[datatypes][uuid][notblank]") {
   }
 }
 
+TEST_CASE("datatypes-uuid-charctordash", "[datatypes][uuid][charctordash]") {
+  SECTION("datatypes-uuid-charctordash") {
+    herald::datatype::UUID serviceUUID("428132af-4746-42d3-801e-4572d65bfd9b");
+    INFO("Service UUID " << serviceUUID.string());
+    auto blankUUID = herald::datatype::UUID::fromString("");
+    INFO("Blank UUID " << blankUUID.string());
+    REQUIRE(serviceUUID != blankUUID);
+  }
+}
 
+TEST_CASE("datatypes-uuid-charctor", "[datatypes][uuid][charctor]") {
+  SECTION("datatypes-uuid-charctor") {
+    herald::datatype::UUID serviceUUID("428132af474642d3801e4572d65bfd9b");
+    INFO("Service UUID " << serviceUUID.string());
+    auto blankUUID = herald::datatype::UUID::fromString("");
+    INFO("Blank UUID " << blankUUID.string());
+    REQUIRE(serviceUUID != blankUUID);
+  }
+}
 
-
+TEST_CASE("datatypes-uuid-charctormatch", "[datatypes][uuid][charctormatch]") {
+  SECTION("datatypes-uuid-charctormatch") {
+    herald::datatype::UUID serviceUUID("428132af-4746-42d3-801e-4572d65bfd9b");
+    herald::datatype::UUID serviceUUID2("428132af474642d3801e4572d65bfd9b");
+    INFO("Service UUID " << serviceUUID.string());
+    INFO("Service UUID2 " << serviceUUID2.string());
+    REQUIRE(serviceUUID == serviceUUID2);
+  }
+}
 
 // TEST_CASE("datatypes-memory-use","[datatypes][memory]") {
 

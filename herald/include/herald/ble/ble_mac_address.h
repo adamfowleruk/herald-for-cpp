@@ -1,4 +1,4 @@
-//  Copyright 2020-2021 Herald Project Contributors
+//  Copyright 2020-2022 Herald Project Contributors
 //  SPDX-License-Identifier: Apache-2.0
 //
 
@@ -6,6 +6,8 @@
 #define HERALD_BLE_MAC_ADDRESS_H
 
 #include "../datatype/data.h"
+
+#include "../data/string_utils.h"
 
 namespace herald {
 namespace ble {
@@ -29,7 +31,7 @@ public:
 
   operator Data() const;
   /// \brief Print mac address format with colon separators, little endian
-  operator std::string() const;
+  operator herald::data::String() const;
   bool operator==(const BLEMacAddress& other) const;
   bool operator!=(const BLEMacAddress& other) const;
 

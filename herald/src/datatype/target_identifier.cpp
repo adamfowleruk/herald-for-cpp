@@ -1,46 +1,15 @@
-//  Copyright 2020-2021 Herald Project Contributors
+//  Copyright 2020-2022 Herald Project Contributors
 //  SPDX-License-Identifier: Apache-2.0
 //
 
 #include "herald/datatype/target_identifier.h"
+
 #include "herald/datatype/data.h"
+#include "herald/datatype/hex_string.h"
+#include "herald/data/string_utils.h"
 
 namespace herald {
 namespace datatype {
-
-// class TargetIdentifier::Impl {
-// public:
-//   Impl();
-//   Impl(const Data& mac);
-//   Impl(const TargetIdentifier& from);
-//   ~Impl() = default;
-
-//   Data value;
-// };
-
-// TargetIdentifier::Impl::Impl()
-//  : value()
-// {
-//   ;
-// }
-
-// TargetIdentifier::Impl::Impl(const Data& v)
-//  : value(v)
-// {
-//   ;
-// }
-
-// TargetIdentifier::Impl::Impl(const TargetIdentifier& v)
-//  : value((Data)v) // conversion operator
-// {
-//   ;
-// }
-
-
-
-
-
-
 
 TargetIdentifier::TargetIdentifier()
  : value()
@@ -103,8 +72,8 @@ TargetIdentifier::hashCode() const {
   return std::hash<Data>{}(value);
 }
 
-TargetIdentifier::operator std::string() const {
-  return value.description();
+TargetIdentifier::operator herald::data::String() const {
+  return HexString::encode(value).encoded();
 }
 
 TargetIdentifier::operator Data() const {

@@ -1,4 +1,4 @@
-//  Copyright 2020-2021 Herald Project Contributors
+//  Copyright 2020-2022 Herald Project Contributors
 //  SPDX-License-Identifier: Apache-2.0
 //
 
@@ -22,6 +22,8 @@
 #include "ble_coordinator.h"
 #include "../datatype/bluetooth_state.h"
 #include "../datatype/target_identifier.h"
+#include "../datatype/hex_string.h"
+#include "../data/string_utils.h"
 
 #include <array>
 #include <algorithm>
@@ -226,7 +228,7 @@ public:
       // HTDBG("Device for target identifier {} already exists",(std::string)targetIdentifier);
       return results[0].value().get(); // TODO ensure we send back the latest, not just the first match
     }
-    HTDBG("New target identified: {}",(std::string)targetIdentifier);
+    HTDBG("New target identified: {}",(herald::data::String)targetIdentifier);
     BLEDevice& newDevice = devices[indexAvailable()];
     newDevice.reset(targetIdentifier,*this);
 
@@ -328,7 +330,7 @@ private:
           "^00","^1002","^06","^08","^03","^0C","^0D","^0F","^0E","^0B"
       */
       for (auto& segment : appleDataSegments) {
-        HTDBG(segment.data.hexEncodedString());
+        HTDBG(HexString::encode(segment.data).encoded());
         switch (segment.type) {
           case 0x00:
           case 0x05:

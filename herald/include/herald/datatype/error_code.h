@@ -5,7 +5,7 @@
 #ifndef HERALD_ERROR_CODE_H
 #define HERALD_ERROR_CODE_H
 
-#include <string>
+#include "herald/data/string_utils.h"
 
 namespace herald {
 namespace datatype {
@@ -15,20 +15,19 @@ class ErrorCode {
 public:
   ErrorCode() : mSuccess(true), mMessage("") { }
   ErrorCode(bool success) : mSuccess(success), mMessage("") { }
-  ErrorCode(bool success, std::string message) : mSuccess(success), mMessage(message) { }
+  ErrorCode(bool success, herald::data::String message)
+      : mSuccess(success), mMessage(message) {}
   ~ErrorCode() = default;
 
   bool operator()() {
     return mSuccess;
   }
 
-  std::string message() {
-    return mMessage;
-  }
+  herald::data::String message() { return mMessage; }
 
-private:
+ private:
   bool mSuccess;
-  std::string mMessage;
+  herald::data::String mMessage;
 };
 
 } // end namespace

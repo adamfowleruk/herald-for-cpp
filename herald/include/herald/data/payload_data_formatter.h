@@ -1,4 +1,4 @@
-//  Copyright 2021 Herald Project Contributors
+//  Copyright 2021-2022 Herald Project Contributors
 //  SPDX-License-Identifier: Apache-2.0
 //
 
@@ -7,7 +7,7 @@
 
 #include "../datatype/payload_data.h"
 
-#include <string>
+#include "string_utils.h"
 
 namespace herald::data {
 
@@ -18,7 +18,7 @@ public:
   PayloadDataFormatter() = default;
   virtual ~PayloadDataFormatter() = default;
 
-  virtual std::string shortFormat(const PayloadData& payloadData) const noexcept = 0;
+  virtual herald::data::String shortFormat(const PayloadData& payloadData) const noexcept = 0;
 };
 
 class ConcretePayloadDataFormatter : public PayloadDataFormatter {
@@ -26,7 +26,7 @@ public:
   ConcretePayloadDataFormatter() = default;
   ~ConcretePayloadDataFormatter() = default;
 
-  std::string shortFormat(const PayloadData& payloadData) const noexcept override;
+  herald::data::String shortFormat(const PayloadData& payloadData) const noexcept override;
 };
 
 }

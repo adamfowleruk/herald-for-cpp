@@ -1,4 +1,4 @@
-//  Copyright 2020-2021 Herald Project Contributors
+//  Copyright 2020-2022 Herald Project Contributors
 //  SPDX-License-Identifier: Apache-2.0
 //
 
@@ -16,6 +16,7 @@
 #include "../../payload/payload_data_supplier.h"
 #include "../../context.h"
 #include "../../data/sensor_logger.h"
+#include "../../data/string_utils.h"
 #include "../ble_sensor_configuration.h"
 #include "../ble_coordinator.h"
 #include "../../datatype/bluetooth_state.h"
@@ -75,9 +76,9 @@ struct ConnectedDeviceState {
 };
 
 namespace zephyrinternal {
-  std::string toMacString(const bt_addr_le_t* addr);
-  std::string toIdentityString(const bt_addr_le_t* addr);
-  
+  herald::data::String toMacString(const bt_addr_le_t* addr);
+  herald::data::String toIdentityString(const bt_addr_le_t* addr);
+
   struct bt_uuid_128* getHeraldUUID();
   struct bt_uuid_128* getHeraldSignalAndroidCharUUID();
   struct bt_uuid_128* getHeraldSignalIOSCharUUID();
@@ -391,7 +392,7 @@ public:
     // idiot check of copied data
     Data newAddr(state.address.a.val,6);
     BLEMacAddress newMac(newAddr);
-    HTDBG("Address copied. Constituted as: {}", (std::string)newMac);
+    HTDBG("Address copied. Constituted as: {}", (herald::data::String)newMac);
 
 
 
@@ -940,7 +941,8 @@ private:
     bool found = false;
     ConnectedDeviceState& state = findOrCreateStateByConnection(bt_gatt_dm_conn_get(dm));
     auto& device = db.device(state.target);
-    HTDBG("The GATT discovery procedure succeeded for {}", ((std::string)device.identifier()));
+    HTDBG("The GATT discovery procedure succeeded for {}",
+      ((herald::data::String)device.identifier()));
     do {
       prev = bt_gatt_dm_char_next(dm,prev);
       if (NULL != prev) {
@@ -1020,7 +1022,7 @@ private:
     ConnectedDeviceState& state = findOrCreateStateByConnection(conn);
     // HTDBG((std::string)state.target);
     HTDBG("The service could not be found during the discovery. Ignoring device: {}", 
-      (std::string)BLEMacAddress(state.target.underlyingData()));
+      (herald::data::String)BLEMacAddress(state.target.underlyingData()));
 
     auto& device = db.device(state.target);
     std::vector<UUID> serviceList; // empty service list // TODO put other listened-for services here
@@ -1082,7 +1084,7 @@ private:
 
   void doStatePrint(const TargetIdentifier& key, const ConnectedDeviceState& value) {
     HTDBG("  {} is {}, conn==null?: {}, ri: {}, inDiscovery: {}, isReading: {}",
-      (std::string)BLEMacAddress(key.underlyingData()),
+      (herald::data::String)BLEMacAddress(key.underlyingData()),
       ((BLEDeviceState::connected==value.state) ? "Connected":
         ((BLEDeviceState::disconnected==value.state) ? "Disconnected" :
           ((BLEDeviceState::connecting==value.state) ? "Connecting" : "Uninitialised")

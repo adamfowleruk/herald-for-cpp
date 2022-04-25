@@ -1,4 +1,4 @@
-//  Copyright 2020-2021 Herald Project Contributors
+//  Copyright 2020-2022 Herald Project Contributors
 //  SPDX-License-Identifier: Apache-2.0
 //
 
@@ -56,8 +56,8 @@ public:
         ,Size
       >({std::variant<std::reference_wrapper<SensorTs>...>(sensors)...})
     ),
-    engine(ctx),
-    deviceDescription("")
+    engine(ctx)
+    // deviceDescription("")
     HLOGGERINIT(mContext, "Sensor", "SensorArray")
   {
     // addSensors(0,sensors...);
@@ -130,7 +130,7 @@ private:
   Coordinator<ContextT> engine;
 
   // Not initialised (and thus optional):-
-  std::string deviceDescription;
+  // std::string deviceDescription;
 
   HLOGGER(ContextT);
 

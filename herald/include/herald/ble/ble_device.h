@@ -1,4 +1,4 @@
-//  Copyright 2020-2021 Herald Project Contributors
+//  Copyright 2020-2022 Herald Project Contributors
 //  SPDX-License-Identifier: Apache-2.0
 //
 
@@ -10,7 +10,7 @@
 #include "ble_sensor_configuration.h"
 
 #include "../device.h"
-
+#include "herald/data/string_utils.h"
 #include "../datatype/allocatable_array.h"
 #include "../datatype/payload_data.h"
 #include "../datatype/payload_sharing_data.h"
@@ -86,7 +86,7 @@ public:
   void reset();
 
   BLEInternalState internalState() const;
-  std::string internalStateDescription() const;
+  herald::data::String internalStateDescription() const;
   void internalState(BLEInternalState newInternalState);
 
   BLEDeviceState state() const;
@@ -207,8 +207,8 @@ public:
   // Date created() const override; // TODO unused, consider removing
 
   // basic descriptors
-  std::string description() const;
-  operator std::string() const;
+  herald::data::String description() const;
+  operator herald::data::String() const;
 
   // GENERAL BLUETOOTH STATE
   TimeInterval timeIntervalSinceLastUpdate() const override;
@@ -230,7 +230,7 @@ public:
   BLEDeviceState state() const;
   void state(BLEDeviceState newState);
 
-  std::string internalStateDescription() const;
+  herald::data::String internalStateDescription() const;
 
   // TODO decide if operatingSystem is relevant anymore??? - change it to BluetoothComplianceFlag?
   BLEDeviceOperatingSystem operatingSystem() const;

@@ -1,5 +1,5 @@
-//  Copyright 2021 Herald Project Contributors
-//  SPDX-License-Identifier: Apache-2.0
+// Copyright 2021-2022 Herald Project Contributors
+// SPDX-License-Identifier: Apache-2.0
 //
 
 #ifndef HERALD_COORDINATOR_H
@@ -8,6 +8,7 @@
 #include "../context.h"
 #include "activities.h"
 #include "../data/sensor_logger.h"
+#include "herald/data/string_utils.h"
 
 #include <map>
 #include <vector>
@@ -105,7 +106,7 @@ public:
       std::copy(myConns.begin(),myConns.end(),
         std::back_insert_iterator<std::vector<PrioritisedPrerequisite>>(connsRequired));
     }
-    HTDBG(std::to_string(connsRequired.size()));
+    HTDBG(" - Connections required: {}", connsRequired.size());
     HTDBG("Retrieved providers' current prerequisites");
     // TODO de-duplicate pre-reqs
     // Now link required prereqs to each provider
@@ -154,7 +155,7 @@ public:
       auto maxActs = prov.get().requiredActivities();
       // TODO sort by descending priority before actioning
       for (auto& act : maxActs) {
-        std::string san("Activity ");
+        herald::data::String san("Activity ");
         san += act.name;
         HTDBG(san);
         // HTDBG("Checking next desired activity for prereqs being satisfied");

@@ -4,12 +4,13 @@
 
 #include "herald/data/payload_data_formatter.h"
 #include "herald/datatype/payload_data.h"
+#include "herald/data/string_utils.h"
 
 namespace herald::data {
 
 using namespace herald::datatype;
 
-std::string
+herald::data::String
 ConcretePayloadDataFormatter::shortFormat(const PayloadData& payloadData) const noexcept
 {
   return payloadData.shortName();

@@ -341,8 +341,16 @@ struct AllocatableArrayIterator {
     return pos < other.pos;
   }
 
+  bool operator<=(const AllocatableArrayIterator<AllocatableArrayT>& other) const noexcept {
+    return pos <= other.pos;
+  }
+
   bool operator>(const AllocatableArrayIterator<AllocatableArrayT>& other) const noexcept {
     return pos > other.pos;
+  }
+
+  bool operator>=(const AllocatableArrayIterator<AllocatableArrayT>& other) const noexcept {
+    return pos >= other.pos;
   }
 
   /// \brief Prefix increment operator

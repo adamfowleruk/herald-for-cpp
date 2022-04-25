@@ -1,8 +1,11 @@
-//  Copyright 2020-2021 Herald Project Contributors
+//  Copyright 2020-2022 Herald Project Contributors
 //  SPDX-License-Identifier: Apache-2.0
 //
 
 #include "herald/ble/ble_mac_address.h"
+
+#include "herald/data/string_utils.h"
+#include "herald/datatype/hex_string.h"
 
 namespace herald {
 namespace ble {
@@ -67,11 +70,11 @@ BLEMacAddress::underlyingData() const
 }
 
 // TODO Thorough test of this function with formatting and valid content across numeric range
-BLEMacAddress::operator std::string() const
+BLEMacAddress::operator herald::data::String() const
 {
-  auto reversed = data.reversed();
-  auto hexReversed = reversed.hexEncodedString();
-  std::string result;
+  auto hexReversed = herald::datatype::HexString::encode(
+    data.reversed()).encoded();
+  herald::data::String result;
   for (std::size_t i = 0;i < hexReversed.size();i += 2) {
     result += hexReversed.at(i);
     result += hexReversed.at(i + 1);

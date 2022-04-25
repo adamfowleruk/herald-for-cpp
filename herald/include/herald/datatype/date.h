@@ -5,8 +5,9 @@
 #ifndef HERALD_DATE_H
 #define HERALD_DATE_H
 
-#include <string>
-#include <memory>
+#include "herald/data/string_utils.h"
+
+#include <cstdint>
 
 namespace herald {
 namespace datatype {
@@ -29,8 +30,8 @@ public:
   /// \brief Sets the value to now without any temporaries being created/destroyed
   void setToNow() noexcept;
 
-  std::string iso8601DateTime() const noexcept;
-  operator std::string() const noexcept;
+  herald::data::String iso8601DateTime() const noexcept;
+  operator herald::data::String() const noexcept;
   std::uint64_t secondsSinceUnixEpoch() const noexcept;
 
   bool operator==(const Date& other) const noexcept;

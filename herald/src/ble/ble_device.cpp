@@ -12,6 +12,8 @@
 #include "herald/datatype/time_interval.h"
 #include "herald/datatype/target_identifier.h"
 
+#include "herald/data/string_utils.h"
+
 #include <optional>
 
 namespace herald {
@@ -74,7 +76,7 @@ BLEDeviceFlags::internalState() const
   return BLEInternalState::discovered;
 }
 
-std::string
+herald::data::String
 BLEDeviceFlags::internalStateDescription() const
 {
   if (bitFields.test(0)) {
@@ -507,15 +509,15 @@ BLEDevice::identifier(const TargetIdentifier& toCopyFrom)
 // }
 
 // basic descriptors
-std::string
+herald::data::String
 BLEDevice::description() const
 {
-  return (std::string)id;
+  return (herald::data::String)id;
 }
 
-BLEDevice::operator std::string() const
+BLEDevice::operator herald::data::String() const
 {
-  return (std::string)id;
+  return (herald::data::String)id;
 }
 
 // timing related getters
@@ -680,10 +682,10 @@ BLEDevice::state(BLEDeviceState newState)
   }
 }
 
-std::string
+herald::data::String
 BLEDevice::internalStateDescription() const
 {
-  std::string di = flags.internalStateDescription();
+  herald::data::String di = flags.internalStateDescription();
   // Now add some extra context
   const auto is = flags.internalState();
   if (is == BLEInternalState::relevant) {

@@ -1,4 +1,4 @@
-//  Copyright 2021 Herald Project Contributors
+//  Copyright 2021-2022 Herald Project Contributors
 //  SPDX-License-Identifier: Apache-2.0
 //
 
@@ -9,6 +9,7 @@
 // #include "../../../datatype/data.h"
 // #include "../../../datatype/uuid.h"
 // #include "../../ble.h"
+#include "herald/data/string_utils.h"
 
 #ifdef __ZEPHYR__
 #ifdef CONFIG_BT_NUS
@@ -69,24 +70,24 @@ public:
   /// \brief Detection of a target with an ephemeral identifier, e.g. BLE central detecting a BLE peripheral.
   void sensor(SensorType sensor, const TargetIdentifier& didDetect) {
     newline("didDetect");
-    column((std::string)didDetect);
+    column((herald::data::String)didDetect);
     sendline();
   }
 
   /// \brief Measure proximity to target
   void sensor(SensorType sensor, const Proximity& didMeasure, const TargetIdentifier& fromTarget) {
     newline("didMeasure");
-    column((std::string)fromTarget);
-    column(std::to_string((int)didMeasure.value));
+    column((herald::data::String)fromTarget);
+    column(std::to_string((int)didMeasure.value)); // TODO replace this freestanding function
     sendline();
   }
 
   /// \brief Measure proximity to target with payload data. Combines didMeasure and didRead into a single convenient delegate method
   void sensor(SensorType sensor, const Proximity& didMeasure, const TargetIdentifier& fromTarget, const PayloadData& withPayload) {
     newline("didMeasureWithPayload");
-    column((std::string)fromTarget);
-    column(std::to_string((int)didMeasure.value));
-    column(withPayload.hexEncodedString());
+    column((herald::data::String)fromTarget);
+    column(std::to_string((int)didMeasure.value)); // TODO replace this freestanding function
+    column(HexString::encode(withPayload).encoded());
     sendline();
   }
 

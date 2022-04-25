@@ -5,6 +5,10 @@
 #ifndef HERALD_BYTE_ARRAY_PRINTER_H
 #define HERALD_BYTE_ARRAY_PRINTER_H
 
+#include "herald/data/string_utils.h"
+
+#include <array>
+
 namespace herald {
 namespace util {
 
@@ -23,7 +27,7 @@ public:
       '0','1','2','3','4','5','6','7',
       '8','9','a','b','c','d','e','f'
     };
-    std::string ci = std::to_string(initialByteID);
+    herald::data::String ci = herald::data::to_string(initialByteID);
     ci += ": ";
     ci += hexChars[0x0F & (std::size_t(data[ 0]) >> 4)];
     ci += hexChars[0x0F & std::size_t(data[ 0])];

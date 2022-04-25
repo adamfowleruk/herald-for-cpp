@@ -5,8 +5,9 @@
 #ifndef HERALD_DISTRIBUTION_H
 #define HERALD_DISTRIBUTION_H
 
+#include "herald/data/string_utils.h"
+
 #include <cstddef>
-#include <string>
 
 namespace herald {
 namespace datatype {
@@ -43,7 +44,7 @@ public:
   const double max() const noexcept;
 
   /// Convert this distribution to a string
-  operator std::string() const noexcept;
+  operator herald::data::String() const noexcept;
 
   /// Reset this instance to its initial state
   void reset() noexcept;

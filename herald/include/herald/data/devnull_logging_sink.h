@@ -1,4 +1,4 @@
-//  Copyright 2020-2021 Herald Project Contributors
+//  Copyright 2020-2022 Herald Project Contributors
 //  SPDX-License-Identifier: Apache-2.0
 //
 
@@ -6,6 +6,7 @@
 #define HERALD_DEVNULL_LOGGING_SINK
 
 #include "herald/data/sensor_logger.h"
+#include "herald/data/string_utils.h"
 
 namespace herald::data {
 
@@ -13,7 +14,7 @@ struct DevNullLoggingSink {
   DevNullLoggingSink();
   ~DevNullLoggingSink();
 
-  void log(const std::string& subsystem, const std::string& category, SensorLoggerLevel level, std::string message);
+  void log(const String& subsystem, const String& category, SensorLoggerLevel level, const String& message);
 };
 
 }

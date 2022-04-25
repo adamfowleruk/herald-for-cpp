@@ -6,9 +6,7 @@
 #define HERALD_TIME_INTERVAL_H
 
 #include "date.h"
-
-#include <string>
-#include <memory>
+#include "herald/data/string_utils.h"
 
 #include <cstdint>
 #include <climits>
@@ -55,7 +53,7 @@ public:
   long millis() const noexcept;
   long seconds() const noexcept;
 
-  operator std::string() const noexcept;
+  operator herald::data::String() const noexcept;
   operator long() const noexcept; // returns SECONDS not millis
 
 private:

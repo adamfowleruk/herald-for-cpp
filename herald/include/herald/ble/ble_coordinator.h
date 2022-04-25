@@ -1,5 +1,5 @@
-//  Copyright 2021 Herald Project Contributors
-//  SPDX-License-Identifier: Apache-2.0
+// Copyright 2021-2022 Herald Project Contributors
+// SPDX-License-Identifier: Apache-2.0
 //
 
 #ifndef HERALD_BLE_COORDINATION_PROVIDER_H
@@ -15,6 +15,7 @@
 #include "../data/sensor_logger.h"
 #include "ble_sensor_configuration.h"
 #include "../util/byte_array_printer.h"
+#include "herald/data/string_utils.h"
 
 #include <memory>
 #include <functional>
@@ -179,10 +180,8 @@ public:
     for (auto& exp : expired) {
       if (exp.has_value()) {
         db.remove(exp.value().get().identifier());
-        HTDBG("Removing expired device with ID: ");
-        HTDBG((std::string)exp.value().get().identifier());
-        HTDBG("time since last update:-");
-        HTDBG(std::to_string(exp.value().get().timeIntervalSinceLastUpdate()));
+        HTDBG("Removing expired device with ID: ", (herald::data::String)exp.value().get().identifier());
+        HTDBG("time since last update: {}",exp.value().get().timeIntervalSinceLastUpdate());
       }
     }
 
@@ -249,7 +248,7 @@ public:
         continue;
       }
       // remove now so we don't get tasks later for expired devices
-      HTDBG("taskRemoveExpiredDevices (remove={})", (std::string)device.value().get().identifier());
+      HTDBG("taskRemoveExpiredDevices (remove={})", (herald::data::String)device.value().get().identifier());
       db.remove(device.value().get().identifier());
     }
     std::size_t dbSizeAfter = db.size();
@@ -405,9 +404,9 @@ private:
       if (!device.has_value()) {
         continue;
       }
-      std::string di(" - ");
+      herald::data::String di(" - ");
       BLEMacAddress mac(device.value().get().identifier().underlyingData());
-      di += (std::string)mac;
+      di += (herald::data::String)mac;
       // di += ", created=";
       // di += std::to_string(device.get().created());
       di += ", state=";
@@ -416,7 +415,7 @@ private:
       di += ", pseudoAddress=";
       auto pseudo = device.value().get().pseudoDeviceAddress();
       if (pseudo.has_value()) {
-        di += (std::string)pseudo.value();
+        di += (herald::data::String)pseudo.value();
       } else {
         di += "unset";
       }
@@ -450,7 +449,7 @@ private:
           di += "ever)";
         } else {
           di += " ";
-          di += std::to_string(ignoreFor.millis());
+          di += herald::data::to_string(ignoreFor.millis());
           di += " more secs)";
         }
       } else {
@@ -459,7 +458,7 @@ private:
       // di += ", hasServices=";
       // di += (device.value().get().hasServicesSet() ? "true" : "false");
       di += ", hasReadPayload=";
-      di += (device.value().get().payloadData().size() > 0 ? device.value().get().payloadData().hexEncodedString() : "false");
+      di += (device.value().get().payloadData().size() > 0 ? HexString::encode(device.value().get().payloadData()).encoded() : "false");
       HTDBG(di);
     }
   }

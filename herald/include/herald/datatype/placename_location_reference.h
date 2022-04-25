@@ -1,4 +1,4 @@
-//  Copyright 2020-2021 Herald Project Contributors
+//  Copyright 2020-2022 Herald Project Contributors
 //  SPDX-License-Identifier: Apache-2.0
 //
 
@@ -6,17 +6,21 @@
 #define HERALD_PLACENAME_LOCATION_REFERENCE_H
 
 #include "location_reference.h"
+#include "herald/data/string_utils.h"
 
 namespace herald {
 namespace datatype {
 
 struct PlacenameLocationReference : public LocationReference {
-  PlacenameLocationReference(std::string n) : LocationReference(), name(n) { };
+  PlacenameLocationReference(herald::data::String n)
+    : LocationReference(),
+      name(n)
+  { };
   ~PlacenameLocationReference() = default;
-  
-  std::string name;
 
-  std::string description() {
+  herald::data::String name;
+
+  herald::data::String description() {
     return "PLACE(name=" + name + ")";
   }
 };

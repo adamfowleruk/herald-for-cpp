@@ -8,8 +8,7 @@
 #include "date.h"
 #include "proximity.h"
 #include "payload_data.h"
-
-#include <string>
+#include "herald/data/string_utils.h"
 
 namespace herald {
 namespace datatype {
@@ -18,10 +17,10 @@ class Encounter {
 public:
   Encounter(Proximity didMeasure, PayloadData withPayload, Date timestamp);
   Encounter(Proximity didMeasure, PayloadData withPayload);
-  Encounter(const std::string csvRow);
+  Encounter(const herald::data::String csvRow);
   ~Encounter();
 
-  std::string csvString() const;
+  herald::data::String csvString() const;
 
   bool isValid() const;
 

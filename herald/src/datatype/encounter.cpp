@@ -4,37 +4,10 @@
 
 #include "herald/datatype/encounter.h"
 
-#include <string>
+#include "herald/data/string_utils.h"
 
 namespace herald {
 namespace datatype {
-
-// PIMPL DEFINITION
-// class Encounter::Impl {
-// public:
-//   Impl();
-//   Impl(Proximity didMeasure, PayloadData withPayload, Date timestamp);
-//   ~Impl() = default;
-
-//   Date date;
-//   Proximity proximity;
-//   PayloadData payloadData;
-//   bool valid;
-// };
-
-
-// // PIMPL DECLARATIONS
-// Encounter::Impl::Impl()
-//   : date(), proximity(), payloadData(), valid(false)
-// {
-//   ;
-// }
-
-// Encounter::Impl::Impl(Proximity didMeasure, PayloadData withPayload, Date timestamp)
-//   : date(timestamp), proximity(didMeasure), payloadData(withPayload), valid(true)
-// {
-//   ;
-// }
 
 // ENCOUNTER DECLARATIONS
 
@@ -50,7 +23,7 @@ Encounter::Encounter(Proximity didMeasure, PayloadData withPayload)
   ;
 }
 
-Encounter::Encounter(const std::string csvRow)
+Encounter::Encounter(const herald::data::String csvRow)
   : date(), prox(), payloadData(), valid(false)
 {
   ;
@@ -60,7 +33,7 @@ Encounter::Encounter(const std::string csvRow)
 Encounter::~Encounter() = default;
 
 
-std::string
+herald::data::String
 Encounter::csvString() const {
   return ""; // TODO fill this out properly
 }

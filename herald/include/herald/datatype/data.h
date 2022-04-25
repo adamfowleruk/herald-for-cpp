@@ -1,14 +1,17 @@
-//  Copyright 2020-2021 Herald Project Contributors
+//  Copyright 2020-2022 Herald Project Contributors
 //  SPDX-License-Identifier: Apache-2.0
 //
 
 #ifndef HERALD_DATA_H
 #define HERALD_DATA_H
 
-#include <string>
-#include <iostream>
+// NOTE Fundamental class - DO NOT make reliant upon any external classes
 
 #include "memory_arena.h"
+
+#ifndef CONFIG_HERALD_NO_STD_STRING
+#include <string>
+#endif
 
 namespace herald {
 namespace datatype {
@@ -58,6 +61,7 @@ public:
       getArena().set(entry, i, (unsigned char)value[i]);
     }
   }
+#ifndef CONFIG_HERALD_NO_STD_STRING
   /// \brief Initialises a DataRef from a string of chars
   DataRef(const std::string& from) : entry(getArena().allocate(from.size())) {
     for (std::size_t i = 0;i < from.size(); ++i) {
@@ -65,6 +69,7 @@ public:
       getArena().set(entry, i, (unsigned char)from[i]);
     }
   }
+#endif
   /// \brief Initialises a DataRef copying another data object (uses more data, to ensure only one object owns the entry)
   DataRef(const DataRef& from) : entry(getArena().allocate(from.entry.byteLength)) {
     for (std::size_t i = 0;i < from.size(); ++i) {
@@ -100,38 +105,38 @@ public:
     clear();
   }
 
-  // std::string base64EncodedString(); // use Base64String.encode(Data) instead
-  /// \brief Creates a new DataRef object from a hexadecimal encoded string
-  static DataRef fromHexEncodedString(const std::string& hex)
-  {
-    // parse string
-    const std::size_t length = hex.size();
-    std::string hexInput;
-    // Input size check - two characters per single byte
-    if (1 == length % 2) {
-      // invalid format - not an even number of characters
-      // Prepend input with a 0. (Note '8' and '08' in hex are the same)
-      hexInput += "0";
-    }
-    hexInput += hex;
+  // // std::string base64EncodedString(); // use Base64String.encode(Data) instead
+  // /// \brief Creates a new DataRef object from a hexadecimal encoded string
+  // static DataRef fromHexEncodedString(const herald::data::String& hex)
+  // {
+  //   // parse string
+  //   const std::size_t length = hex.size();
+  //   herald::data::String hexInput;
+  //   // Input size check - two characters per single byte
+  //   if (1 == length % 2) {
+  //     // invalid format - not an even number of characters
+  //     // Prepend input with a 0. (Note '8' and '08' in hex are the same)
+  //     hexInput += "0";
+  //   }
+  //   hexInput += hex;
 
-    DataRef d(hexInput.size() / 2);
+  //   DataRef d(hexInput.size() / 2);
 
-    for (std::size_t i = 0; i < hexInput.size(); i += 2) {
-      std::string byteString = hexInput.substr(i, 2);
-      std::byte byte = std::byte(strtol(byteString.c_str(), NULL, 16));
-      // d.data.push_back(byte);
-      getArena().set(d.entry,i / 2, (unsigned char)byte);
-    }
+  //   for (std::size_t i = 0; i < hexInput.size(); i += 2) {
+  //     herald::data::String byteString = hexInput.substr(i, 2);
+  //     std::byte byte = std::byte(strtol(byteString.c_str(), NULL, 16));
+  //     // d.data.push_back(byte);
+  //     getArena().set(d.entry,i / 2, (unsigned char)byte);
+  //   }
 
-    return d;
-  }
+  //   return d;
+  // }
 
-  /// \brief Returns the hex encoded string represetation as the description
-  std::string description() const
-  {
-    return hexEncodedString();
-  }
+  // /// \brief Returns the hex encoded string represetation as the description
+  // std::string description() const
+  // {
+  //   return hexEncodedString();
+  // }
 
   /// \brief Returns a NEWLY allocated DataRef instance returning a subset of this instance
   DataRef subdata(std::size_t offset) const
@@ -211,15 +216,19 @@ public:
     // );
   }
 
-  /// \brief Appends a set of characters to the end of this DataRef
-  void append(const std::string& rawData)
-  {
-    auto curSize = entry.byteLength;
-    getArena().reserve(entry,curSize + rawData.size());
-    for (std::size_t pos = 0; pos < rawData.size();++pos) {
-      getArena().set(entry,curSize + pos,rawData[pos]);
-    }
-  }
+  // /// \brief Appends a set of characters to the end of this DataRef
+  // void append(const herald::data::String& rawData)
+  // {
+  //   auto curSize = entry.byteLength;
+  //   getArena().reserve(entry,curSize + rawData.size());
+  //   for (std::size_t pos = 0; pos < rawData.size();++pos) {
+  //     getArena().set(entry,curSize + pos,rawData[pos]);
+  //   }
+  // }
+
+  // Instead of the above, use a template that converts any of our classes 
+  // with a const Data& data() const function
+  // NOTE we SHOULD be ok with the const assign DataRef& function above...
 
   /// \brief Copies a uint8_t array onto the end of this instance, expanding if necessary
   void append(const std::uint8_t* rawData, std::size_t offset, std::size_t length)
@@ -439,28 +448,28 @@ public:
     return result;
   }
 
-  /// \brief Returns a hex encoded string of this binary data
-  std::string hexEncodedString() const noexcept
-  {
-    static constexpr char hexChars[] {
-      '0','1','2','3','4','5','6','7',
-      '8','9','a','b','c','d','e','f'
-    };
-    if (0 == entry.byteLength) {
-      return "";
-    }
-    std::string result;
-    std::size_t size = entry.byteLength;
-    result.reserve(size * 2);
-    std::size_t v;
-    for (std::size_t i = 0; i < size; ++i) {
-      // v = std::size_t(data.at(i));
-      v = std::size_t(getArena().get(entry,i));
-      result += hexChars[0x0F & (v >> 4)]; // MSB
-      result += hexChars[0x0F &  v      ]; // LSB
-    }
-    return result;
-  }
+  // /// \brief Returns a hex encoded string of this binary data
+  // std::string hexEncodedString() const noexcept
+  // {
+  //   static constexpr char hexChars[] {
+  //     '0','1','2','3','4','5','6','7',
+  //     '8','9','a','b','c','d','e','f'
+  //   };
+  //   if (0 == entry.byteLength) {
+  //     return "";
+  //   }
+  //   std::string result;
+  //   std::size_t size = entry.byteLength;
+  //   result.reserve(size * 2);
+  //   std::size_t v;
+  //   for (std::size_t i = 0; i < size; ++i) {
+  //     // v = std::size_t(data.at(i));
+  //     v = std::size_t(getArena().get(entry,i));
+  //     result += hexChars[0x0F & (v >> 4)]; // MSB
+  //     result += hexChars[0x0F &  v      ]; // LSB
+  //   }
+  //   return result;
+  // }
 
   /// \brief Returns the hash code of this instance
   std::size_t hashCode() const noexcept

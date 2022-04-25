@@ -7,8 +7,8 @@
 
 #include "error_code.h"
 #include "randomness.h"
+#include "herald/data/string_utils.h"
 
-#include <string>
 #include <array>
 
 namespace herald {
@@ -21,7 +21,7 @@ public:
   static constexpr std::size_t max_size = 16;
   using data_type = std::array<value_type,max_size>;
 
-  static UUID fromString(const std::string& from) noexcept;
+  static UUID fromString(const herald::data::String& from) noexcept;
   // static UUID fromString(const char* from) noexcept;
 
   template <typename RandomnessSourceT>
@@ -87,9 +87,10 @@ public:
   // std::string operator=(const UUID& from) const noexcept; // TODO verify this syntax/location
 
   std::array<value_type, max_size> data() const noexcept;
-  std::string string() const noexcept;
+  // herald::data::String string() const noexcept;
+  operator herald::data::String() const noexcept;
 
-protected:
+ protected:
   std::array<value_type, max_size> mData = { {0}};
   bool mValid;
 

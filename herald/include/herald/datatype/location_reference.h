@@ -5,13 +5,13 @@
 #ifndef HERALD_LOCATION_REFERENCE_H
 #define HERALD_LOCATION_REFERENCE_H
 
-#include <string>
+#include "herald/data/string_utils.h"
 
 namespace herald {
 namespace datatype {
 
 struct LocationReference {
-  virtual std::string description() = 0;
+  virtual herald::data::String description() = 0;
 };
 
 

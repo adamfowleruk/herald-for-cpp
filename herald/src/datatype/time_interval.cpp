@@ -4,25 +4,10 @@
 
 #include "herald/datatype/time_interval.h"
 
+#include "herald/data/string_utils.h"
+
 namespace herald {
 namespace datatype {
-
-// class TimeInterval::Impl {
-// public:
-//   Impl();
-//   Impl(long secondsSinceUnixEpoch);
-//   ~Impl() = default;
-
-//   long seconds;
-// };
-
-// TimeInterval::Impl::Impl() : seconds(0) { }
-
-// TimeInterval::Impl::Impl(long secondsSinceUnixEpoch) : seconds(secondsSinceUnixEpoch) { }
-
-
-
-
 
 TimeInterval
 TimeInterval::hours(long hours) {
@@ -201,13 +186,12 @@ TimeInterval::seconds() const noexcept {
   return secs;
 }
 
-TimeInterval::operator std::string() const noexcept {
+TimeInterval::operator herald::data::String() const noexcept {
   if (secs == LONG_MAX) {
     return "never";
   }
-  return std::to_string(secs);
+  return herald::data::to_string(secs);
 }
-
 
 } // end namespace
 } // end namespace

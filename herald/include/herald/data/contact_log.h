@@ -1,4 +1,4 @@
-//  Copyright 2020-2021 Herald Project Contributors
+//  Copyright 2020-2022 Herald Project Contributors
 //  SPDX-License-Identifier: Apache-2.0
 //
 
@@ -9,6 +9,7 @@
 #include "payload_data_formatter.h"
 #include "sensor_logger.h"
 #include "../context.h"
+#include "string_utils.h"
 
 namespace herald::data {
 
@@ -42,19 +43,19 @@ public:
   // void sensor(SensorType sensor, const SensorState& didUpdateState) {}
 
 private:
-  std::string csv(std::string toEscape) const noexcept {
-    // C++23 only: if (toEscape.contains(",") || toEscape.contains("\"") || toEscape.contains("'") || toEscape.contains("’")) {
-    // Pre C++23:-
-    if (std::string::npos != toEscape.find(",") || 
-        std::string::npos != toEscape.find("\"") || 
-        std::string::npos != toEscape.find("'") || 
-        std::string::npos != toEscape.find("’")) {
+  herald::data::String csv(herald::data::String toEscape) const noexcept {
+    // C++23 only: if (toEscape.contains(",") || toEscape.contains("\"") ||
+    // toEscape.contains("'") || toEscape.contains("’")) { Pre C++23:-
+    if (herald::data::String::npos != toEscape.find(",") ||
+        herald::data::String::npos != toEscape.find("\"") ||
+        herald::data::String::npos != toEscape.find("'") ||
+        herald::data::String::npos != toEscape.find("’")) {
       return "\"" + toEscape + "\"";
     }
     return toEscape;
   }
 
-  std::string timestamp() const noexcept {
+  herald::data::String timestamp() const noexcept {
     return Date().iso8601DateTime();
   }
 

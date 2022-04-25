@@ -47,9 +47,10 @@
 #include "herald/datatype/encounter.h"
 #include "herald/datatype/error_code.h"
 #include "herald/datatype/exposure_risk.h"
+#include "herald/datatype/hex_string.h"
 #include "herald/datatype/immediate_send_data.h"
-#include "herald/datatype/location_reference.h"
 #include "herald/datatype/location.h"
+#include "herald/datatype/location_reference.h"
 #include "herald/datatype/luminosity.h"
 #include "herald/datatype/memory_arena.h"
 #include "herald/datatype/model.h"
@@ -77,6 +78,7 @@
 #include "herald/data/payload_data_formatter.h"
 #include "herald/data/sensor_logger.h"
 #include "herald/data/stdout_logging_sink.h"
+#include "herald/data/string_utils.h"
 
 // engine namespace
 #include "herald/engine/activities.h"

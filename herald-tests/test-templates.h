@@ -1,4 +1,4 @@
-//  Copyright 2021 Herald Project Contributors
+//  Copyright 2021-2022 Herald Project Contributors
 //  SPDX-License-Identifier: Apache-2.0
 //
 
@@ -44,16 +44,16 @@ struct DummyLoggingSink {
   DummyLoggingSink() : subsystem(), category(), value() {}
   ~DummyLoggingSink() = default;
 
-  void log(const std::string& sub,const std::string& cat,herald::data::SensorLoggerLevel level, std::string message) {
+  void log(const herald::data::String& sub,const herald::data::String& cat,herald::data::SensorLoggerLevel level, const herald::data::String& message) {
     value = sub + "," + cat + "," + message;
     std::cout << "DummyLoggingSink::log: " << value << std::endl;
     subsystem = sub;
     category = cat;
   }
 
-  std::string subsystem;
-  std::string category;
-  std::string value;
+  herald::data::String subsystem;
+  herald::data::String category;
+  herald::data::String value;
 };
 
 class DummyBluetoothStateManager : public herald::ble::BluetoothStateManager {

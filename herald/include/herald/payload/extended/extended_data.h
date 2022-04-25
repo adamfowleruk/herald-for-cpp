@@ -1,15 +1,15 @@
-//  Copyright 2020-2021 Herald Project Contributors
+//  Copyright 2020-2022 Herald Project Contributors
 //  SPDX-License-Identifier: Apache-2.0
 //
 
 #ifndef HERALD_EXTENDED_DATA_H
 #define HERALD_EXTENDED_DATA_H
 
-#include "../../datatype/data.h"
-#include "../../datatype/payload_data.h"
-#include "../../datatype/payload_timestamp.h"
+#include "herald/data/string_utils.h"
+#include "herald/datatype/data.h"
+#include "herald/datatype/payload_data.h"
+#include "herald/datatype/payload_timestamp.h"
 
-#include <optional>
 #include <cstdint>
 
 namespace herald {
@@ -30,7 +30,7 @@ public:
   virtual void addSection(ExtendedDataSegmentCode code, uint8_t value) = 0;
   virtual void addSection(ExtendedDataSegmentCode code, uint16_t value) = 0;
   virtual void addSection(ExtendedDataSegmentCode code, float value) = 0;
-  virtual void addSection(ExtendedDataSegmentCode code, const std::string value) = 0;
+  virtual void addSection(ExtendedDataSegmentCode code, const herald::data::String& value) = 0;
   virtual void addSection(ExtendedDataSegmentCode code, const Data& value) = 0;
 
   virtual PayloadData payload() = 0;
@@ -76,8 +76,8 @@ struct ConcreteExtendedDataSectionV1 {
     ;
   }
 
-  ConcreteExtendedDataSectionV1(uint8_t code,const std::string& from) 
-    : code(code), length(from.size()), data(from)
+  ConcreteExtendedDataSectionV1(uint8_t code,const herald::data::String& from) 
+    : code(code), length(from.size()), data((Data)from)
   {
     ;
   }
@@ -111,7 +111,8 @@ public:
   void addSection(ExtendedDataSegmentCode code, uint8_t value) override;
   void addSection(ExtendedDataSegmentCode code, uint16_t value) override;
   void addSection(ExtendedDataSegmentCode code, float value) override;
-  void addSection(ExtendedDataSegmentCode code, const std::string value) override;
+  void addSection(ExtendedDataSegmentCode code,
+                  const herald::data::String& value) override;
   void addSection(ExtendedDataSegmentCode code, const Data& value) override;
   PayloadData payload() override;
 

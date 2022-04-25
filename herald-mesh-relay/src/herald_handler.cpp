@@ -207,6 +207,12 @@ static struct basic_venue adamsPond = {
 static struct basic_venue adamsLounge = {
     .country = 826, .state = 4, .code = 7890, .name = "Adam's Lounge"};
 
+// struct herald_shared_state {
+//   herald::SensorArray* sa;
+// };
+// static struct herald_shared_state herald_app_state = {
+// };
+
 void herald_entry() {
   APP_DBG("Herald entry");
   k_sleep(K_MSEC(2000));  // pause so we have time to see Herald initialisation
@@ -248,7 +254,7 @@ void herald_entry() {
                         sensorDelegates);
   SensorArray sa(ctx, pds, ble);
 
-  // Start array (and thus start advertising)
+  APP_DBG("Starting sensor array");
   sa.start();
 
   int iter = 0;
@@ -292,6 +298,9 @@ void herald_entry() {
 k_tid_t herald_pid;
 
 void herald_initialise() {
+  APP_DBG("Herald init called");
+  if (herald_pid) return;  // single initialisation only
+  APP_DBG("Herald init now occuring");
   herald_pid = k_thread_create(
       &herald_thread, herald_stack, stackMaxSize,
       (k_thread_entry_t)herald_entry, NULL, NULL, NULL, -1, K_USER, K_NO_WAIT);
@@ -299,19 +308,29 @@ void herald_initialise() {
 
 void herald_healthcheck() {
   // TODO implement this
+  APP_DBG("Herald healthcheck called");
 }
 
 bool herald_configure() {
   // TODO implement this - from mesh configuration
+  APP_DBG("Herald configure called");
   return true;
 }
 
 bool herald_start() {
-  // TODO implement this - put sa.start here
+  APP_DBG("Herald start called");
+
+  // Start array (and thus start advertising, scanning)
+  // herald_shared_state.sa->start();
+
   return true;
 }
 
 bool herald_stop() {
-  // TODO implement this - put sa.stop here
+  APP_DBG("Herald stop called");
+
+  // Stop array (and thus stop advertising, scanning)
+  // herald_shared_state.sa->stop();
+
   return true;
 }

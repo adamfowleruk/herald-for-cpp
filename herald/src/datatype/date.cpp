@@ -4,6 +4,7 @@
 
 #include "herald/datatype/date.h"
 #include "herald/datatype/time_interval.h"
+#include "herald/data/string_utils.h"
 
 #ifdef __ZEPHYR__
 #include <kernel.h>
@@ -100,16 +101,16 @@ Date::operator+=(const TimeInterval& other) noexcept
   return *this;
 }
 
-std::string
+herald::data::String
 Date::iso8601DateTime() const noexcept {
   // time_t t(seconds);
   // char buf[21];
   // strftime(buf, sizeof(buf), "%FT%TZ", gmtime(&t));
   // return std::string(buf);
-  return std::to_string(seconds);
+  return herald::data::to_string(seconds);
 }
 
-Date::operator std::string() const noexcept {
+Date::operator herald::data::String() const noexcept {
   return iso8601DateTime();
 }
 

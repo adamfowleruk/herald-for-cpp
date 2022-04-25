@@ -40,8 +40,19 @@ LOG_MODULE_REGISTER(app, CONFIG_APP_LOG_LEVEL);
 #define FLAGS 0
 #endif
 
+uint16_t ourNetId = 0;
+uint16_t ourConfiguratorId = 0;
+
 static void prov_complete(uint16_t net_idx, uint16_t src) {
   // Called when provisioning is finished (successfully)
+  ourNetId = net_idx;
+  ourConfiguratorId = src;
+
+  // stop gatt MESH proxy functionality - AFTER CONFIGURATION COMPLETED
+  // int res = bt_mesh_gatt_proxy_set(BT_MESH_FEATURE_DISABLED);
+  // if (!res) {
+  //   APP_ERR("Could not disable MESH GATT Proxy after provisioning");
+  // }
 
   // Start herald entry on a new thread in case of errors, or needing to do
   // something on the main thread
@@ -133,9 +144,6 @@ void main(void) {
     led_is_on = !led_is_on;
 
     APP_DBG("Herald Relay main thread still running");
-
-    // TODO Add logic here to detect failure in Herald thread, and restart to
-    // resume as necessary
 
     // Regular health checks
     ++iter;

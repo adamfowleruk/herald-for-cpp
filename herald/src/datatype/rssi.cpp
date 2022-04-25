@@ -1,23 +1,13 @@
-//  Copyright 2020-2021 Herald Project Contributors
+//  Copyright 2020-2022 Herald Project Contributors
 //  SPDX-License-Identifier: Apache-2.0
 //
 
 #include "herald/datatype/rssi.h"
 
-#include <string>
+#include "herald/data/string_utils.h"
 
 namespace herald {
 namespace datatype {
-
-// class RSSI::Impl {
-// public:
-//   Impl();
-//   ~Impl() = default;
-
-//   int value;
-// };
-
-// RSSI::Impl::Impl() : value(0) { }
 
 RSSI::RSSI()
  : value(0)
@@ -64,8 +54,8 @@ RSSI::hashCode() const noexcept {
   return std::hash<int>{}(value);
 }
 
-RSSI::operator std::string() const noexcept {
-  return "RSSI{value=" + std::to_string(value) + "}";
+RSSI::operator herald::data::String() const noexcept {
+  return "RSSI{value=" + herald::data::to_string(value) + "}";
 }
 
 int

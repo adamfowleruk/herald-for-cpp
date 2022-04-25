@@ -1,4 +1,4 @@
-//  Copyright 2020-2021 Herald Project Contributors
+//  Copyright 2020-2022 Herald Project Contributors
 //  SPDX-License-Identifier: Apache-2.0
 //
 
@@ -21,6 +21,7 @@
 #include "ble_sensor_configuration.h"
 #include "ble_coordinator.h"
 #include "../datatype/bluetooth_state.h"
+#include "../data/string_utils.h"
 
 // Include the relevant concrete BLE Receiver here
 #ifdef __ZEPHYR__
@@ -179,7 +180,7 @@ public:
           }
         } else {
           HTERR("payloadData update called for {} but device has no payload data! No callback called.", 
-            (std::string)BLEMacAddress(device.identifier().underlyingData())
+            (herald::data::String)BLEMacAddress(device.identifier().underlyingData())
           );
         }
         break;

@@ -1,4 +1,4 @@
-//  Copyright 2021 Herald Project Contributors
+//  Copyright 2021-2022 Herald Project Contributors
 //  SPDX-License-Identifier: Apache-2.0
 //
 
@@ -8,6 +8,7 @@
 #include "../context.h"
 #include "../datatype/data.h"
 #include "../datatype/target_identifier.h"
+#include "herald/data/string_utils.h"
 
 #include <memory>
 #include <functional>
@@ -77,7 +78,7 @@ struct Activity {
   /// \sa Priorities
   Priority priority;
   /// \brief A human readable name for this activity used for logging.
-  std::string name;
+  herald::data::String name;
   /// \brief A list of non-prioritised pre-requisities (priority is taken from the priority field in Activity).
   std::vector<Prerequisite> prerequisites; // no target id means all that are connected
   /// \brief The Activity function to call when all prerequisites have been met. May not be called.

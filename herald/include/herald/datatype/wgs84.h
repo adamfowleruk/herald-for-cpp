@@ -7,7 +7,7 @@
 
 #include "location_reference.h"
 
-#include <string>
+#include "herald/data/string_utils.h"
 
 namespace herald {
 namespace datatype {
@@ -18,10 +18,12 @@ struct WGS84CircularAreaLocationReference : public LocationReference {
   double altitude;
   double radius;
 
-  std::string description() override {
-    return "WGS84(lat=" + std::to_string(latitude) + ",lon=" + std::to_string(longitude) + ",alt=" + std::to_string(altitude) + ",radius=" + std::to_string(radius) + ")";
+  herald::data::String description() override {
+    return "WGS84(lat=" + herald::data::to_string(latitude) + 
+      ",lon=" + herald::data::to_string(longitude) + 
+      ",alt=" + herald::data::to_string(altitude) + 
+      ",radius=" + herald::data::to_string(radius) + ")";
   }
-
 };
 
 
@@ -31,10 +33,11 @@ struct WGS84PointLocationReference : public LocationReference {
   double longitude;
   double altitude;
 
-  std::string description() override {
-    return "WGS84(lat=" + std::to_string(latitude) + ",lon=" + std::to_string(longitude) + ",alt=" + std::to_string(altitude) + ")";
+  herald::data::String description() override {
+    return "WGS84(lat=" + herald::data::to_string(latitude) + 
+      ",lon=" + herald::data::to_string(longitude) + 
+      ",alt=" + herald::data::to_string(altitude) + ")";
   }
-
 };
 
 

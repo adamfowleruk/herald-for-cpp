@@ -71,6 +71,7 @@ endif()
 #   )
 # endif()
 
+add_definitions(-DHERALD_MEMORYARENA_MAX=4096)
 
 # Generic Zephyr build command below
 cmake_minimum_required(VERSION 3.13.1)
@@ -94,8 +95,9 @@ message("HERALD HEADERS: ${HERALD_HEADERS}")
 
 include_directories(../herald/include)
 
+# NOTE Herald logging causing malloc issues with strings, so disabling
 if(CMAKE_BUILD_TYPE MATCHES Debug)
-  add_definitions(-DHERALD_LOG_LEVEL=4 -DCONFIG_APP_LOG_LEVEL=4)
+  add_definitions(-DHERALD_LOG_LEVEL=0 -DCONFIG_APP_LOG_LEVEL=4)
 else()
   add_definitions(-DHERALD_LOG_LEVEL=0 -DCONFIG_APP_LOG_LEVEL=0)
 endif()

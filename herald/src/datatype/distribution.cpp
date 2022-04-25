@@ -1,8 +1,10 @@
-//  Copyright 2021 Herald Project Contributors
+//  Copyright 2021-2022 Herald Project Contributors
 //  SPDX-License-Identifier: Apache-2.0
 //
 
 #include "herald/datatype/distribution.h"
+
+#include "herald/data/string_utils.h"
 
 #include <limits>
 #include <cmath>
@@ -126,11 +128,12 @@ Distribution::max() const noexcept
   return maximum;
 }
 
-Distribution::operator std::string() const noexcept
-{
-  return "[count=" + std::to_string(count()) + ",mean=" + std::to_string(mean()) + 
-         ",sd=" + std::to_string(standardDeviation()) + ",min=" + std::to_string(min()) +
-         ",max=" + std::to_string(max()) + "]";
+Distribution::operator herald::data::String() const noexcept {
+  return "[count=" + herald::data::to_string(count()) + 
+         ",mean=" + herald::data::to_string(mean()) + 
+         ",sd=" + herald::data::to_string(standardDeviation()) + 
+         ",min=" + herald::data::to_string(min()) +
+         ",max=" + herald::data::to_string(max()) + "]";
 }
 
 void

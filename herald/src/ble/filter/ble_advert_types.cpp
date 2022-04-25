@@ -3,8 +3,8 @@
 //
 
 #include "herald/ble/filter/ble_advert_types.h"
+#include "herald/data/string_utils.h"
 
-#include <string>
 #include <unordered_map>
 
 namespace herald {
@@ -12,7 +12,7 @@ namespace ble {
 namespace filter {
   
 
-static std::unordered_map<std::string,BLEAdvertSegmentType> advertSegmentStringsToTypes {
+static std::unordered_map<herald::data::String,BLEAdvertSegmentType> advertSegmentStringsToTypes {
   {"unknown",BLEAdvertSegmentType::unknown}
 };
 
@@ -64,12 +64,6 @@ typeFor(int code)
       return BLEAdvertSegmentType::unknown;
   }
 }
-
-// BLEAdvertSegmentType typeFor(const std::string& name)
-// {
-//  // TODO fill this out
-//   return BLEAdvertSegmentType::unknown;
-// }
 
 
 }

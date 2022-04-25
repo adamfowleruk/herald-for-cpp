@@ -1,4 +1,4 @@
-//  Copyright 2020-2021 Herald Project Contributors
+//  Copyright 2020-2022 Herald Project Contributors
 //  SPDX-License-Identifier: Apache-2.0
 //
 
@@ -6,10 +6,8 @@
 #define HERALD_TARGET_IDENTIFIER_H
 
 #include "data.h"
-
-#include <string>
-#include <memory>
-#include <iosfwd>
+#include "hex_string.h"
+#include "herald/data/string_utils.h"
 
 namespace herald {
 namespace datatype {
@@ -31,7 +29,7 @@ public:
 
   std::size_t hashCode() const;
 
-  operator std::string() const;
+  operator herald::data::String() const;
 
   operator Data() const;
 
@@ -48,10 +46,14 @@ private:
 
 
 namespace std {
+#ifndef CONFIG_HERALD_NO_STD_STRING
   inline std::ostream& operator<<(std::ostream &os, const herald::datatype::TargetIdentifier& d)
   {
-    return os << d.underlyingData().reversed().hexEncodedString();
+    return os << herald::datatype::HexString::encode(
+      d.underlyingData().reversed()
+    ).encoded();
   }
+#endif
 
   template<>
   struct hash<herald::datatype::TargetIdentifier>

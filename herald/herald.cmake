@@ -42,6 +42,7 @@ set(HERALD_HEADERS
   ${HERALD_BASE}/include/herald/data/payload_data_formatter.h
   ${HERALD_BASE}/include/herald/data/sensor_logger.h
   ${HERALD_BASE}/include/herald/data/stdout_logging_sink.h
+  ${HERALD_BASE}/include/herald/data/string_utils.h
   ${HERALD_BASE}/include/herald/datatype/allocatable_array.h
   ${HERALD_BASE}/include/herald/datatype/base64_string.h
   ${HERALD_BASE}/include/herald/datatype/bluetooth_state.h
@@ -52,6 +53,7 @@ set(HERALD_HEADERS
   ${HERALD_BASE}/include/herald/datatype/encounter.h
   ${HERALD_BASE}/include/herald/datatype/exposure_risk.h
   ${HERALD_BASE}/include/herald/datatype/error_code.h
+  ${HERALD_BASE}/include/herald/datatype/hex_string.h
   ${HERALD_BASE}/include/herald/datatype/immediate_send_data.h
   ${HERALD_BASE}/include/herald/datatype/location_reference.h
   ${HERALD_BASE}/include/herald/datatype/location.h
@@ -137,6 +139,7 @@ set(HERALD_SOURCES
   ${HERALD_BASE}/src/data/concrete_payload_data_formatter.cpp
   ${HERALD_BASE}/src/data/sensor_logger.cpp
   ${HERALD_BASE}/src/data/stdout_logging_sink.cpp
+  ${HERALD_BASE}/src/data/string_utils.cpp
   ${HERALD_BASE}/src/datatype/base64_string.cpp
   ${HERALD_BASE}/src/datatype/data.cpp
   ${HERALD_BASE}/src/datatype/date.cpp
@@ -144,6 +147,7 @@ set(HERALD_SOURCES
   ${HERALD_BASE}/src/datatype/distribution.cpp
   ${HERALD_BASE}/src/datatype/encounter.cpp
   ${HERALD_BASE}/src/datatype/exposure_risk.cpp
+  ${HERALD_BASE}/src/datatype/hex_string.cpp
   ${HERALD_BASE}/src/datatype/immediate_send_data.cpp
   ${HERALD_BASE}/src/datatype/location.cpp
   ${HERALD_BASE}/src/datatype/luminosity.cpp

@@ -35,3 +35,24 @@ Added in v2.1 (First release):-
 - Test commands (hello, status)
 - Default fixed subscriptions to all Presence messages (Herald LE and other LE devices)
 - Programming of Mesh relay nodes' Venue Beacon and Location metadata for site navigation
+
+## What is provided today
+
+- Connects to a plugged-in USB CDC ACM device driver (Herald MESH Modem)
+- Negotiates tty settings successfully (115kbps)
+- Connects to RabbitMQ and sets up exchanges and queues as required, and subscribes to command queue
+
+## TODOs
+
+- Support protobufv3 for messaging format
+- Send an enable as relay message
+- Send a presence subscribe message (Chat group from nRF MESH app) and forward messages onto RabbitMQ for this
+- Send a heartbeat subscribe message and send these updates to RabbitMQ
+- Receive presence messages and send to RabbitMQ
+- Receive heartbeat messages and send to RabbitMQ
+
+## Later
+
+- Send TTL set command
+- Send MESH node attempted discovery (low and high addresses) command
+- Send change of application keys command for arbitrary element-model combinations

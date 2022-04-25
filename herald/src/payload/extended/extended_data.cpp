@@ -103,7 +103,7 @@ ConcreteExtendedDataV1::addSection(ExtendedDataSegmentCode code, float value)
 }
 
 void
-ConcreteExtendedDataV1::addSection(ExtendedDataSegmentCode code, const std::string value)
+ConcreteExtendedDataV1::addSection(ExtendedDataSegmentCode code, const herald::data::String& value)
 {
   if (inUse >= sections.size()) {
     return;

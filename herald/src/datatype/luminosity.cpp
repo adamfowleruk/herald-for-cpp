@@ -4,7 +4,7 @@
 
 #include "herald/datatype/luminosity.h"
 
-#include <string>
+#include "herald/data/string_utils.h"
 
 namespace herald {
 namespace datatype {
@@ -54,8 +54,8 @@ Luminosity::hashCode() const noexcept {
   return std::hash<int>{}(value);
 }
 
-Luminosity::operator std::string() const noexcept {
-  return "Luminosity{value=" + std::to_string(value) + "}";
+Luminosity::operator herald::data::String() const noexcept {
+  return "Luminosity{value=" + herald::data::to_string(value) + "}";
 }
 
 int

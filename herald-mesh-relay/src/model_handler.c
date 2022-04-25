@@ -11,6 +11,8 @@
 #include "herald/mesh/presence.h"
 #include "herald/mesh/presence_server.h"
 
+#include "herald_handler.h"
+
 #include <logging/log.h>
 LOG_MODULE_REGISTER(meshmodel, CONFIG_APP_LOG_LEVEL);
 
@@ -61,11 +63,22 @@ BT_MESH_HEALTH_PUB_DEFINE(health_pub, 0);
 static void presence_on()
 {
   LOG_DBG("Presence On");
+  herald_initialise();
+  bool configured = herald_configure();
+  if (!configured) {
+    LOG_DBG("Herald Sensor Array could not be configured");
+    return;
+  }
+  bool started = herald_start();
+  if (!started) {
+    LOG_DBG("Herald Sensor Array could not be started");
+  }
 }
 
 static void presence_off()
 {
   LOG_DBG("Presence Off");
+  herald_stop();
 }
 
 const struct bt_mesh_herald_presence_server_onoff_cb presence_cbs = {

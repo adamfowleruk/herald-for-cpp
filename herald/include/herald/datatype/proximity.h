@@ -5,7 +5,7 @@
 #ifndef HERALD_PROXIMITY_H
 #define HERALD_PROXIMITY_H
 
-#include <string>
+#include "herald/data/string_utils.h"
 
 namespace herald {
 namespace datatype {
@@ -18,11 +18,11 @@ struct Proximity {
   ProximityMeasurementUnit unit;
   double value;
 
-  std::string description() const noexcept {
-    return std::to_string((short)unit) + ":" + std::to_string((int)value);
+  herald::data::String description() const noexcept {
+    return std::to_string((short)unit) + ":" + herald::data::to_string((int)value);
   }
 
-  operator std::string() const noexcept {
+  operator herald::data::String() const noexcept {
     return description();
   }
 };

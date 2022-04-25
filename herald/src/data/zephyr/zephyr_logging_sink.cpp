@@ -3,10 +3,9 @@
 //
 
 #include "herald/data/zephyr/zephyr_logging_sink.h"
+#include "herald/data/string_utils.h"
 
 #include <logging/log.h>
-
-#include <string>
 
 namespace herald {
 
@@ -16,11 +15,13 @@ LOG_MODULE_REGISTER(heraldlogger, HERALD_LOG_LEVEL);
 namespace data {
 
 void
-ZephyrLoggingSink::log(const std::string& subsystem,const std::string& category,
-  SensorLoggerLevel level, const std::string message) const noexcept
+ZephyrLoggingSink::log(const herald::data::String& subsystem,
+  const herald::data::String& category,
+  SensorLoggerLevel level, 
+  const herald::data::String& message) const noexcept
 {
   // TODO be more specific? Filter here or in Zephyr?
-  std::string finalMessage = subsystem + "," + category + "," + message;
+  herald::data::String finalMessage = subsystem + "," + category + "," + message;
   switch (level) {
     case SensorLoggerLevel::debug:
       LOG_DBG("%s",log_strdup(finalMessage.c_str()));

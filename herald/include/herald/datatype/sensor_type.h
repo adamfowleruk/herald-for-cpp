@@ -5,7 +5,7 @@
 #ifndef HERALD_SENSOR_TYPE_H
 #define HERALD_SENSOR_TYPE_H
 
-#include <string>
+#include "herald/data/string_utils.h"
 
 namespace herald {
 namespace datatype {
@@ -26,7 +26,7 @@ enum class SensorType : short {
   OTHER
 };
 
-std::string str(SensorType t) noexcept;
+herald::data::String str(SensorType t) noexcept;
 
 } // end namespace
 } // end namespace

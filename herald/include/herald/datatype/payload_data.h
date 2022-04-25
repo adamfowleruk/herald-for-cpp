@@ -6,6 +6,7 @@
 #define HERALD_PAYLOAD_DATA_H
 
 #include "data.h"
+#include "herald/data/string_utils.h"
 
 namespace herald {
 namespace datatype {
@@ -19,8 +20,8 @@ public:
   ~PayloadData() = default;
   PayloadData& operator=(const PayloadData& other);
 
-  std::string shortName() const;
-  std::string toString() const;
+  herald::data::String shortName() const;
+  operator herald::data::String() const;
 };
 
 } // end namespace

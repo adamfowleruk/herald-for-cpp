@@ -1,4 +1,4 @@
-//  Copyright 2021 Herald Project Contributors
+//  Copyright 2021-2022 Herald Project Contributors
 //  SPDX-License-Identifier: Apache-2.0
 //
 
@@ -8,6 +8,7 @@
 #include "sampling.h"
 #include "../data/sensor_logger.h"
 #include "../context.h"
+#include "../data/string_utils.h"
 
 #include <memory>
 #include <optional>
@@ -63,14 +64,14 @@ struct OptionalSensorLogger {
     return *this;
   }
 
-  void debug(std::string toLog,SampledID sampled,double value)
+  void debug(herald::data::String toLog,SampledID sampled,double value)
   {
     HTDBG(toLog);
     // HTDBG(std::to_string(sampled));
     // HTDBG(std::to_string(value));
   }
 
-  void debug(std::string toLog)
+  void debug(herald::data::String toLog)
   {
     HTDBG(toLog);
   }

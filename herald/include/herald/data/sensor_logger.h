@@ -1,4 +1,4 @@
-//  Copyright 2020-2021 Herald Project Contributors
+//  Copyright 2020-2022 Herald Project Contributors
 //  SPDX-License-Identifier: Apache-2.0
 //
 
@@ -6,11 +6,15 @@
 #define HERALD_SENSOR_LOGGER_H
 
 #include "../datatype/bluetooth_state.h"
+#include "string_utils.h"
 
-#include <string>
+#ifndef CONFIG_HERALD_NO_STD_STRING
 #include <memory>
 #include <ostream>
 #include <sstream>
+#include <string>
+#endif
+
 
 // Zephyr compile workaround. Not ideal.
 // #ifndef HERALD_LOG_LEVEL
@@ -109,7 +113,7 @@ public:
   LoggingSink() = default;
   ~LoggingSink() = default;
 
-  void log(const std::string& subsystem, const std::string& category, SensorLoggerLevel level, std::string message);
+  void log(const String& subsystem, const String& category, SensorLoggerLevel level, std::string message);
 };
 */
 
@@ -126,7 +130,7 @@ public:
 namespace {
   
   [[maybe_unused]]
-  void tprintf(std::stringstream& os, const std::string& format) // base function
+  void tprintf(StringStream& os, const String& format) // base function
   {
     std::size_t pos = 0;
     for ( auto c : format ) {
@@ -147,33 +151,33 @@ namespace {
 
   /// \brief Fallback method that assumes a << operator exists for type T.
   template <typename T>
-  void tprintValue(std::stringstream& os, T value)
+  void tprintValue(StringStream& os, T value)
   {
     os << value;
   }
   
   // template <typename T>
-  // auto tprintValue(std::stringstream& os, T value) -> decltype(operator<<(os,value), void())
+  // auto tprintValue(StringStream& os, T value) -> decltype(operator<<(os,value), void())
   // {
   //   os << value;
   // }
 
   // /// \brief Partial specialisation for types that std::to_string supports
   // template <typename T>
-  // auto tprintValue(std::stringstream& os, T value) -> decltype(std::to_string(value), void())
+  // auto tprintValue(StringStream& os, T value) -> decltype(std::to_string(value), void())
   // {
   //   os << std::to_string(value);
   // }
   
   [[maybe_unused]]
-  void tprintValue(std::stringstream& os, std::uint8_t value)
+  void tprintValue(StringStream& os, std::uint8_t value)
   {
     // only uint16 and above on zephyr has a stream operator
     os << std::uint16_t(value);
   }
   
   [[maybe_unused]]
-  void tprintValue(std::stringstream& os, std::int8_t value)
+  void tprintValue(StringStream& os, std::int8_t value)
   {
     // only int16 and above on zephyr has a stream operator
     os << std::int16_t(value);
@@ -182,13 +186,13 @@ namespace {
   /// \brief Prints an int value to the stream
   /// \note Also covers int32_t and int64_t
   [[maybe_unused]]
-  void tprintValue(std::stringstream& os, int value)
+  void tprintValue(StringStream& os, int value)
   {
     os << std::int64_t(value);
   }
   
   [[maybe_unused]]
-  void tprintValue(std::stringstream& os, double value)
+  void tprintValue(StringStream& os, double value)
   {
     // double may not be supported depending on Zephyr compile flags
     // TODO check for support for printf(double) rather than just assume it is not there
@@ -196,7 +200,7 @@ namespace {
   }
  
   // template<typename... Targs>
-  // void tprintf(std::stringstream& os, const std::string& format, std::uint8_t value, Targs... Fargs) // recursive variadic function
+  // void tprintf(StringStream& os, const String& format, std::uint8_t value, Targs... Fargs) // recursive variadic function
   // {
   //   std::size_t pos = 0;
   //   for ( auto c : format ) {
@@ -215,7 +219,7 @@ namespace {
   // }
  
   // template<typename... Targs>
-  // void tprintf(std::stringstream& os, const std::string& format, std::int8_t value, Targs... Fargs) // recursive variadic function
+  // void tprintf(StringStream& os, const String& format, std::int8_t value, Targs... Fargs) // recursive variadic function
   // {
   //   std::size_t pos = 0;
   //   for ( auto c : format ) {
@@ -234,7 +238,7 @@ namespace {
   // }
  
   // template<typename... Targs>
-  // void tprintf(std::stringstream& os, const std::string& format, double value, Targs... Fargs) // recursive variadic function
+  // void tprintf(StringStream& os, const String& format, double value, Targs... Fargs) // recursive variadic function
   // {
   //   std::size_t pos = 0;
   //   for ( auto c : format ) {
@@ -253,7 +257,7 @@ namespace {
   // }
  
   // template<typename... Targs>
-  // void tprintf(std::stringstream& os, const std::string& format, const std::string& value, Targs... Fargs) // recursive variadic function
+  // void tprintf(StringStream& os, const String& format, const String& value, Targs... Fargs) // recursive variadic function
   // {
   //   std::size_t pos = 0;
   //   for ( auto c : format ) {
@@ -274,7 +278,7 @@ namespace {
   // typename std::enable_if_t<std::is_convertible<T, std::string>::value, std::string>
 
   template<typename T>
-  void tprintf(std::stringstream& os, const std::string& format, T value) // recursive variadic function
+  void tprintf(StringStream& os, const String& format, T value) // recursive variadic function
   {
     std::size_t pos = 0;
     for ( auto c : format ) {
@@ -293,7 +297,7 @@ namespace {
   }
 
   template<typename FirstT, typename SecondT, typename... RestT>
-  void tprintf(std::stringstream& os, const std::string& format, FirstT first, SecondT second, RestT... rest)
+  void tprintf(StringStream& os, const String& format, FirstT first, SecondT second, RestT... rest)
   {
     std::size_t pos = 0;
     for ( auto c : format ) {
@@ -312,7 +316,7 @@ namespace {
   }
 
   // template<typename T, typename... Targs>
-  // void tprintf(std::stringstream& os, const std::string& format, T value, Targs... Fargs) // recursive variadic function
+  // void tprintf(StringStream& os, const String& format, T value, Targs... Fargs) // recursive variadic function
   // {
   //   std::size_t pos = 0;
   //   for ( auto c : format ) {
@@ -332,7 +336,7 @@ namespace {
 
   // // G++ deduction guide workaround - https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80438
   // template<typename T, typename... Targs>
-  // void tprintf(std::stringstream& os, const std::string& format, Targs... Fargs)
+  // void tprintf(StringStream& os, const String& format, Targs... Fargs)
   // {
   //   tprintf(os, format, Fargs...);
   // }
@@ -342,10 +346,13 @@ namespace {
 template <typename LoggingSinkT>
 class SensorLogger {
 public:
-  SensorLogger(LoggingSinkT& sink, std::string subsystem, std::string category) noexcept
-    : mSink(sink), mSubsystem(subsystem), mCategory(category)
+  SensorLogger(LoggingSinkT& sink, String&& subsystem,
+              String&& category) noexcept
+    : mSink(sink), 
+      mSubsystem(std::move(subsystem)), 
+      mCategory(std::move(category)) 
   {
-    ;
+   ;
   }
 
   SensorLogger(const SensorLogger& other) noexcept
@@ -384,52 +391,52 @@ public:
   // std::format in C++20, fmt::format library before that
   // Note: C++11 Variadic template parameter pack expansion
   template <typename ... Types>
-  void debug(const std::string& message, const Types&... args) const noexcept {
+  void debug(const String& message, const Types&... args) const noexcept {
     constexpr int size = sizeof...(args);
     if constexpr (0 == size) {
       log(SensorLoggerLevel::debug,message);
     } else {
-      std::stringstream os;
+      StringStream os;
       tprintf(os,message,args...);
-      os << std::ends;
+      os << EOS;
       log(SensorLoggerLevel::debug, os.str());
     }
   }
 
   template <typename ... Types>
-  void info(const std::string& message, const Types&... args) const noexcept {
+  void info(const String& message, const Types&... args) const noexcept {
     constexpr int size = sizeof...(args);
     if constexpr (0 == size) {
       log(SensorLoggerLevel::debug,message);
     } else {
-      std::stringstream os;
+      StringStream os;
       tprintf(os,message,args...);
-      os << std::ends;
+      os << EOS;
       log(SensorLoggerLevel::info, os.str());
     }
   }
 
   template <typename ... Types>
-  void fault(const std::string& message, const Types&... args) const noexcept {
+  void fault(const String& message, const Types&... args) const noexcept {
     constexpr int size = sizeof...(args);
     if constexpr (0 == size) {
       log(SensorLoggerLevel::debug,message);
     } else {
-      std::stringstream os;
+      StringStream os;
       tprintf(os,message,args...);
-      os << std::ends;
+      os << EOS;
       log(SensorLoggerLevel::fault, os.str());
     }
   }
 
 private:
-  inline void log(SensorLoggerLevel lvl, const std::string msg) const noexcept {
+  inline void log(SensorLoggerLevel lvl, const String& msg) const noexcept {
     mSink.log(mSubsystem, mCategory, lvl, msg);
   }
 
   LoggingSinkT& mSink;
-  std::string mSubsystem;
-  std::string mCategory;
+  const String mSubsystem;
+  const String mCategory;
 };
 
 } // end namespace

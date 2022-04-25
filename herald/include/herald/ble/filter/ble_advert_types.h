@@ -50,7 +50,6 @@ enum class BLEAdvertSegmentType : int {
 };
 
 BLEAdvertSegmentType typeFor(int code);
-// BLEAdvertSegmentType typeFor(const std::string& name);
 
 struct BLEAdvertSegment {
   BLEAdvertSegmentType type;

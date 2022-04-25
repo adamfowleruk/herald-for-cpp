@@ -7,9 +7,7 @@
 
 #include "location_reference.h"
 #include "date.h"
-
-#include <string>
-#include <memory>
+#include "herald/data/string_utils.h"
 
 namespace herald {
 namespace datatype {
@@ -22,11 +20,13 @@ public:
   {};
   ~Location();
 
-  std::string description() const {
-    return mValue->description() + ":[from=" + ((std::string)mStart) + ",to=" + ((std::string)mEnd) + "]";
+  herald::data::String description() const {
+    return mValue->description() + ":[from=" + 
+      ((herald::data::String)mStart) + ",to=" + 
+      ((herald::data::String)mEnd) + "]";
   }
-  
-  operator std::string() const noexcept {
+
+  operator herald::data::String() const noexcept {
     return description();
   }
 

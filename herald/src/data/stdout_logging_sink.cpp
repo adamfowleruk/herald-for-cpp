@@ -1,9 +1,11 @@
-//  Copyright 2020-2021 Herald Project Contributors
+//  Copyright 2020-2022 Herald Project Contributors
 //  SPDX-License-Identifier: Apache-2.0
 //
 
-#include "herald/data/sensor_logger.h"
 #include "herald/data/stdout_logging_sink.h"
+
+#include "herald/data/sensor_logger.h"
+#include "herald/data/string_utils.h"
 
 #include <iostream>
 
@@ -13,9 +15,9 @@ StdOutLoggingSink::StdOutLoggingSink() = default;
 StdOutLoggingSink::~StdOutLoggingSink() = default;
 
 void
-StdOutLoggingSink::log(const std::string& subsystem, const std::string& category, SensorLoggerLevel level, std::string message)
+StdOutLoggingSink::log(const String& subsystem, const String& category, SensorLoggerLevel level, const String& message)
 {
-  std::string lvl = "info";
+  String lvl = "info";
   switch (level) {
     case SensorLoggerLevel::debug:
       lvl = "debug";

@@ -7,7 +7,7 @@
 
 #include "model.h"
 
-#include <string>
+#include "herald/data/string_utils.h"
 
 namespace herald {
 namespace datatype {
@@ -38,7 +38,7 @@ public:
 
   std::size_t hashCode() const noexcept;
 
-  operator std::string() const noexcept;
+  operator herald::data::String() const noexcept;
 
   double doubleValue() const noexcept;
 

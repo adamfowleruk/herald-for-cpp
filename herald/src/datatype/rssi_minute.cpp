@@ -1,10 +1,10 @@
-//  Copyright 2021 Herald Project Contributors
+//  Copyright 2021-2022 Herald Project Contributors
 //  SPDX-License-Identifier: Apache-2.0
 //
 
 #include "herald/datatype/rssi_minute.h"
 
-#include <string>
+#include "herald/data/string_utils.h"
 
 namespace herald {
 namespace datatype {
@@ -54,8 +54,8 @@ RSSIMinute::hashCode() const noexcept {
   return std::hash<double>{}(value);
 }
 
-RSSIMinute::operator std::string() const noexcept {
-  return "RSSIMinute{value=" + std::to_string(value) + "}";
+RSSIMinute::operator herald::data::String() const noexcept {
+  return "RSSIMinute{value=" + herald::data::to_string(value) + "}";
 }
 
 RSSIMinute::operator double() const noexcept {

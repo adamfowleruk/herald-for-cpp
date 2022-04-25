@@ -6,8 +6,8 @@
 #define HERALD_RANDOMNESS_H
 
 #include "data.h"
+#include "herald/data/string_utils.h"
 
-#include <string>
 #include <random>
 #include <climits>
 
@@ -46,8 +46,8 @@ public:
   AllZerosNotRandom(AllZerosNotRandom&& other) noexcept = default;
   ~AllZerosNotRandom() = default;
 
-  std::string methodName() const {
-    return "allzeros";
+  herald::data::String methodName() const {
+    return herald::data::String("allzeros");
   }
 
   void nextBytes(std::size_t count, Data& into) {
@@ -83,8 +83,8 @@ public:
 
   ~IntegerDistributedRandomSource() = default;
 
-  std::string methodName() const {
-    return "integerdistributed";
+  herald::data::String methodName() const {
+    return herald::data::String("integerdistributed");
   }
 
   void nextBytes(std::size_t count, Data& into) {
@@ -158,7 +158,7 @@ public:
   }
 
   
-  std::string methodName() const {
+  herald::data::String methodName() const {
     return m_source.methodName();
   }
 

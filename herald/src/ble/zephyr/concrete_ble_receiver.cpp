@@ -4,6 +4,8 @@
 
 #include "herald/ble/zephyr/concrete_ble_receiver.h"
 
+#include "herald/data/string_utils.h"
+
 namespace herald {
 namespace ble {
 
@@ -41,15 +43,15 @@ uint32_t waitWithTimeout(uint32_t timeoutMillis, k_timeout_t period, std::functi
 }
 
 namespace zephyrinternal {
-  std::string toMacString(const bt_addr_le_t* addr) {
+  herald::data::String toMacString(const bt_addr_le_t* addr) {
     Data newAddr(addr->a.val,6);
     BLEMacAddress newMac(newAddr);
-    return (std::string)newMac;
+    return (herald::data::String)newMac;
   }
-  std::string toIdentityString(const bt_addr_le_t* addr) {
+  herald::data::String toIdentityString(const bt_addr_le_t* addr) {
     Data newAddr(addr->a.val,5);
     BLEMacAddress newMac(newAddr);
-    return (std::string)newMac;
+    return (herald::data::String)newMac;
   }
   
   // Items that can only be defined in a single translation unit (cpp file):-

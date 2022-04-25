@@ -4,9 +4,9 @@
 
 #include "herald/datatype/payload_data.h"
 #include "herald/datatype/base64_string.h"
+#include "herald/data/string_utils.h"
 
 #include <algorithm>
-#include <string>
 
 namespace herald {
 namespace datatype {
@@ -41,7 +41,7 @@ PayloadData::operator=(const PayloadData& other)
   return *this;
 }
 
-std::string
+herald::data::String
 PayloadData::shortName() const {
   if (size() == 0) {
     return "";
@@ -51,12 +51,11 @@ PayloadData::shortName() const {
   }
   const Data suffix = subdata(3, size() - 3);
   Base64String base64EncodedString = Base64String::encode(suffix);
-  std::string asString = base64EncodedString.encoded();
+  herald::data::String asString = base64EncodedString.encoded();
   return asString.substr((std::size_t)0, std::min((std::size_t)6, asString.length())); // TODO figure out why we trim 6 chars? What if we don't have 6 chars???
 }
 
-std::string
-PayloadData::toString() const {
+PayloadData::operator herald::data::String() const {
   return shortName();
 }
 
