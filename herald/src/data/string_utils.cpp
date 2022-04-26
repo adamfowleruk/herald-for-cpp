@@ -87,6 +87,12 @@ DataString::substr(std::size_t fromIdx, std::size_t length) const noexcept
   return DataString(value.subdata(fromIdx, length));
 }
 
+char
+DataString::operator[](std::size_t idx) const noexcept
+{
+  return (char)value.at(idx);
+}
+
 bool
 DataString::operator==(const DataString& other) const noexcept
 {
@@ -102,7 +108,13 @@ DataString::operator!=(const DataString& other) const noexcept
 DataString&
 DataString::operator+=(const DataString& toAppend) noexcept
 {
-  value.append(toAppend.value);
+  value.append((uint8_t)toAppend.value);
+}
+
+DataString&
+DataString::operator+=(const char toAppend) noexcept
+{
+  value.append((uint8_t)toAppend);
 }
 
 DataString
@@ -111,10 +123,18 @@ DataString::operator+(const DataString& toAppend) const noexcept
   return DataString(value + toAppend.value);
 }
 
+DataString
+DataString::operator+(const char toAppend) const noexcept
+{
+  herald::datatype::Data nv(value);
+  nv.append(toAppend);
+  return DataString(std::move(nv));
+}
+
 DataString&
 DataString::operator=(const DataString& toCopyAssign) noexcept
 {
-  value = Data()
+  value = herald::datatype::Data()
 }
 
 DataString&
@@ -155,6 +175,20 @@ DataStringIterator::operator*() noexcept
     return over.at[pos];
   }
   return '\0';
+}
+
+DataStringIterator&
+DataStringIterator::operator=(const DataStringIterator& other) noexcept
+{
+  pos = other.pos
+  over = other.over
+}
+
+DataStringIterator&
+DataStringIterator::operator=(DataStringIterator&& other) noexcept
+{
+  pos = other.pos
+  over = other.over
 }
 
 bool

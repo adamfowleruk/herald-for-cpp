@@ -61,4 +61,16 @@ private:
 } // end namespace
 } // end namespace
 
+#ifndef CONFIG_HERALD_NO_STD_STREAMS
+namespace std {
+
+template <typename MemoryArenaT>
+inline std::ostream&
+operator<<(std::ostream& os, const herald::datatype::DataRef<MemoryArenaT>& d) {
+  return os << herald::datatype::HexString::encode(d).encoded();
+}
+
+} // namespace std
+#endif
+
 #endif

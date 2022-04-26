@@ -149,9 +149,9 @@ TEST_CASE("datatypes-uuid-notblank", "[datatypes][uuid][notblank]") {
 TEST_CASE("datatypes-uuid-charctordash", "[datatypes][uuid][charctordash]") {
   SECTION("datatypes-uuid-charctordash") {
     herald::datatype::UUID serviceUUID("428132af-4746-42d3-801e-4572d65bfd9b");
-    INFO("Service UUID " << serviceUUID.string());
+    INFO("Service UUID " << serviceUUID);
     auto blankUUID = herald::datatype::UUID::fromString("");
-    INFO("Blank UUID " << blankUUID.string());
+    INFO("Blank UUID " << blankUUID);
     REQUIRE(serviceUUID != blankUUID);
   }
 }
@@ -159,9 +159,9 @@ TEST_CASE("datatypes-uuid-charctordash", "[datatypes][uuid][charctordash]") {
 TEST_CASE("datatypes-uuid-charctor", "[datatypes][uuid][charctor]") {
   SECTION("datatypes-uuid-charctor") {
     herald::datatype::UUID serviceUUID("428132af474642d3801e4572d65bfd9b");
-    INFO("Service UUID " << serviceUUID.string());
+    INFO("Service UUID " << serviceUUID);
     auto blankUUID = herald::datatype::UUID::fromString("");
-    INFO("Blank UUID " << blankUUID.string());
+    INFO("Blank UUID " << blankUUID);
     REQUIRE(serviceUUID != blankUUID);
   }
 }
@@ -170,8 +170,8 @@ TEST_CASE("datatypes-uuid-charctormatch", "[datatypes][uuid][charctormatch]") {
   SECTION("datatypes-uuid-charctormatch") {
     herald::datatype::UUID serviceUUID("428132af-4746-42d3-801e-4572d65bfd9b");
     herald::datatype::UUID serviceUUID2("428132af474642d3801e4572d65bfd9b");
-    INFO("Service UUID " << serviceUUID.string());
-    INFO("Service UUID2 " << serviceUUID2.string());
+    INFO("Service UUID " << serviceUUID);
+    INFO("Service UUID2 " << serviceUUID2);
     REQUIRE(serviceUUID == serviceUUID2);
   }
 }

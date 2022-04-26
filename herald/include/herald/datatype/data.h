@@ -5,12 +5,16 @@
 #ifndef HERALD_DATA_H
 #define HERALD_DATA_H
 
-// NOTE Fundamental class - DO NOT make reliant upon any external classes
+/// \file Holds the fundamental Data class and related low-level constructs.
+/// \note Fundamental class - DO NOT make reliant upon any external classes
+///       as it results in a circular dependency, as many Herald classes are
+///       based upon or use Data, including herald::data::String and 
+///       herald::datatype::HexString.
 
 #include "memory_arena.h"
 
 #ifndef CONFIG_HERALD_NO_STD_STRING
-#include <string>
+#include <string> // for Data(std::string) only (uses RAW chars, not HexString)
 #endif
 
 namespace herald {
@@ -568,12 +572,6 @@ Data DataSections<maxSize>::emptyRef = Data();
 } // end namespace
 
 namespace std {
-  template <typename MemoryArenaT>
-  inline std::ostream& operator<<(std::ostream &os, const herald::datatype::DataRef<MemoryArenaT>& d)
-  {
-    return os << d.hexEncodedString();
-  }
-
   inline void hash_combine_impl(std::size_t& seed, std::size_t value)
   {
     seed ^= value + 0x9e3779b9 + (seed<<6) + (seed>>2);

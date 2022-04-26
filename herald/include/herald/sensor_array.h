@@ -16,9 +16,8 @@
 #include "datatype/payload_data.h"
 #include "ble/ble_concrete.h"
 #include "engine/coordinator.h"
+#include "data/string_utils.h"
 
-#include <memory>
-#include <string>
 #include <array>
 #include <variant>
 #include <functional>

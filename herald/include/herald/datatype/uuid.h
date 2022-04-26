@@ -9,6 +9,10 @@
 #include "randomness.h"
 #include "herald/data/string_utils.h"
 
+#ifndef CONFIG_HERALD_NO_STD_STREAMS
+#include <ostream>
+#endif
+
 #include <array>
 
 namespace herald {
@@ -101,5 +105,16 @@ public:
 
 } // end namespace
 } // end namespace
+
+#ifndef CONFIG_HERALD_NO_STD_STREAMS
+namespace std {
+
+inline std::ostream&
+operator<<(std::ostream& os, const herald::datatype::UUID& uuid) {
+  return os << (herald::data::String)uuid;
+}
+
+}  // namespace std
+#endif
 
 #endif

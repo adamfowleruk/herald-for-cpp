@@ -228,7 +228,7 @@ public:
       // HTDBG("Device for target identifier {} already exists",(std::string)targetIdentifier);
       return results[0].value().get(); // TODO ensure we send back the latest, not just the first match
     }
-    HTDBG("New target identified: {}",(herald::data::String)targetIdentifier);
+    HTDBG("New target identified: {}",targetIdentifier);
     BLEDevice& newDevice = devices[indexAvailable()];
     newDevice.reset(targetIdentifier,*this);
 

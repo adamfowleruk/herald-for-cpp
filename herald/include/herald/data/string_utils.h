@@ -5,9 +5,17 @@
 #ifndef HERALD_STRING_UTILS_H
 #define HERALD_STRING_UTILS_H
 
+#ifndef CONFIG_HERALD_NO_STD_STREAMS
+#include <iostream> // for 'operator << char' support
+
 #ifndef CONFIG_HERALD_NO_STD_STRING
 #include <ostream>
 #include <sstream>
+#endif
+
+#endif
+
+#ifndef CONFIG_HERALD_NO_STD_STRING
 #include <string>
 #else
 #include "herald/datatype/data.h"
@@ -49,12 +57,15 @@ public:
   DataString substr(std::size_t fromIdx) const noexcept;
   DataString substr(std::size_t fromIdx, std::size_t length) const noexcept;
 
+  char operator[](std::size_t idx) const noexcept;
   bool operator==(const DataString& other) const noexcept;
   bool operator!=(const DataString& other) const noexcept;
   DataString& operator+=(const DataString& toAppend) noexcept;
+  DataString& operator+=(const char toAppend) noexcept;
   /// \brief Creates a new String from this + next string
   /// \note Avoid using this as it's RAM wasteful. Use DataStringStream instead
   DataString operator+(const DataString& toAppend) const noexcept;
+  DataString operator+(const char) const noexcept;
   DataString& operator=(const DataString& toCopyAssign) noexcept;
   DataString& operator=(const DataString&& toMoveAssign) noexcept;
 
@@ -71,9 +82,13 @@ private:
 class DataStringIterator {
 public:
   DataStringIterator(const DataString& stringOver) noexcept;
+  DataStringIterator(DataString&& stringOver) noexcept;
   ~DataStringIterator() noexcept;
 
   char operator*() noexcept;
+
+  DataStringIterator& operator=(const DataStringIterator& consume) noexcept;
+  DataStringIterator& operator=(DataStringIterator&& consume) noexcept;
 
   bool operator==(const DataStringIterator& other) const noexcept;
   bool operator!=(const DataStringIterator& other) const noexcept;
@@ -95,7 +110,7 @@ public:
   ~DataStringStream() noexcept;
 
   DataStringStream& operator<<(DataString consume) noexcept;
-  DataStringStream& operator<<(std::size_t consume) noexcept;
+  // DataStringStream& operator<<(std::size_t consume) noexcept;
   DataStringStream& operator<<(std::uint8_t consume) noexcept;
   DataStringStream& operator<<(std::uint16_t consume) noexcept;
   DataStringStream& operator<<(std::uint32_t consume) noexcept;
@@ -125,6 +140,11 @@ using StringStream = DataStringStream;
 #endif
 
 inline String to_string(std::size_t toConvert) noexcept {
+  // TODO
+  return String();
+}
+
+inline String to_string(std::uint32_t toConvert) noexcept {
   // TODO
   return String();
 }
@@ -162,14 +182,48 @@ inline String to_string(double toConvert) noexcept {
 }
 }
 
-#ifdef CONFIG_HERALD_NO_STD_STRING
+
 #ifndef CONFIG_HERALD_NO_STD_STREAMS
 namespace std {
 
-std::ostream& operator<<(std::ostream& lhs, const herald::data::String& rhs) noexcept;
-
+#ifdef CONFIG_HERALD_NO_STD_STRING
+/// \brief Streaming support for herald::data::String
+/// \note Not defined if String is a std::string
+template <>
+inline std::ostream&
+operator<<(std::ostream& lhs,
+           const herald::data::String& rhs) noexcept
+{
+  for (auto c: rhs) {
+    lhs << (char)c;
+  }
+  return lhs;
 }
 #endif
+
+/// \brief Stream for all Herald types that have an explicit herald::data::String operator
+template <typename HeraldT,
+          typename T = typename std::enable_if<false ==
+                       std::is_same<HeraldT, char>::value>::type
+         >
+inline std::ostream&
+operator<<(std::ostream& lhs, const HeraldT& rhs) noexcept {
+  return lhs << (herald::data::String)rhs;
+}
+}
+#endif
+
+#ifdef CONFIG_HERALD_NO_STD_STRING
+namespace std {
+
+template <>
+struct hash<herald::data::DataString> {
+  size_t operator()(const herald::data::DataString& v) const {
+    return std::hash<herald::datatype::Data>()((herald::datatype::Data)v);
+  }
+};
+
+}
 #endif
 
 #endif  // HERALD_STRING_UTILS_H

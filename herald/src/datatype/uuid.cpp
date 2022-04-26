@@ -16,6 +16,7 @@
 // #include <iosfwd>
 // #include <sstream>
 // #include <string>
+#include <cstring>
 #include <type_traits>
 
 namespace herald {

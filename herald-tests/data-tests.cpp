@@ -14,7 +14,7 @@ TEST_CASE("datatypes-data-ctor-empty", "[datatypes][data][ctor][empty]") {
   SECTION("datatypes-data-ctor-empty") {
     herald::datatype::Data data;
     REQUIRE(data.size() == 0);
-    REQUIRE(data.hexEncodedString() == "");
+    REQUIRE(herald::datatype::HexString::encode(data).encoded() == "");
   }
 }
 
@@ -48,7 +48,8 @@ TEST_CASE("datatypes-data-ctor-move", "[datatypes][data][ctor][move]") {
     REQUIRE(d.at(3) == std::byte(3));
 
     REQUIRE(orig.size() == 0);
-    REQUIRE(orig.hexEncodedString() == ""); // this will definitely try to 'use' the underlying data store
+    REQUIRE(herald::datatype::HexString::encode(orig).encoded() ==
+            "");  // this will definitely try to 'use' the underlying data store
   }
 }
 
@@ -65,7 +66,7 @@ TEST_CASE("datatypes-data-assign-move", "[datatypes][data][assign][move]") {
     REQUIRE(d.at(3) == std::byte(3));
 
     REQUIRE(orig.size() == 0);
-    REQUIRE(orig.hexEncodedString() == ""); // this will definitely try to 'use' the underlying data store
+    REQUIRE(herald::datatype::HexString::encode(orig).encoded() == ""); // this will definitely try to 'use' the underlying data store
   }
 }
 
@@ -119,7 +120,7 @@ TEST_CASE("datatypes-data-from-uint8array", "[datatypes][data][ctor][from-uint8a
     const uint8_t bytes[] = {0,1,2,3};
     herald::datatype::Data d{bytes, 4};
 
-    std::string hs = d.hexEncodedString();
+    herald::data::String hs = herald::datatype::HexString::encode(d).encoded();
     INFO("Data: uint8array as hexString: expected: 00010203, got: " << hs);
 
     REQUIRE(d.size() == 4);
@@ -178,9 +179,12 @@ TEST_CASE("datatypes-data-ctor-repeat", "[datatypes][data][ctor][repeat]") {
 
 TEST_CASE("datatypes-data-ctor-fromhexstring", "[datatypes][data][ctor][fromhexstring]") {
   SECTION("datatypes-data-ctor-fromhexstring") {
-    const std::string hex = "00010ff0ffcc";
-    herald::datatype::Data d = herald::datatype::Data::fromHexEncodedString(hex);
-    const std::string finalhex = d.hexEncodedString();
+    const herald::data::String hex = "00010ff0ffcc";
+    herald::data::HexString hs;
+    bool ok = herald::data::HexString::from(hex,hs);
+    REQUIRE(ok);
+    herald::datatype::Data d = hs.decode();
+    const herald::data::String finalhex = hs.encoded();
     INFO("Data: fromHexEncodedString: from: " << hex << ", to: " << finalhex);
 
     REQUIRE(d.size() == 6);
@@ -197,9 +201,12 @@ TEST_CASE("datatypes-data-ctor-fromhexstring", "[datatypes][data][ctor][fromhexs
 
 TEST_CASE("datatypes-data-ctor-fromhexstring-trimmed", "[datatypes][data][ctor][fromhexstring]") {
   SECTION("datatypes-data-ctor-fromhexstring-trimmed") {
-    const std::string hex = "8010ff0ffcc";
-    herald::datatype::Data d = herald::datatype::Data::fromHexEncodedString(hex);
-    const std::string finalhex = d.hexEncodedString();
+    const herald::data::String hex = "8010ff0ffcc";
+    herald::data::HexString hs;
+    bool ok = herald::data::HexString::from(hex,hs);
+    REQUIRE(ok);
+    herald::datatype::Data d = hs.decode();
+    const herald::data::String finalhex = hs.encoded();
     INFO("Data: fromHexEncodedString: from: " << hex << ", to: " << finalhex);
 
     REQUIRE(d.size() == 6);
@@ -375,38 +382,11 @@ TEST_CASE("datatypes-data-changeendianness", "[datatypes][data][changeendianness
 
     for (std::size_t i = 0;i < 5;++i) {
       REQUIRE(rev.uint8(i, value));
-      INFO("Byte value is " << value << " with hex " << rev.subdata(i,1).hexEncodedString());
+      INFO("Byte value is "
+           << value << " with hex "
+           << herald::datatype::HexString::encode(rev.subdata(i, 1)).encoded());
       REQUIRE(uintTwoFourty == value);
     }
-  }
-}
-
-TEST_CASE("datatypes-data-description", "[datatypes][data][description]") {
-  SECTION("datatypes-data-description") {
-    const uint8_t bytes[] = {0,1,2,3};
-    herald::datatype::Data d{bytes, 4};
-
-    std::string hex = d.description();
-    INFO("Data: description output: " << hex);
-    REQUIRE(hex.size() > 0);
-    // NOTE: No requirements on format for this method - DO NOT rely on it
-  }
-}
-
-TEST_CASE("datatypes-data-hexencodedstring", "[datatypes][data][hexencodedstring]") {
-  SECTION("datatypes-data-hexencodedstring") {
-    const uint8_t bytes[] = {0,1,2,3};
-    herald::datatype::Data d{bytes, 4};
-
-    std::string hex = d.hexEncodedString();
-    INFO("Data: hexEncodedString (std::string) output: " << hex);
-    REQUIRE(8 == hex.size());
-    REQUIRE("00010203" == hex);
-
-    std::string hexrev = d.reversed().hexEncodedString();
-    INFO("Data: hexEncodedString (std::string) reversed output: " << hexrev);
-    REQUIRE(8 == hexrev.size());
-    REQUIRE("03020100" == hexrev);
   }
 }
 
