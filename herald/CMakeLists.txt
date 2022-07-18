@@ -16,7 +16,8 @@ if (WIN32)
   )
 else()
 	# GCov flags for template classes
-	add_compile_options(--coverage -fno-inline -fno-inline-small-functions -fno-default-inline)
+  # --coverage 
+	add_compile_options(-fno-inline -fno-inline-small-functions -fno-default-inline)
 
   if(HERALD_TARGET STREQUAL zephyr)
     set(PLATFORM_SOURCES

@@ -13,11 +13,11 @@ add_executable(herald-tests
 	# allocatablearray-tests.cpp
 	# bytearrayprinter-tests.cpp
 	# memoryarena-tests.cpp
-	# datatypes-tests.cpp
+	datatypes-tests.cpp
 	# base64string-tests.cpp
 	hexstring-tests.cpp
 	# datetime-tests.cpp
-	# randomuuid-tests.cpp
+	randomuuid-tests.cpp
 	# uint8-tests.cpp 
 	# uint16-tests.cpp 
 	# uint32-tests.cpp 
@@ -28,7 +28,7 @@ add_executable(herald-tests
 	# Low level
 	# sensorlogger-tests.cpp
 	# errorcontactlog-tests.cpp
-	# data-tests.cpp
+	data-tests.cpp
 	# datatypesdataderived-tests.cpp
 	# blemacaddress-tests.cpp
 	# targetidentifier-tests.cpp

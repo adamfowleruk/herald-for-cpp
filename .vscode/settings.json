@@ -85,16 +85,50 @@
     "codecvt": "cpp",
     "*.rh": "cpp",
     "bitset": "cpp",
-    "cfenv": "cpp"
+    "cfenv": "cpp",
+    "__string": "c",
+    "__tuple": "cpp",
+    "__tree": "c",
+    "__bit_reference": "cpp",
+    "__config": "cpp",
+    "__debug": "cpp",
+    "__errc": "cpp",
+    "__functional_base": "cpp",
+    "__hash_table": "cpp",
+    "__locale": "cpp",
+    "__mutex_base": "cpp",
+    "__node_handle": "cpp",
+    "__nullptr": "cpp",
+    "__split_buffer": "cpp",
+    "__threading_support": "cpp",
+    "bit": "cpp",
+    "csignal": "cpp",
+    "cwctype": "cpp",
+    "string_view": "cpp",
+    "cinttypes": "cpp",
+    "coroutine": "cpp",
+    "shared_mutex": "cpp",
+    "models.h": "c",
+    "hash_map": "cpp",
+    "__memory": "cpp",
+    "memory_resource": "cpp"
   },
   "cSpell.words": [
     "backoff"
   ],
+  "cmake.configureArgs": [
+    "-DCONFIG_HERALD_NO_STD_STRING=y" // use to test removal of std lib
+  ],
   "cmake.configureSettings": {
     "CODE_COVERAGE": "ON",
-    "OPENSSL_ROOT_DIR": "/opt/openssl",
-    "OPENSSL_CRYPTO_LIBRARY": "/opt/openssl/lib64/libcrypto.a",
-    "OPENSSL_INCLUDE_DIR": "/opt/openssl/include",
+    // Linux:-
+    // "OPENSSL_ROOT_DIR": "/opt/openssl",
+    // "OPENSSL_CRYPTO_LIBRARY": "/opt/openssl/lib64/libcrypto.a",
+    // "OPENSSL_INCLUDE_DIR": "/opt/openssl/include",
+    // Mac:-
+    "OPENSSL_ROOT_DIR": "/usr/local/opt/openssl@3",
+    "OPENSSL_CRYPTO_LIBRARY": "/usr/local/opt/openssl@3/lib/libcrypto.a",
+    "OPENSSL_INCLUDE_DIR": "/usr/local/opt/openssl@3/include",
     "OPENSSL_USE_STATIC_LIBS": true
   },
   "kconfig.zephyr.west": "west",
@@ -103,7 +137,8 @@
     "${workspaceFolder}/herald-wearable",
     "${workspaceFolder}/herald-wearable-c",
     "${workspaceFolder}/herald-venue-beacon",
-    "${workspaceFolder}/herald-tests-zephyr"
+    "${workspaceFolder}/herald-tests-zephyr",
+    "/Volumes/TB3-1/git/nordicscratch/onoff_level_lighting_vnd_app"
   ],
   "kconfig.zephyr.board": {
     "board": "nrf52840dk_nrf52840",
@@ -113,5 +148,8 @@
   "C_Cpp.intelliSenseMemoryLimit": 16384,
   "editor.quickSuggestions": {
     "other": true
-  }
+  },
+  "nrf-connect.topdir": "${nrf-connect.sdk:1.9.1}",
+  "nrf-connect.toolchain.path": "${nrf-connect.toolchain:1.9.1}",
+  "workbench.colorTheme": "Bluloco Light"
 }

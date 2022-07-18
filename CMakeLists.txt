@@ -4,7 +4,7 @@ project(herald VERSION 2.1.0 LANGUAGES CXX)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}")
 # Include the sanitizer module
-include(code-coverage)
+#include(code-coverage)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -22,6 +22,5 @@ add_subdirectory(heraldns-cli)
 add_subdirectory(herald)
 add_subdirectory(herald-tests)
 add_subdirectory(herald-programmer)
-add_subdirectory(herald-mesh-relay)
 add_subdirectory(herald-mesh-rmq-adapter)
 add_subdirectory(doxygen)

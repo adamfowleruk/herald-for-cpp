@@ -83,6 +83,9 @@ message("HERALD HEADERS: ${HERALD_HEADERS}")
 
 include_directories(../herald/include)
 
+# remove std::string from compilation
+add_definitions(-DCONFIG_HERALD_NO_STD_STRING=y -DCONFIG_HERALD_NO_STD_STREAM=y)
+
 if(CMAKE_BUILD_TYPE MATCHES Debug)
   add_definitions(-DHERALD_LOG_LEVEL=4 -DCONFIG_APP_LOG_LEVEL=4)
 else()

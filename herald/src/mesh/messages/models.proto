@@ -1,0 +1,32 @@
+//  Copyright 2022 Herald Project Contributors
+//  SPDX-License-Identifier: Apache-2.0
+//
+
+// This file holds the message formats for data
+// being sent around the MESH by the Herald Mesh Models.
+// We do not include any administration messages here.
+
+syntax = "proto3";
+
+package io.heraldprox.sensor.mesh.messages.models;
+
+import "google/protobuf/any.proto";
+
+option cc_enable_arenas = true;
+
+// A presence information message. E.g. a nearby Bluetooth
+// device has been detected.
+message Presence {
+  // Variable Int encoding means we use max the first 6 bytes for the 
+  // Mac (uint8_t[6])
+  uint64 mac = 0;
+  // RSSI is normally negative and single byte (int8)
+  int32 rssi = 0;
+  enum Status {
+    OBSERVED = 0;
+    IDENTIFIED = 1;
+    VANISHED = 2;
+  }
+  Status status = 0;
+}
+

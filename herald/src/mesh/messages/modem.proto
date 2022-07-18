@@ -1,0 +1,141 @@
+//  Copyright 2022 Herald Project Contributors
+//  SPDX-License-Identifier: Apache-2.0
+//
+
+// This file lists the commands and responses from the Herald MESH Modem.
+// This file makes heavy use of low-level data formats in other proto files.
+// The contents of this file are specific to herald-mesh-modem and
+// herald-mesh-rmq-adapter, but can be used by any app issuing and receiving
+// responses to Herald Mesh Modem commands.
+
+syntax = "proto3";
+
+package io.heraldprox.sensor.mesh.messages.modem;
+
+import "google/protobuf/any.proto";
+
+// Import low level Bluetooth MESH functionality
+import "mesh.proto";
+// Import Herald MESH Model message formats (data only)
+import "models.proto";
+
+option cc_enable_arenas = true;
+
+// MARK: INITIAL CONNECTION FUNCTIONS
+
+// Test we can talk to the modem over the tty driver.
+// Reply using the specified commandId number (NON ZERO).
+message Hello {
+  uint64 commandId = 0;
+}
+
+// // A REPLY message for a General purposes Ok command response.
+message Ok {
+  uint64 commandId = 0;
+}
+
+// A REPLY message for an invalid issued command
+message Invalid {
+  uint64 commandId = 0;
+
+  optional string explanation;
+}
+
+// A REPLY message indicating the command timed out
+message TimedOut {
+  uint64 commandId = 0;
+}
+
+
+
+
+
+
+// MARK: NETWORK COMMUNICATION FUNCTIONS
+
+// Sets the Bluetooth MESH Network key, allowing the modem USB key 
+// to communicate with the MESH.
+message SetNetworkKey {
+  uint64 commandId = 0;
+
+  uint64 key = 0;
+}
+
+// TODO set this modem node's own app keys too
+
+
+
+
+
+
+// MARK: GENERIC PURPOSE LOW LEVEL BLUETOOTH MESH FUNCTIONS
+
+// Get Mesh Model value command.
+// Reply with Ok or Invalid or TimedOut
+message MeshGetCommand {
+  uint64 commandId = 0;
+
+  MeshGet get;
+}
+
+message MeshSetCommand {
+  uint64 commandId = 0;
+
+  MeshSet set;
+}
+
+message MeshSubscribeCommand {
+  uint64 commandId = 0;
+
+  MeshSubscribe subscribe;
+}
+
+message MeshUnsubscribeCommand {
+  uint64 commandId = 0;
+
+  MeshUnsubscribe unsubscribe;
+}
+
+message MeshPublishCommand {
+  uint64 commandId = 0;
+
+  MeshPublish publish;
+}
+
+message MeshSendCommand {
+  uint64 commandId = 0;
+
+  MeshSend send;
+}
+
+
+
+
+
+
+// MARK: INFORMATIONAL COMMANDS
+
+// Requests the known Mesh nodes from this Modem.
+// May be accomplished via a routing table, or Ping.
+// Method decided by the modem itself.
+message GetKnownMeshNodes {
+  uint64 commandId = 0;
+
+  // If requested from a specific node on the mesh (I.e. not just modems)
+  optional uint32 fromNodeId = 0;
+}
+
+// A basic summary about a Bluetooth MESH Node
+message MeshNodeSummary {
+  uint32 nodeId = 0;
+}
+
+// A REPLY message from the Modem, specific to GetKnownMeshNodes replies.
+// Note there may be multiple replies, one per Mesh Modem.
+message KnownMeshNodes {
+  uint64 commandId = 0;
+
+  // The node ID responding to this query (may be a modem)
+  uint32 nodeId = 0;
+  repeated MeshNodeSummary;
+}

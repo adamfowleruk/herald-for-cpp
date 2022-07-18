@@ -34,16 +34,20 @@
       "name": "Debug on NRF52840_XXAA using Cortex-Debug",
       "request": "launch",
       "type": "cortex-debug",
-      "showDevDebugOutput": true,
+      "showDevDebugOutput": "parsed",
       "servertype": "jlink",
       "interface": "swd",
       "device": "NRF52840_XXAA",
-      "svdFile": "${env:ZEPHYR_BASE}/../modules/hal/nordic/nrfx/mdk/nrf52840.svd",
-      "serverpath": "C:/Program Files (x86)/SEGGER/JLink/JLinkGDBServerCL.exe",
+      "svdFile": "/opt/nordic/ncs/v1.9.1/modules/hal/nordic/nrfx/mdk/nrf52840.svd",
+      // "svdFile": "${env:ZEPHYR_BASE}/../modules/hal/nordic/nrfx/mdk/nrf52840.svd",
+      // "serverpath": "C:/Program Files (x86)/SEGGER/JLink/JLinkGDBServerCL.exe",
+      "serverpath": "/usr/local/bin/JLinkGDBServerCL",
       // "armToolchainPath": "${config:armToolchainPath}/bin", // Only works if you have installed GNU Arm embeeded toolchain external to NCS
-      "armToolchainPath": "${env:ZEPHYR_BASE}/../toolchain/opt/bin", // Works if ZEPHYR_BASE set (which needs to be for our CMake to run)
+      "armToolchainPath": "/opt/nordic/ncs/v1.9.1/toolchain/bin", 
+      // "armToolchainPath": "${env:ZEPHYR_BASE}/../toolchain/opt/bin", // Works if ZEPHYR_BASE set (which needs to be for our CMake to run)
       "rttConfig": {
         "enabled": true,
+        "clearSearch": false,
         "address": "auto",
         "decoders": [
             {
