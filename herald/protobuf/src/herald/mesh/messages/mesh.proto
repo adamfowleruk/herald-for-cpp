@@ -1,0 +1,55 @@
+//  Copyright 2022 Herald Project Contributors
+//  SPDX-License-Identifier: Apache-2.0
+//
+
+// This file holds mesh level general purpose data formats
+// which may be used by mesh devices, or the mesh modem itself
+
+syntax = "proto3";
+
+package herald.mesh.messages;
+
+// import "google/protobuf/any.proto";
+
+// option cc_enable_arenas = true;
+option optimize_for = CODE_SIZE;
+
+// INITIAL CONNECTION FUNCTIONS
+
+message MeshGet {
+  uint32 nodeId = 1;
+  uint32 modelId = 2;
+  uint32 fieldId = 3;
+}
+
+message MeshSet {
+  uint32 nodeId = 1;
+  uint32 modelId = 2;
+  uint32 fieldId = 3;
+  bool reply = 4;
+}
+
+message MeshSubscribe {
+  uint32 nodeId = 1;
+  uint32 modelId = 2;
+  uint32 activityId = 3;
+}
+
+message MeshUnsubscribe {
+  uint32 nodeId = 1;
+  uint32 modelId = 2;
+  uint32 activityId = 3;
+}
+
+message MeshPublish {
+  uint32 topicId = 1;
+
+  repeated bytes message = 3;
+}
+
+message MeshSend {
+  uint32 nodeId = 1;
+  uint32 modelId = 2;
+
+  repeated bytes message = 3;
+}

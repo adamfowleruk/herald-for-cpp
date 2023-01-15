@@ -693,11 +693,11 @@ BLEDevice::internalStateDescription() const
     di += "[everConn?: ";
     di += flags.hasEverConnected() ? "true" : "false";
     di +=", connFailures: ";
-    di += std::to_string(rs.connectRepeatedFailures);
+    di += rs.connectRepeatedFailures;
     di += ", txPower: ";
-    di += std::to_string(rs.txPower);
+    di += rs.txPower;
     di += ", payloadUpdated: ";
-    di += std::to_string((std::uint32_t)rs.payloadUpdated.secondsSinceUnixEpoch());
+    di += (std::uint32_t)rs.payloadUpdated.secondsSinceUnixEpoch();
     di += "]";
   }
   return di;

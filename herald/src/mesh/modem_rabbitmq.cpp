@@ -6,8 +6,11 @@
  * @file Implements the wrapping of a MESH modem client with a link to RabbitMQ.
  */
 
+#ifdef HERALD_RABBITMQ
+
 #include "herald/mesh/modem_rabbitmq.h"
 #include "herald/mesh/modem_client.h"
+
 
 #include <amqpcpp.h>
 
@@ -291,3 +294,5 @@ MeshModemRabbitMQAdapter::isConnected()
 
 } // end namespace
 } // end namespace
+
+#endif

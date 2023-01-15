@@ -12,7 +12,14 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 #IF(CMAKE_BUILD_TYPE MATCHES DEBUG)
 add_definitions(-DHERALD_LOG_LEVEL=4)
-#ENDIF(CMAKE_BUILD_TYPE MATCHES DEBUG)
+
+# ENDIF(CMAKE_BUILD_TYPE MATCHES DEBUG)
+
+# Ensure we test our Herald String
+add_definitions("-DCONFIG_HERALD_NO_STD_STRING")
+add_definitions("-DCONFIG_HERALD_NO_STD_STREAMS")
+
+
 
 include(GNUInstallDirs)
 

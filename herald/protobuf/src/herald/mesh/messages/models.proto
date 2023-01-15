@@ -8,25 +8,26 @@
 
 syntax = "proto3";
 
-package io.heraldprox.sensor.mesh.messages.models;
+package herald.mesh.messages;
 
-import "google/protobuf/any.proto";
+// import "google/protobuf/any.proto";
 
-option cc_enable_arenas = true;
+// option cc_enable_arenas = true;
+option optimize_for = CODE_SIZE;
 
 // A presence information message. E.g. a nearby Bluetooth
 // device has been detected.
 message Presence {
   // Variable Int encoding means we use max the first 6 bytes for the 
   // Mac (uint8_t[6])
-  uint64 mac = 0;
+  uint64 mac = 1;
   // RSSI is normally negative and single byte (int8)
-  int32 rssi = 0;
+  int32 rssi = 2;
   enum Status {
     OBSERVED = 0;
     IDENTIFIED = 1;
     VANISHED = 2;
   }
-  Status status = 0;
+  Status status = 3;
 }
 

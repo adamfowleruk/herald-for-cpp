@@ -52,7 +52,7 @@ PayloadData::shortName() const {
   const Data suffix = subdata(3, size() - 3);
   Base64String base64EncodedString = Base64String::encode(suffix);
   herald::data::String asString = base64EncodedString.encoded();
-  return asString.substr((std::size_t)0, std::min((std::size_t)6, asString.length())); // TODO figure out why we trim 6 chars? What if we don't have 6 chars???
+  return asString.substr((std::size_t)0, std::min((std::size_t)6, asString.size())); // TODO figure out why we trim 6 chars? What if we don't have 6 chars???
 }
 
 PayloadData::operator herald::data::String() const {

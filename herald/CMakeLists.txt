@@ -7,6 +7,8 @@ set(CMAKE_CXX_EXTENSIONS ON)
 include(GNUInstallDirs
 )
 
+find_package(Protobuf REQUIRED)
+
 set(HERALD_BASE .)
 include(herald.cmake)
 
@@ -32,9 +34,11 @@ else()
   endif()
 endif()
 
-add_library(herald 
-	${HERALD_HEADERS}
+add_library(herald
+  ${HERALD_HEADERS}
+  ${HERALD_HEADERS_MESH}
   ${HERALD_SOURCES}
+  ${HERALD_SOURCES_MESH}
   ${PLATFORM_SOURCES}
 )
 
@@ -44,14 +48,15 @@ endif()
 
 set_target_properties(herald PROPERTIES PUBLIC_HEADER "${HERALD_HEADERS}")
 
-target_include_directories(herald 
-	PUBLIC 
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-	$<INSTALL_INTERFACE:include>
+target_include_directories(herald
+  PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+  ${PROTOBUF_INCLUDE_DIRS}
 )
 
 if (MSVC)
-  target_link_libraries(herald Crypt32.lib Bcrypt.lib)
+  target_link_libraries(herald Crypt32.lib Bcrypt.lib ${PROTOBUF_LITE_LIBRARIES})
 endif()
 
 if(HERALD_TARGET STREQUAL zephyr)  
@@ -75,16 +80,21 @@ if(HERALD_TARGET STREQUAL zephyr)
   #set(CMAKE_CXX_FLAGS ${Z_CFLAGS} ${CXXFLAGS})
 endif()
 
-
-#target_compile_features(herald PRIVATE cxx_std_17)
-
-add_compile_options(-Wl,-Wno-unused-function)
+# target_compile_features(herald PRIVATE cxx_std_17)
+# add_compile_options(-Wl,-Wno-unused-function)
+add_compile_options(-Wl)
 
 if(NOT (MSVC OR (HERALD_TARGET STREQUAL zephyr)) )
   # Use the DEV location (not system location) to pick up OpenSSL v3
   # see .vscode/settings.json for CMake path overrides
   find_package(OpenSSL 3.0.2 REQUIRED)
-  target_link_libraries(herald OpenSSL::Crypto)
+  target_link_libraries(herald PUBLIC
+    OpenSSL::Crypto
+    # pthread
+    # ${PROTOBUF_LITE_LIBRARIES}
+    /usr/local/lib/libprotobuf.a
+    # ${PROTOBUF_LIBRARIES}
+  )
 endif()
 
 install(TARGETS herald 

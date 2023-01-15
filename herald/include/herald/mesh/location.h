@@ -7,6 +7,9 @@
 #ifndef HERALD_MESH_LOCATION_H
 #define HERALD_MESH_LOCATION_H
 
+#ifdef __ZEPHYR__
+#ifdef CONFIG_BT_MESH
+
 #include "mesh.h"
 
 #include <bluetooth/mesh/model_types.h>
@@ -59,6 +62,9 @@ struct bt_mesh_model_herald_location_beacon {
 
 #ifdef __cplusplus
 }
+#endif
+
+#endif
 #endif
 
 #endif /* HERALD_MESH_LOCATION_H */

@@ -9,6 +9,8 @@
 #ifndef HERALD_MESH_MODEM_RABBITMQ_H
 #define HERALD_MESH_MODEM_RABBITMQ_H
 
+#ifdef HERALD_RABBITMQ
+
 #include "modem_client.h"
 
 // AMQP-CPP is Apache-2.0 licensed
@@ -132,5 +134,7 @@ public:
 
 } // end namespace
 } // end namespace
+
+#endif
 
 #endif // end HERALD_MESH_MODEM_RABBITMQ_H

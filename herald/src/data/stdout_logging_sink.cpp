@@ -7,7 +7,11 @@
 #include "herald/data/sensor_logger.h"
 #include "herald/data/string_utils.h"
 
+#ifdef CONFIG_HERALD_NO_STD_STREAMS
+#include <cstdio>
+#else
 #include <iostream>
+#endif
 
 namespace herald::data {
 
@@ -28,8 +32,14 @@ StdOutLoggingSink::log(const String& subsystem, const String& category, SensorLo
     default:
       break;
   }
-  std::cout << subsystem << "," << category << ","
-            << lvl << "," << message << std::endl;
+
+#ifdef CONFIG_HERALD_NO_STD_STREAMS
+  printf("%s,%s,%s,%s\n",
+    subsystem.c_str(),category.c_str(),lvl.c_str(),message.c_str());
+#else
+  std::cout << subsystem.c_str() << "," << category.c_str() << ","
+            << lvl.c_str() << "," << message.c_str() << std::endl;
+#endif
 }
 
 }

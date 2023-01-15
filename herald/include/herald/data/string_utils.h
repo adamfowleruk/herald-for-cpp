@@ -19,6 +19,7 @@
 #include <string>
 #else
 #include "herald/datatype/data.h"
+#include <ostream>
 #endif
 
 namespace herald {
@@ -81,21 +82,22 @@ private:
 
 class DataStringIterator {
 public:
-  DataStringIterator(const DataString& stringOver) noexcept;
-  DataStringIterator(DataString&& stringOver) noexcept;
+  DataStringIterator(const DataStringIterator& toCopy) noexcept;
+  DataStringIterator(DataStringIterator&& toMove) noexcept;
+  DataStringIterator(const DataString& stringOver, std::size_t at) noexcept;
   ~DataStringIterator() noexcept;
 
-  char operator*() noexcept;
+  char operator*() const noexcept;
 
-  DataStringIterator& operator=(const DataStringIterator& consume) noexcept;
-  DataStringIterator& operator=(DataStringIterator&& consume) noexcept;
+  DataStringIterator& operator=(const DataStringIterator& consume) noexcept = delete;
+  DataStringIterator& operator=(DataStringIterator&& consume) noexcept = delete;
 
   bool operator==(const DataStringIterator& other) const noexcept;
   bool operator!=(const DataStringIterator& other) const noexcept;
   void operator++() noexcept;
   void operator--() noexcept;
 
- private:
+private:
   std::size_t pos;
   const DataString& over;
 };
@@ -110,7 +112,7 @@ public:
   ~DataStringStream() noexcept;
 
   DataStringStream& operator<<(DataString consume) noexcept;
-  // DataStringStream& operator<<(std::size_t consume) noexcept;
+  DataStringStream& operator<<(std::size_t consume) noexcept;
   DataStringStream& operator<<(std::uint8_t consume) noexcept;
   DataStringStream& operator<<(std::uint16_t consume) noexcept;
   DataStringStream& operator<<(std::uint32_t consume) noexcept;
@@ -126,7 +128,7 @@ public:
   DataString str() noexcept;
 
   /// \brief Implicit conversion to Data for Data.append() to work
-  /// \note DOES NOT conver to HEX. Equivalent of raw char array access
+  /// \note DOES NOT convert to HEX. Equivalent of raw char array access
   operator herald::datatype::Data() const noexcept;
 
  private:
@@ -140,76 +142,137 @@ using StringStream = DataStringStream;
 #endif
 
 inline String to_string(std::size_t toConvert) noexcept {
-  // TODO
-  return String();
+  if (0 == toConvert) {
+    return String(herald::datatype::Data(std::byte('0'), 1));
+  }
+  herald::datatype::Data d;
+
+  std::uint64_t n = toConvert;
+
+  while (n != 0) {
+    d.append(std::byte((char)(n % 10)));
+    n = n / 10;
+  }
+
+  return String(d.reversed());
 }
 
 inline String to_string(std::uint32_t toConvert) noexcept {
-  // TODO
-  return String();
+  return to_string((std::size_t)toConvert);
 }
 
-inline String to_string(std::uint64_t toConvert) noexcept {
-  // TODO
-  return String();
-}
+// inline String to_string(std::uint64_t toConvert) noexcept {
+//   if (0 == toConvert) {
+//     return String(herald::datatype::Data(std::byte('0'), 1));
+//   }
+//   herald::datatype::Data d;
+
+//   std::uint64_t n = toConvert;
+
+//   while (n != 0) {
+//     d.append(std::byte((char)(n % 10)));
+//     n = n / 10;
+//   }
+
+//   return String(d.reversed());
+// }
 
 inline String to_string(std::int64_t toConvert) noexcept {
-  // TODO
-  return String();
+  if (0 == toConvert) {
+    return String(herald::datatype::Data(std::byte('0'), 1));
+  }
+  herald::datatype::Data d;
+
+  std::size_t i = 0;
+  std::size_t n = toConvert;
+  bool isNeg = n < 0;
+
+  unsigned int n1 = isNeg ? -n : n;
+
+  while (n1 != 0) {
+    d.append(std::byte((char)(n1 % 10)));
+    n1 = n1 / 10;
+  }
+  if (isNeg) {
+    d.append(std::byte('-'));
+  }
+
+  return String(d.reversed());
 }
 
 inline String to_string(short toConvert) noexcept {
-  // TODO
-  return String();
+  return to_string((std::int64_t)toConvert);
 }
 
 inline String to_string(int toConvert) noexcept {
-  // TODO
-  return String();
+  return to_string((std::int64_t)toConvert);
 }
 
 inline String to_string(long toConvert) noexcept {
-  // TODO
-  return String();
+  return to_string((std::int64_t)toConvert);
 }
 
 inline String to_string(double toConvert) noexcept {
-  // TODO
-  return String();
+  std::int64_t whole = (std::int64_t)toConvert;
+  double remainder = toConvert - (double)whole;
+  std::uint64_t rwhole = 0;
+  while (0 != remainder) {
+    remainder = (remainder * 10);
+    rwhole = (rwhole * 10) + (std::uint64_t)remainder;
+  }
+  return to_string(whole) + '.' + to_string((std::size_t)rwhole);
+}
+
+template <typename T>
+inline String operator+(const T& lhs, const String& rhs) noexcept {
+  return String(lhs) + rhs;
 }
 
 }
 }
 
+// #ifdef CONFIG_HERALD_NO_STD_STRING
+// namespace std {
+// /// \brief Streaming support for herald::data::String
+// /// \note Not defined if String is a std::string
+// template <>
+// inline std::ostream& operator<<(std::ostream& lhs,
+//                                 const herald::data::String& rhs) noexcept {
+//   for (auto c : rhs) {
+//     lhs << (char)c;
+//   }
+//   return lhs;
+// }
+
+// }
+// #endif
 
 #ifndef CONFIG_HERALD_NO_STD_STREAMS
 namespace std {
 
-#ifdef CONFIG_HERALD_NO_STD_STRING
-/// \brief Streaming support for herald::data::String
-/// \note Not defined if String is a std::string
-template <>
-inline std::ostream&
-operator<<(std::ostream& lhs,
-           const herald::data::String& rhs) noexcept
-{
-  for (auto c: rhs) {
-    lhs << (char)c;
-  }
-  return lhs;
-}
-#endif
-
 /// \brief Stream for all Herald types that have an explicit herald::data::String operator
-template <typename HeraldT,
-          typename T = typename std::enable_if<false ==
-                       std::is_same<HeraldT, char>::value>::type
-         >
-inline std::ostream&
-operator<<(std::ostream& lhs, const HeraldT& rhs) noexcept {
-  return lhs << (herald::data::String)rhs;
+template <
+    typename HeraldT,
+    typename T = typename std::enable_if<
+        false == std::is_same<HeraldT, char>::value &&
+        false == std::is_same<HeraldT, char*>::value &&
+        false == std::is_same<HeraldT, herald::data::String>::value>::type>
+inline std::ostream& operator<<(std::ostream& lhs,
+                                const HeraldT& rhs) noexcept {
+  return lhs << (herald::data::String)rhs; // copy ctor
 }
+
+// template <size_t N>
+// inline std::ostream& operator<<(std::ostream& lhs,
+//                                 const char[N] rhs) noexcept {
+//   return lhs << herald::data::StringStream(rhs);
+// }
+
+// template<typename HeraldT>
+// inline std::ostream& operator<<(std::ostream& lhs,
+//                                 const HeraldT& rhs) noexcept {
+//   return lhs << (herald::data::String)rhs;
+// }
 }
 #endif
 

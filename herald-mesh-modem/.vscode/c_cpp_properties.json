@@ -23,14 +23,14 @@
             "includePath": [
                 "${default}",
                 "${workspaceFolder}/../herald/include",
-                "/opt/nordic/ncs/v1.9.1/zephyr/include"
+                "/opt/nordic/ncs/v2.0.2/zephyr/include"
             ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE"
             ],
-            "compilerPath": "/opt/nordic/ncs/v1.9.1/toolchain/bin/arm-none-eabi-gcc",
+            "compilerPath": "/opt/nordic/ncs/toolchains/v2.0.2/opt/zephyr-sdk/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc",
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "gcc-arm",

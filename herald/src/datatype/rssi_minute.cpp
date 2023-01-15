@@ -55,7 +55,9 @@ RSSIMinute::hashCode() const noexcept {
 }
 
 RSSIMinute::operator herald::data::String() const noexcept {
-  return "RSSIMinute{value=" + herald::data::to_string(value) + "}";
+  return herald::data::String("RSSIMinute{value=") + 
+         herald::data::to_string(value) +
+         herald::data::String("}");
 }
 
 RSSIMinute::operator double() const noexcept {

@@ -107,7 +107,7 @@ Date::iso8601DateTime() const noexcept {
   // char buf[21];
   // strftime(buf, sizeof(buf), "%FT%TZ", gmtime(&t));
   // return std::string(buf);
-  return herald::data::to_string(seconds);
+  return herald::data::to_string((std::size_t)seconds);
 }
 
 Date::operator herald::data::String() const noexcept {

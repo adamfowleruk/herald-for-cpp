@@ -27,7 +27,7 @@ bool is_base64(char c) {
 bool
 Base64String::from(const herald::data::String& original, Base64String& toInitialise) noexcept {
   bool ok = true;
-  for (auto& c : original) {
+  for (auto c : original) {
     ok = ok & is_base64(c);
   }
   if (!ok) {
@@ -68,7 +68,7 @@ Base64String
 Base64String::encode(const Data& from) noexcept {
   std::size_t bufLen = from.size();
   herald::data::String ret;
-  ret.reserve(from.size());
+  // ret.reserve(from.size());
   int i = 0;
   int j = 0;
   char char_array_3[3];

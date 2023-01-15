@@ -89,7 +89,7 @@
       "device": "NRF52832_XXAA",
       "serverpath": "C:/Program Files (x86)/SEGGER/JLink/JLinkGDBServerCL.exe",
       // "armToolchainPath": "${config:armToolchainPath}/bin", // Only works if you have installed GNU Arm embeeded toolchain external to NCS
-      "armToolchainPath": "${env:ZEPHYR_BASE}/../toolchain/opt/bin", // Works if ZEPHYR_BASE set (which needs to be for our CMake to run)
+      "armToolchainPath": "/opt/nordic/ncs/toolchains/v2.0.2/opt/zephyr-sdk/arm-zephyr-eabi/bin", // Works if ZEPHYR_BASE set (which needs to be for our CMake to run)
       "rttConfig": {
         "enabled": true,
         "address": "auto",

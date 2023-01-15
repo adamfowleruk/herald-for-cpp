@@ -1,5 +1,5 @@
 
-set(HERALD_HEADERS 
+set(HERALD_HEADERS
   ${HERALD_BASE}/include/herald.h
   ${HERALD_BASE}/include/herald/platform.h
   ${HERALD_BASE}/include/herald/datatype/stdlib.h
@@ -8,7 +8,7 @@ set(HERALD_HEADERS
   ${HERALD_BASE}/include/herald/context.h
   ${HERALD_BASE}/include/herald/device.h
   ${HERALD_BASE}/include/herald/default_sensor_delegate.h
-  ${HERALD_BASE}/include/herald/sensor_array.h 
+  ${HERALD_BASE}/include/herald/sensor_array.h
   ${HERALD_BASE}/include/herald/sensor_delegate.h
   ${HERALD_BASE}/include/herald/sensor.h
   ${HERALD_BASE}/include/herald/analysis/aggregates.h
@@ -95,19 +95,25 @@ set(HERALD_HEADERS
   ${HERALD_BASE}/include/herald/payload/simple/simple_payload_data_supplier.h
   ${HERALD_BASE}/include/herald/payload/extended/extended_data.h
   ${HERALD_BASE}/include/herald/util/byte_array_printer.h
-
 )
 set(HERALD_HEADERS_ZEPHYR 
   ${HERALD_BASE}/include/herald/ble/zephyr/concrete_ble_transmitter.h
   ${HERALD_BASE}/include/herald/data/zephyr/zephyr_logging_sink.h
   ${HERALD_BASE}/include/herald/zephyr_context.h
 )
-set(HERALD_HEADERS_MESH 
+set(HERALD_HEADERS_MESH
   ${HERALD_BASE}/include/herald/mesh/mesh.h
+  ${HERALD_BASE}/include/herald/mesh/modem.h
+  ${HERALD_BASE}/include/herald/mesh/modem_codes.h
+  ${HERALD_BASE}/include/herald/mesh/modem_client.h
+  ${HERALD_BASE}/include/herald/mesh/modem_rabbitmq.h
   ${HERALD_BASE}/include/herald/mesh/presence.h
   ${HERALD_BASE}/include/herald/mesh/presence_client.h
   ${HERALD_BASE}/include/herald/mesh/presence_server.h
   ${HERALD_BASE}/include/herald/mesh/location.h
+  ${HERALD_BASE}/include/herald/mesh/messages/mesh.pb.h
+  ${HERALD_BASE}/include/herald/mesh/messages/models.pb.h
+  ${HERALD_BASE}/include/herald/mesh/messages/modem.pb.h
 )
 if(DEFINED CONFIG_BT_SCAN)
   set(HERALD_HEADERS_ZEPHYR
@@ -184,8 +190,12 @@ set(HERALD_SOURCES_TINYCRYPT
 set(HERALD_SOURCES_MESH
   ${HERALD_BASE}/src/mesh/presence_client.c
   ${HERALD_BASE}/src/mesh/presence_server.c
+  ${HERALD_BASE}/src/mesh/messages/mesh.pb.cc
+  ${HERALD_BASE}/src/mesh/messages/models.pb.cc
+  ${HERALD_BASE}/src/mesh/messages/modem.pb.cc
 )
 set(HERALD_SOURCES_MESH_CLIENT
+  ${HERALD_BASE}/src/mesh/modem.c
   ${HERALD_BASE}/src/mesh/modem_rabbitmq.cpp
   ${HERALD_BASE}/src/mesh/modem_client.cpp
 )

@@ -7,3 +7,4 @@ Output
 **/.DS_Store
 **/build*
 */.vscode/.cortex-debug.*.json
+/herald/protobuf/generated/*

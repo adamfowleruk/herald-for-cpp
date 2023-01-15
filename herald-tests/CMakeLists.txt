@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
+find_package(Protobuf REQUIRED)
+
 add_executable(herald-tests
   # Test templates
 	test-templates.h
@@ -10,28 +12,28 @@ add_executable(herald-tests
 	#codecoverage-tests.cpp
 
   # base data types
-	# allocatablearray-tests.cpp
-	# bytearrayprinter-tests.cpp
-	# memoryarena-tests.cpp
-	datatypes-tests.cpp
-	# base64string-tests.cpp
-	hexstring-tests.cpp
-	# datetime-tests.cpp
-	randomuuid-tests.cpp
-	# uint8-tests.cpp 
-	# uint16-tests.cpp 
-	# uint32-tests.cpp 
-	# uint64-tests.cpp 
-	# sha256-tests.cpp
-	# distribution-tests.cpp
+	# # allocatablearray-tests.cpp
+	# # bytearrayprinter-tests.cpp
+	# # memoryarena-tests.cpp
+	# datatypes-tests.cpp
+	# # base64string-tests.cpp
+	# hexstring-tests.cpp
+	# # datetime-tests.cpp
+	# randomuuid-tests.cpp
+	# # uint8-tests.cpp 
+	# # uint16-tests.cpp 
+	# # uint32-tests.cpp 
+	# # uint64-tests.cpp 
+	# # sha256-tests.cpp
+	# # distribution-tests.cpp
 	
 	# Low level
-	# sensorlogger-tests.cpp
-	# errorcontactlog-tests.cpp
-	data-tests.cpp
-	# datatypesdataderived-tests.cpp
-	# blemacaddress-tests.cpp
-	# targetidentifier-tests.cpp
+	# # sensorlogger-tests.cpp
+	# # errorcontactlog-tests.cpp
+	# data-tests.cpp
+	# # datatypesdataderived-tests.cpp
+	# # blemacaddress-tests.cpp
+	# # targetidentifier-tests.cpp
  
 	# Low level cross platform 
 	test-util.cpp 
@@ -50,10 +52,13 @@ add_executable(herald-tests
 	# gaussian-tests.cpp
 
   # high level
-	# advertparser-tests.cpp
-	# bledatabase-tests.cpp
-	# blecoordinator-tests.cpp
-	coordinator-tests.cpp
+	# # advertparser-tests.cpp
+	# # bledatabase-tests.cpp
+	# # blecoordinator-tests.cpp
+	# coordinator-tests.cpp
+
+  # Bluetooth Mesh
+  mesh-tests.cpp
 
 	# App level
 	# nordicuart-tests.cpp
@@ -66,15 +71,33 @@ add_executable(herald-tests
 	main.cpp
 )
 
-include_directories(${herald_SOURCE_DIR})
+include_directories(
+  ${herald_SOURCE_DIR}
+  ${PROTOBUF_INCLUDE_DIRS}
+)
+
+# target_include_directories(herald-tests
+#   PUBLIC
+#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#   $<INSTALL_INTERFACE:include>
+#   ${PROTOBUF_INCLUDE_DIRS}
+# )
 
 # set(THREADS_PREFER_PTHREAD_FLAG ON)
 # find_package(Threads REQUIRED)
 
 # Do this if you want to test string_utils stdlib replacements
 # add_definitions(-DCONFIG_HERALD_NO_STD_STRING=y)
+target_link_libraries(herald-tests PRIVATE
+  herald
+  # ${PROTOBUF_LIBRARIES}
+  /usr/local/lib/libprotobuf.a
 
-target_link_libraries(herald-tests PRIVATE herald) # Threads::Threads
+  # pthread
+  # ${PROTOBUF_LITE_LIBRARIES}
+) # Threads::Threads
+
+  # ${PROTOBUF_LIBRARIES}
 # target_code_coverage(herald-tests AUTO EXTERNAL EXCLUDE *-tests.cpp test-*.h *ain.cpp *est-util.cpp *est-templates.h *atch.hpp /usr/include/**/*) # EXCLUDE ONLY WORKS WITH PATTERNS
 
 if (WIN32)

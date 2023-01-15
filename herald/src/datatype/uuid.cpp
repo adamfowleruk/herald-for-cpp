@@ -10,7 +10,7 @@
 #include "herald/datatype/randomness.h"
 #include "herald/data/string_utils.h"
 
-#include <algorithm>
+// #include <algorithm>
 #include <array>
 // #include <iomanip>
 // #include <iosfwd>
@@ -28,8 +28,13 @@ namespace datatype {
 UUID
 UUID::fromString(const herald::data::String& from) noexcept {
   // remove hyphens before using hex decoding
-  herald::data::String newFrom = from;  // copy
-  newFrom.erase(std::remove(newFrom.begin(),newFrom.end(),'-'), newFrom.end());
+  herald::data::String newFrom;
+  for (auto c: from) {
+    if ('-' != c) {
+      newFrom += c;
+    }
+  }
+  // newFrom.erase(std::remove(newFrom.begin(),newFrom.end(),'-'), newFrom.end());
   HexString hs;
   bool ok = HexString::from(newFrom, hs);
   if (!ok) {

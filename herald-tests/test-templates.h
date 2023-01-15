@@ -7,7 +7,7 @@
 
 #include "herald/herald.h"
 
-#include <iostream>
+#include <cstdio>
 
 class BlankDevice : public herald::Device {
 public:
@@ -46,7 +46,7 @@ struct DummyLoggingSink {
 
   void log(const herald::data::String& sub,const herald::data::String& cat,herald::data::SensorLoggerLevel level, const herald::data::String& message) {
     value = sub + "," + cat + "," + message;
-    std::cout << "DummyLoggingSink::log: " << value << std::endl;
+    printf("DummyLoggingSink::log: %s\n",value.c_str());
     subsystem = sub;
     category = cat;
   }

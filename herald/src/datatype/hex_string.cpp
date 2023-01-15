@@ -23,7 +23,7 @@ bool is_base16(char c) {
 bool HexString::from(const herald::data::String& original,
                         HexString& toInitialise) noexcept {
   bool ok = true;
-  for (auto& c : original) {
+  for (auto c : original) {
     ok = ok & is_base16(c);
   }
   if (!ok) {
@@ -61,8 +61,8 @@ HexString::~HexString() = default;
 
 HexString HexString::encode(const Data& from) noexcept {
   std::size_t bufLen = from.size() * 2;
-  herald::data::String ret;
-  ret.reserve(bufLen);
+  herald::datatype::Data ret;
+  // ret.reserve(bufLen);
   int i = 0;
   int j = 0;
   char v;
@@ -73,12 +73,12 @@ HexString HexString::encode(const Data& from) noexcept {
     v = (char)from.at(idx);
     hi = (v & 0xf0) >> 4;
     lo =  v & 0x0f;
-    ret += base16_chars[hi];
-    ret += base16_chars[lo];
+    ret.append(std::byte(base16_chars[hi]));
+    ret.append(std::byte(base16_chars[lo]));
   }
 
   HexString nvalue;
-  nvalue.value = std::move(ret);
+  nvalue.value = herald::data::String(herald::datatype::Data(ret));
   return nvalue;
 }
 

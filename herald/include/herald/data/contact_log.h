@@ -46,11 +46,11 @@ private:
   herald::data::String csv(herald::data::String toEscape) const noexcept {
     // C++23 only: if (toEscape.contains(",") || toEscape.contains("\"") ||
     // toEscape.contains("'") || toEscape.contains("’")) { Pre C++23:-
-    if (herald::data::String::npos != toEscape.find(",") ||
-        herald::data::String::npos != toEscape.find("\"") ||
-        herald::data::String::npos != toEscape.find("'") ||
-        herald::data::String::npos != toEscape.find("’")) {
-      return "\"" + toEscape + "\"";
+    if (herald::data::String::npos != toEscape.find(',') ||
+        herald::data::String::npos != toEscape.find('"') ||
+        herald::data::String::npos != toEscape.find('\'') ||
+        herald::data::String::npos != toEscape.find('`')) {
+      return '"' + toEscape + '"';
     }
     return toEscape;
   }

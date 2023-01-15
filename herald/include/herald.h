@@ -147,6 +147,21 @@
 
 // service namespace
 
+// mesh namespace
+#include "herald/mesh/location.h"
+#include "herald/mesh/mesh.h"
+#include "herald/mesh/messages/modem.pb.h"
+#include "herald/mesh/modem.h"
+#include "herald/mesh/modem_client.h"
+#include "herald/mesh/modem_codes.h"
+#include "herald/mesh/modem_rabbitmq.h"
+#include "herald/mesh/presence.h"
+#include "herald/mesh/presence_client.h"
+#include "herald/mesh/presence_server.h"
+#include "herald/mesh/messages/mesh.pb.h"
+#include "herald/mesh/messages/models.pb.h"
+#include "herald/mesh/messages/modem.pb.h"
+
 // utilities
 #include "herald/util/byte_array_printer.h"
 

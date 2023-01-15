@@ -24,8 +24,12 @@ DataString::DataString(herald::datatype::Data&& toOwn) noexcept
 }
 
 DataString::DataString(const char* v) noexcept
-  : value(v)
+  : value()
 {
+  while ((*v) != '\0') {
+    value.append(std::byte(*v));
+    ++v;
+  }
 }
 
 DataString::DataString(DataString&& toMove) noexcept
@@ -44,9 +48,9 @@ const char*
 DataString::c_str() const noexcept
 {
   std::size_t max = size();
-  const char* ptr = new char[max + 1];
+  char* ptr = new char[max + 1];
   for (std::size_t i = 0;i < max; ++i) {
-    ptr[i] = (char)value.at[i];
+    ptr[i] = (char)value.at(i);
   }
   ptr[max] = '\0';
   return ptr;
@@ -108,39 +112,43 @@ DataString::operator!=(const DataString& other) const noexcept
 DataString&
 DataString::operator+=(const DataString& toAppend) noexcept
 {
-  value.append((uint8_t)toAppend.value);
+  value.append(toAppend.value);
+  return *this;
 }
 
 DataString&
 DataString::operator+=(const char toAppend) noexcept
 {
   value.append((uint8_t)toAppend);
+  return *this;
 }
 
 DataString
 DataString::operator+(const DataString& toAppend) const noexcept
 {
-  return DataString(value + toAppend.value);
+  return DataString(herald::datatype::Data(value)) + toAppend;
 }
 
 DataString
 DataString::operator+(const char toAppend) const noexcept
 {
   herald::datatype::Data nv(value);
-  nv.append(toAppend);
+  nv.append((uint8_t)toAppend);
   return DataString(std::move(nv));
 }
 
 DataString&
 DataString::operator=(const DataString& toCopyAssign) noexcept
 {
-  value = herald::datatype::Data()
+  value = toCopyAssign.value;
+  return *this;
 }
 
 DataString&
 DataString::operator=(const DataString&& toMoveAssign) noexcept
 {
   value = std::move(toMoveAssign);
+  return *this;
 }
 
 DataString::operator herald::datatype::Data() const noexcept
@@ -160,6 +168,20 @@ DataString::end() const noexcept
   return DataStringIterator(*this, size());
 }
 
+DataStringIterator::DataStringIterator(const DataStringIterator& toCopy) noexcept
+  : pos(toCopy.pos),
+    over(toCopy.over)
+{
+  ;
+}
+
+DataStringIterator::DataStringIterator(DataStringIterator&& toMove) noexcept
+  : pos(toMove.pos),
+    over(toMove.over)
+{
+  ;
+}
+
 DataStringIterator::DataStringIterator(const DataString& stringOver, size_t at) noexcept
   : pos(at),
     over(stringOver)
@@ -169,38 +191,42 @@ DataStringIterator::DataStringIterator(const DataString& stringOver, size_t at) 
 DataStringIterator::~DataStringIterator() noexcept = default;
 
 char
-DataStringIterator::operator*() noexcept
+DataStringIterator::operator*() const noexcept
 {
   if (pos < over.size()) {
-    return over.at[pos];
+    return over[pos];
   }
   return '\0';
 }
 
-DataStringIterator&
-DataStringIterator::operator=(const DataStringIterator& other) noexcept
-{
-  pos = other.pos
-  over = other.over
-}
+// DataStringIterator&
+// DataStringIterator::operator=(const DataStringIterator& other) noexcept
+// {
+//   pos = other.pos;
+//   over = other.over;
+//   return *this;
+// }
 
-DataStringIterator&
-DataStringIterator::operator=(DataStringIterator&& other) noexcept
-{
-  pos = other.pos
-  over = other.over
-}
+// DataStringIterator&
+// DataStringIterator::operator=(DataStringIterator&& other) noexcept
+// {
+//   pos = other.pos;
+//   over = other.over;
+//   return *this;
+// }
 
 bool
 DataStringIterator::operator==(const DataStringIterator& other) const noexcept
 {
   return (pos == other.pos) && (over == other.over);
 }
+
 bool
 DataStringIterator::operator!=(const DataStringIterator& other) const noexcept
 {
   return (pos != other.pos) || (over != other.over);
 }
+
 void
 DataStringIterator::operator++() noexcept
 {
@@ -209,6 +235,7 @@ DataStringIterator::operator++() noexcept
     pos = over.size();
   }
 }
+
 void
 DataStringIterator::operator--() noexcept
 {
@@ -232,93 +259,106 @@ DataStringStream::~DataStringStream() noexcept = default;
 DataStringStream&
 DataStringStream::operator<<(DataString consume) noexcept
 {
-  value.append((Data)consume);
+  value.append((herald::datatype::Data)consume);
+  return *this;
 }
 
 DataStringStream&
 DataStringStream::operator<<(std::size_t consume) noexcept
 {
-  // TODO convert to string representation
+  value.append(herald::data::to_string(consume));
+  return *this;
 }
 
 DataStringStream&
 DataStringStream::operator<<(std::uint8_t consume) noexcept
 {
-  // TODO convert to string representation
+  value.append(herald::data::to_string(consume));
+  return *this;
 }
 
 DataStringStream&
 DataStringStream::operator<<(std::uint16_t consume) noexcept
 {
-  // TODO convert to string representation
+  value.append(herald::data::to_string(consume));
+  return *this;
 }
 
 DataStringStream&
 DataStringStream::operator<<(std::uint32_t consume) noexcept
 {
-  // TODO convert to string representation
+  value.append(herald::data::to_string(consume));
+  return *this;
 }
 
 DataStringStream&
 DataStringStream::operator<<(std::uint64_t consume) noexcept
 {
-  // TODO convert to string representation
+  value.append(herald::data::to_string(std::size_t(consume)));
+  return *this;
 }
 
 DataStringStream&
 DataStringStream::operator<<(std::int8_t consume) noexcept
 {
-  // TODO convert to string representation
+  value.append(herald::data::to_string(consume));
+  return *this;
 }
 
 DataStringStream&
 DataStringStream::operator<<(std::int16_t consume) noexcept
 {
-  // TODO convert to string representation
+  value.append(herald::data::to_string(consume));
+  return *this;
 }
 
 DataStringStream&
 DataStringStream::operator<<(std::int32_t consume) noexcept
 {
-  // TODO convert to string representation
+  value.append(herald::data::to_string(consume));
+  return *this;
 }
 
 DataStringStream&
 DataStringStream::operator<<(std::int64_t consume) noexcept
 {
-  // TODO convert to string representation
+  value.append(herald::data::to_string(consume));
+  return *this;
 }
 
 DataStringStream&
 DataStringStream::operator<<(long consume) noexcept
 {
-  // TODO convert to string representation
+  value.append(herald::data::to_string(consume));
+  return *this;
 }
 
 DataStringStream&
 DataStringStream::operator<<(char consume) noexcept
 {
-  value.append(consume);
+  value.append(std::byte(consume));
+  return *this;
 }
 
 DataStringStream&
 DataStringStream::operator<<(EOSStruct consume) noexcept
 {
   // No Op for our representation
+  return *this;
 }
 
 
 DataString
 DataStringStream::str() noexcept
 {
-  return DataString(value);
+  return DataString(herald::datatype::Data(value));  // explicit copy ctor
 }
 
 /// \brief Implicit conversion to Data for Data.append() to work
-/// \note DOES NOT conver to HEX. Equivalent of raw char array access
+/// \note DOES NOT convert to HEX. Equivalent of raw char array access
 DataStringStream::operator herald::datatype::Data() const noexcept
 {
-  return Data(value);
+  return herald::datatype::Data(value);
 }
 
 
