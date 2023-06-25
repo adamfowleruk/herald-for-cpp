@@ -22,12 +22,10 @@ Must also have zephyr libc++ support. (highly likely)
 
 ## Setting up your environment
 
-Se sure you've followed the following guides before starting:-
+Se sure you've followed the following guides before starting. Note that we've recently (June 2023) moved from using the Nordic SDK that included Zephyr to instead use Zephyr directly as that process is now easier and more reliable. Do the following to set up your environment (one time):-
 
-1. Install [GNU ARM mbed toolchain - gnu-arm-none-eabi](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads) [External]
-  - For simplicity, place this in c:\gnuarmemb
-1. Set up the [nRF Connect SDK](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/getting_started.html) [External]
-  - E.g. install in d:\devtools\ncs
+1. Follow the [Zephyr Getting Started Guide]() to ensure you have a working Zephyr system
+  - Note: After the initial `west update` command you can `cd zephyr; git checkout v3.4.0; west update; west zephyr-export` to switch versions
 1. Set up your board for programming - instructions vary
   - Instructions for [Maker Diary nRF52840-usb-dongle using nRF Connect (RECOMMENDED)](https://wiki.makerdiary.com/nrf52840-mdk-usb-dongle/programming/) [External]
   - Instructions for [Maker Diary nRF52832-usb-dongle using DAPLINK (RECOMMENDED)](https://wiki.makerdiary.com/nrf52832-mdk/nrf5-sdk/) [External]
@@ -43,6 +41,8 @@ You will need the following extensions:-
 
 - C/C++ Extension
 - CMake Extension
+
+You DO NOT need to use the Nordic Connect SDK plugin.
 
 You can now open the herald-for-cpp/herald-venue-beacon folder
 to load this specific CMake configuration. Don't open the
@@ -71,46 +71,49 @@ much simpler for adopters:-
 
 1. Import a herald.cmake settings file to get Herald source and header
 variables
-1. Import any C++20 extension libraries required (Herald uses the fmt library)
+1. Import any C++17 libraries you need in addition to your source code
 1. Add some extra lines to your app's sources
 1. Now simply compile your app as normal!
 
-Here is a standard Zephyr app CMakeLists.txt file before linking to herald:-
+You will need to specify the board you are using. We default to the nrf52840dk-nrf52840 if none is specified.
+
+You then need to initialise a build once, and then execute the CMake build as many times as required.
+
+Below are all these steps in succession:-
 
 ```sh
-# ...usual CMake preamble
-
-target_sources(app PRIVATE
-  src/main.cpp
-)
+# We assume you have already set ZEPHYR_BASE
+cd herald-for-cpp/herald-venue-beacon
+export BOARD=nrf52dk_nrf52832
+cmake -B ./build -DCMAKE_CXX_STANDARD=c++17 -DCMAKE_CXX_STANDARD_REQUIRED=ON
+# You now have build files generated. If you switch boards, you need to delete the `build` folder and rerun the above
+cmake --build ./build --config Debug --target all -j
 ```
 
-And here it is after:-
+Assume this works you now have a built app binary in `./build/zephyr/zephyr.hex`.
+
+## Programming your board
+
+You can now programme your app
+to a connected board via a JLink interface (including via a Nordic Dev Kit board instead) by doing the following:-
 
 ```sh
-# ...usual CMake preamble
-
-# Include Herald core library
-add_subdirectory(../fmt ./build/fmt) # Note the use of a specified build folder
-
-set(HERALD_BASE ${CMAKE_CURRENT_SOURCE_DIR}/../herald)
-include(../herald/herald.cmake) # include sources and headers
-
-include_directories(../herald/include)
-include_directories(../fmt/include)
-
-target_sources(app PRIVATE
-  ${HERALD_HEADERS}
-  ${HERALD_HEADERS_ZEPHYR}
-  ${HERALD_SOURCES}
-  ${HERALD_SOURCES_ZEPHYR}
-  src/main.cpp
-)
-
-target_link_libraries(app PUBLIC fmt)
+west flash
 ```
 
-## Recommended code layout
+Note: If the board you are flashing is secured/protected, you will need to run `west flash --recover` first before flashing the app.
+
+If your board is connected to the reset pin properly then the app will now be running on your device and detectable over Bluetooth
+via the Nordic Connect mobile app or the Herald Demo App (for iOS or Android). 
+Its name will be 'Herald Venue Beacon' and so is easily discovered.
+
+
+
+## Ancillary instructions / extensions
+
+You are now done, but if you need further information then the below may be useful.
+
+### Recommended code layout
 
 We highly recommend you link in the herald-for-cpp folder as a git submodule underneath your app's git tree.
 This will enable you to easily switch between release and develop branches of code, latest fixes, and
@@ -118,19 +121,6 @@ be able to test any PRs you wish to make to the upstream herald-for-cpp project 
 
 Don't forget to regularly update the submodule folder. Also note that Herald has the 'fmt' library
 as an existing submodule, so ensure your submodule depth for updates is at least 2.
-
-## Programming your board
-
-How you do this will vary greatly depending on your board. You
-may be able to do this simply with the ```ninja flash``` command.
-Refer to the Zephyr RTOS documentation for more details.
-
-For Nordic Semiconductor boards we use the below methods in development.
-
-**WARNING**: When switching boards be sure to:-
-
-1. Change the CMakeLists.txt file's ARCH and BOARD to the correct value
-1. DELETE the herald-venue-beacon/build folder, entirely, before launching a new build - else it will cache the old board name
 
 ### nRF52840 USB Dongle board
 
@@ -160,10 +150,3 @@ Once this is done the board will program itself, disconnect, and reconnect.
 
 **NOTE**: Also the DAPLINK drive will automatically reconnect. This doesn't mean the beacon app isn't running.
 
-### Verifying the board is running
-
-You can now use the Herald iOS demo app to see the beacon running, 
-or use the nRF Connect mobile phone app to scan for and interact
-with the Herald Venue Beacon.
-
-It's name will be 'Herald Venue Beacon' and so is easily discovered.

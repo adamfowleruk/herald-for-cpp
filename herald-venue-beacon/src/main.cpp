@@ -23,7 +23,7 @@
 
 #include <zephyr/kernel_structs.h>
 // #include <sys/thread_stack.h>
-// #include <zephyr/drivers/gpio.h>
+#include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/hwinfo.h>
 
 #include <inttypes.h>
@@ -39,19 +39,9 @@ LOG_MODULE_REGISTER(app, CONFIG_APP_LOG_LEVEL);
 #define SLEEP_TIME_MS   1000
 
 /* The devicetree node identifier for the "led0" alias. */
-// #define LED0_NODE DT_ALIAS(led0)
+#define LED0_NODE DT_ALIAS(led0)
+static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 
-// #if DT_NODE_HAS_STATUS(LED0_NODE, okay)
-// #define LED0	DT_GPIO_LABEL(LED0_NODE, gpios)
-// #define PIN	DT_GPIO_PIN(LED0_NODE, gpios)
-// #define FLAGS	DT_GPIO_FLAGS(LED0_NODE, gpios)
-// #else
-// /* A build error here means your board isn't set up to blink an LED. */
-// #error "Unsupported board: led0 devicetree alias is not defined"
-// #define LED0	""
-// #define PIN	0
-// #define FLAGS	0
-// #endif
 
 void k_sys_fatal_error_handler(unsigned int reason, const z_arch_esf_t *esf) {
 	// LOG_PANIC();
@@ -164,6 +154,31 @@ static struct basic_venue estimoteGarage = {
 	.name = "Estimote Herald"
 };
 
+static struct basic_venue beaconBasic1 = {
+  .country = 1,
+	.state = 1,
+	.code = 1,
+	.name = "Herald-01"
+};
+static struct basic_venue beaconBasic2 = {
+  .country = 2,
+	.state = 2,
+	.code = 2,
+	.name = "Herald-02"
+};
+static struct basic_venue beaconBasic3 = {
+  .country = 3,
+	.state = 3,
+	.code = 3,
+	.name = "Herald-03"
+};
+static struct basic_venue beaconBasic4 = {
+  .country = 4,
+	.state = 4,
+	.code = 4,
+	.name = "Herald-04"
+};
+
 void herald_entry() {
 	APP_DBG("Herald entry");
 	k_sleep(K_MSEC(10000)); // pause so we have time to see Herald initialisation log messages. Don't do this in production!
@@ -186,12 +201,12 @@ void herald_entry() {
 	ctx.setSensorConfiguration(config);
 
 	ConcreteExtendedDataV1 extendedData;
-	extendedData.addSection(ExtendedDataSegmentCodesV1::TextPremises, estimoteGarage.name);
+	extendedData.addSection(ExtendedDataSegmentCodesV1::TextPremises, beaconBasic3.name);
 
 	payload::beacon::ConcreteBeaconPayloadDataSupplierV1 pds(
-		estimoteGarage.country,
-		estimoteGarage.state,
-		estimoteGarage.code,
+		beaconBasic3.country,
+		beaconBasic3.state,
+		beaconBasic3.code,
 		extendedData
 	);
 	
@@ -241,19 +256,15 @@ void herald_entry() {
 
 int main(void)
 {
-	// const struct device *dev;
-	// bool led_is_on = true;
-	// int ret;
+	// The below LED device lines have changed since at least Zephyr 3.4.0
+	if (!gpio_is_ready_dt(&led)) {
+		return 1;
+	}
 
-	// dev = device_get_binding(LED0);
-	// if (dev == NULL) {
-	// 	return 1;
-	// }
-
-	// ret = gpio_pin_configure(dev, PIN, GPIO_OUTPUT_ACTIVE | FLAGS);
-	// if (ret < 0) {
-	// 	return 1;
-	// }
+	int ret = gpio_pin_configure_dt(&led, GPIO_OUTPUT_ACTIVE);
+	if (ret < 0) {
+		return 1;
+	}
 
 	APP_DBG("Logging test");
 
@@ -272,8 +283,11 @@ int main(void)
 	 */
 	while (1) {
 		k_sleep(K_SECONDS(2));
-		// gpio_pin_set(dev, PIN, (int)led_is_on);
-		// led_is_on = !led_is_on;
+		
+		ret = gpio_pin_toggle_dt(&led);
+		if (ret < 0) {
+			return 1;
+		}
 
 		APP_DBG("main thread still running");
 
