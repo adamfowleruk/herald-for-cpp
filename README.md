@@ -15,7 +15,7 @@ This implementation was introduced in Herald v1.2.
 
 ## License and Copyright
 
-Copyright 2020-2021 Herald Project Contributors
+Copyright 2020-2023 Herald Project Contributors
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache2.0-yellow.svg)](https://opensource.org/licenses/Apache-2.0)
 

@@ -19,8 +19,22 @@ namespace datatype {
 /// Used by calling classes only.
 /// Max memory allocation in bytes is 65536
 struct MemoryArenaEntry {
+public:
   unsigned short startPageIndex = 0;
   unsigned short byteLength = 0;
+
+  constexpr MemoryArenaEntry() noexcept
+    : startPageIndex(0), byteLength(0)
+  {
+    ;
+  }
+  
+  constexpr MemoryArenaEntry(unsigned short startPageIndex, unsigned short byteLength) noexcept
+    : startPageIndex(startPageIndex), byteLength(byteLength)
+  {
+    ;
+  }
+
 
   bool isInitialised() const {
     return 0 != byteLength;

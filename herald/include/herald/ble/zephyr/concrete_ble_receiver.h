@@ -23,16 +23,16 @@
 #include "../../zephyr_context.h"
 
 // nRF Connect SDK includes
-#include <bluetooth/bluetooth.h>
-#include <bluetooth/conn.h>
-#include <bluetooth/uuid.h>
-#include <bluetooth/gatt.h>
-#include <bluetooth/gatt_dm.h>
-#include <bluetooth/addr.h>
-#include <bluetooth/scan.h>
-#include <kernel.h>
+#include <zephyr/bluetooth/bluetooth.h>
+#include <zephyr/bluetooth/conn.h>
+#include <zephyr/bluetooth/uuid.h>
+#include <zephyr/bluetooth/gatt.h>
+#include <zephyr/bluetooth/gatt_dm.h>
+#include <zephyr/bluetooth/addr.h>
+#include <zephyr/bluetooth/scan.h>
+#include <zephyr/kernel.h>
 #include <zephyr/types.h>
-#include <zephyr.h>
+#include <zephyr/zephyr.h>
 
 // C++17 includes
 #include <memory>

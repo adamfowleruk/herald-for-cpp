@@ -90,7 +90,7 @@ public:
    * @return false If the instanceId was not found
    */
   bool remove(const UUID& instanceId) noexcept {
-    std::size_t pos = findMetaBySensorInstanceId(instanceId);
+    std::size_t pos = findMetaByModelInstanceId(instanceId);
     if (pos >= max_size) {
       // agent not found - return false
       return false;

@@ -6,7 +6,7 @@
 #include "herald/datatype/time_interval.h"
 
 #ifdef __ZEPHYR__
-#include <kernel.h>
+#include <zephyr/kernel.h>
 #else
 #include <chrono>
 #endif

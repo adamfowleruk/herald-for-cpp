@@ -8,27 +8,27 @@
 #include <stddef.h>
 #include <string.h>
 #include <errno.h>
-#include <sys/printk.h>
-#include <sys/byteorder.h>
-#include <zephyr.h>
+#include <zephyr/sys/printk.h>
+#include <zephyr/sys/byteorder.h>
+#include <zephyr/kernel.h>
 
-#include <settings/settings.h>
+#include <zephyr/settings/settings.h>
 
-#include <bluetooth/bluetooth.h>
-#include <bluetooth/hci.h>
-#include <bluetooth/conn.h>
-#include <bluetooth/uuid.h>
-#include <bluetooth/gatt.h>
-#include <bluetooth/services/bas.h>
+#include <zephyr/bluetooth/bluetooth.h>
+#include <zephyr/bluetooth/hci.h>
+#include <zephyr/bluetooth/conn.h>
+#include <zephyr/bluetooth/uuid.h>
+#include <zephyr/bluetooth/gatt.h>
+#include <zephyr/bluetooth/services/bas.h>
 
-#include <kernel_structs.h>
+#include <zephyr/kernel_structs.h>
 // #include <sys/thread_stack.h>
-#include <drivers/gpio.h>
-#include <drivers/hwinfo.h>
+// #include <zephyr/drivers/gpio.h>
+#include <zephyr/drivers/hwinfo.h>
 
 #include <inttypes.h>
 
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 
 LOG_MODULE_REGISTER(app, CONFIG_APP_LOG_LEVEL);
 #define APP_DBG(_msg,...) LOG_DBG(_msg,##__VA_ARGS__);
@@ -39,19 +39,19 @@ LOG_MODULE_REGISTER(app, CONFIG_APP_LOG_LEVEL);
 #define SLEEP_TIME_MS   1000
 
 /* The devicetree node identifier for the "led0" alias. */
-#define LED0_NODE DT_ALIAS(led0)
+// #define LED0_NODE DT_ALIAS(led0)
 
-#if DT_NODE_HAS_STATUS(LED0_NODE, okay)
-#define LED0	DT_GPIO_LABEL(LED0_NODE, gpios)
-#define PIN	DT_GPIO_PIN(LED0_NODE, gpios)
-#define FLAGS	DT_GPIO_FLAGS(LED0_NODE, gpios)
-#else
-/* A build error here means your board isn't set up to blink an LED. */
-#error "Unsupported board: led0 devicetree alias is not defined"
-#define LED0	""
-#define PIN	0
-#define FLAGS	0
-#endif
+// #if DT_NODE_HAS_STATUS(LED0_NODE, okay)
+// #define LED0	DT_GPIO_LABEL(LED0_NODE, gpios)
+// #define PIN	DT_GPIO_PIN(LED0_NODE, gpios)
+// #define FLAGS	DT_GPIO_FLAGS(LED0_NODE, gpios)
+// #else
+// /* A build error here means your board isn't set up to blink an LED. */
+// #error "Unsupported board: led0 devicetree alias is not defined"
+// #define LED0	""
+// #define PIN	0
+// #define FLAGS	0
+// #endif
 
 void k_sys_fatal_error_handler(unsigned int reason, const z_arch_esf_t *esf) {
 	// LOG_PANIC();
@@ -157,6 +157,13 @@ static struct basic_venue adamsLounge = {
 	.name = "Adam's Lounge"
 };
 
+static struct basic_venue estimoteGarage = {
+  .country = 826,
+	.state = 4,
+	.code = 666,
+	.name = "Estimote Herald"
+};
+
 void herald_entry() {
 	APP_DBG("Herald entry");
 	k_sleep(K_MSEC(10000)); // pause so we have time to see Herald initialisation log messages. Don't do this in production!
@@ -179,12 +186,12 @@ void herald_entry() {
 	ctx.setSensorConfiguration(config);
 
 	ConcreteExtendedDataV1 extendedData;
-	extendedData.addSection(ExtendedDataSegmentCodesV1::TextPremises, erinsStakehouse.name);
+	extendedData.addSection(ExtendedDataSegmentCodesV1::TextPremises, estimoteGarage.name);
 
 	payload::beacon::ConcreteBeaconPayloadDataSupplierV1 pds(
-		erinsStakehouse.country,
-		erinsStakehouse.state,
-		erinsStakehouse.code,
+		estimoteGarage.country,
+		estimoteGarage.state,
+		estimoteGarage.code,
 		extendedData
 	);
 	
@@ -232,21 +239,21 @@ void herald_entry() {
 }
 
 
-void main(void)
+int main(void)
 {
-	const struct device *dev;
-	bool led_is_on = true;
-	int ret;
+	// const struct device *dev;
+	// bool led_is_on = true;
+	// int ret;
 
-	dev = device_get_binding(LED0);
-	if (dev == NULL) {
-		return;
-	}
+	// dev = device_get_binding(LED0);
+	// if (dev == NULL) {
+	// 	return 1;
+	// }
 
-	ret = gpio_pin_configure(dev, PIN, GPIO_OUTPUT_ACTIVE | FLAGS);
-	if (ret < 0) {
-		return;
-	}
+	// ret = gpio_pin_configure(dev, PIN, GPIO_OUTPUT_ACTIVE | FLAGS);
+	// if (ret < 0) {
+	// 	return 1;
+	// }
 
 	APP_DBG("Logging test");
 
@@ -265,11 +272,13 @@ void main(void)
 	 */
 	while (1) {
 		k_sleep(K_SECONDS(2));
-		gpio_pin_set(dev, PIN, (int)led_is_on);
-		led_is_on = !led_is_on;
+		// gpio_pin_set(dev, PIN, (int)led_is_on);
+		// led_is_on = !led_is_on;
 
 		APP_DBG("main thread still running");
 
 		// TODO Add logic here to detect failure in Herald thread, and restart to resume as necessary
 	}
+
+	return 0;
 };
