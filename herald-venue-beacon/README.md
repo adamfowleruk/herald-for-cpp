@@ -107,6 +107,42 @@ If your board is connected to the reset pin properly then the app will now be ru
 via the Nordic Connect mobile app or the Herald Demo App (for iOS or Android). 
 Its name will be 'Herald Venue Beacon' and so is easily discovered.
 
+## Pre-programme venue details
+
+You can create some pre-programmed data to be added to the device which configures the beacon name and ID.
+This works by setting data in the 'storage' flash partition of the device.
+
+You do this by creating an Intel format data hex file. For an example, see test-flash-storage.hex.
+Note that this file is an example for the nrf52dk_nrf52832 board with its default flash memory layout.
+
+This files content with explanation is below. Note: I've added spaces for ease of explanation:-
+
+```txt
+:02 0000 02 7A0082
+# The above specified an initial memory address, divided by 16. The above is 0007a000 - the start of the nrf52832 storage partition.
+:11 0001 00 0001 0002 00000004 544553545445535400 67
+The above writes 11 data bytes - country uint16_t, state uint16_t, beacon ID code uint32_t, then text (TESTTEST) ended with the termination character (00 or \0 in C).
+:00 0000 01 FF
+# The above says that this is the end of the hex file
+```
+
+Note that the final number on each line is the two's complement of the modulo 256 of the entire line after the : character.
+A good modulo calculator is here (Use the `CheckSum8 2s Complement` value): https://www.scadacore.com/tools/programming-calculators/online-checksum-calculator/
+
+Note: See your DTS file for your board for the named `storage_partition` base address. E.g. for the nrf52dk_nrf52832: https://github.com/zephyrproject-rtos/zephyr/blob/db1a718341a3724b82c052e6e6b7db19251f7a22/boards/arm/nrf52dk_nrf52832/nrf52dk_nrf52832.dts#L222
+
+To merge your built Herald venue beacon programme with this configuration file, execute:-
+
+```sh
+mergehex -m build/zephyr/zephyr.hex test-flash-storage.hex -o combined.hex
+```
+
+Then be sure to flash `combined.hex` to your device and NOT the zephyr.hex file as usual.
+
+When you reboot your device you will see the correct data exposed in the Herald Venue Beacon in its Herald Payload area.
+
+TODO: I shall create a python helper script to create the hex file in future.
+
 
 
 ## Ancillary instructions / extensions
@@ -149,4 +185,3 @@ Once this is done the board will program itself, disconnect, and reconnect.
 **NOTE**: Be sure to hit the 'reset' button to launch the newly programmed app - it doesn't start automatically.
 
 **NOTE**: Also the DAPLINK drive will automatically reconnect. This doesn't mean the beacon app isn't running.
-

@@ -30,6 +30,8 @@
 
 #include <zephyr/logging/log.h>
 
+#include <zephyr/storage/flash_map.h>
+
 LOG_MODULE_REGISTER(app, CONFIG_APP_LOG_LEVEL);
 #define APP_DBG(_msg,...) LOG_DBG(_msg,##__VA_ARGS__);
 #define APP_INF(_msg,...) LOG_INF(_msg,##__VA_ARGS__);
@@ -42,6 +44,8 @@ LOG_MODULE_REGISTER(app, CONFIG_APP_LOG_LEVEL);
 #define LED0_NODE DT_ALIAS(led0)
 static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 
+/* The maximum name length allowed in Flash storage */
+#define MAX_NAME_LENGTH 40
 
 void k_sys_fatal_error_handler(unsigned int reason, const z_arch_esf_t *esf) {
 	// LOG_PANIC();
@@ -81,102 +85,109 @@ struct basic_venue {
 	std::string name;
 };
 
-static struct basic_venue joesPizza = {
-	.country = 826,
-	.state = 4,
-	.code = 12345,
-	.name = "Joe's Pizza"
-};
+// static struct basic_venue joesPizza = {
+// 	.country = 826,
+// 	.state = 4,
+// 	.code = 12345,
+// 	.name = "Joe's Pizza"
+// };
 
-static struct basic_venue adamsFishShop = {
-	.country = 826,
-	.state = 3,
-	.code = 22334,
-	.name = "Adam's Fish Shop"
-};
+// static struct basic_venue adamsFishShop = {
+// 	.country = 826,
+// 	.state = 3,
+// 	.code = 22334,
+// 	.name = "Adam's Fish Shop"
+// };
 
-static struct basic_venue maxsFineDining = {
-	.country = 832,
-	.state = 1,
-	.code = 55566,
-	.name = "Max's Fine Dining"
-};
+// static struct basic_venue maxsFineDining = {
+// 	.country = 832,
+// 	.state = 1,
+// 	.code = 55566,
+// 	.name = "Max's Fine Dining"
+// };
 
-static struct basic_venue erinsStakehouse = {
-	.country = 826,
-	.state = 4,
-	.code = 123123,
-	.name = "Erin's Stakehouse"
-};
+// static struct basic_venue erinsStakehouse = {
+// 	.country = 826,
+// 	.state = 4,
+// 	.code = 123123,
+// 	.name = "Erin's Stakehouse"
+// };
 
 // TODO replace the below with sub-venue extended data, with same venue code
-static struct basic_venue adamsKitchen = {
-  .country = 826,
-	.state = 4,
-	.code = 1234,
-	.name = "Adam's Kitchen"
-};
-static struct basic_venue adamsOffice = {
-  .country = 826,
-	.state = 4,
-	.code = 2345,
-	.name = "Adam's Office"
-};
-static struct basic_venue adamsBedroom = {
-  .country = 826,
-	.state = 4,
-	.code = 3456,
-	.name = "Adam's Bedroom"
-};
-static struct basic_venue adamsLanding = {
-  .country = 826,
-	.state = 4,
-	.code = 5678,
-	.name = "Adam's Landing"
-};
-static struct basic_venue adamsPond = {
-  .country = 826,
-	.state = 4,
-	.code = 6789,
-	.name = "Adam's Pond"
-};
-static struct basic_venue adamsLounge = {
-  .country = 826,
-	.state = 4,
-	.code = 7890,
-	.name = "Adam's Lounge"
-};
+// static struct basic_venue adamsKitchen = {
+//   .country = 826,
+// 	.state = 4,
+// 	.code = 1234,
+// 	.name = "Adam's Kitchen"
+// };
+// static struct basic_venue adamsOffice = {
+//   .country = 826,
+// 	.state = 4,
+// 	.code = 2345,
+// 	.name = "Adam's Office"
+// };
+// static struct basic_venue adamsBedroom = {
+//   .country = 826,
+// 	.state = 4,
+// 	.code = 3456,
+// 	.name = "Adam's Bedroom"
+// };
+// static struct basic_venue adamsLanding = {
+//   .country = 826,
+// 	.state = 4,
+// 	.code = 5678,
+// 	.name = "Adam's Landing"
+// };
+// static struct basic_venue adamsPond = {
+//   .country = 826,
+// 	.state = 4,
+// 	.code = 6789,
+// 	.name = "Adam's Pond"
+// };
+// static struct basic_venue adamsLounge = {
+//   .country = 826,
+// 	.state = 4,
+// 	.code = 7890,
+// 	.name = "Adam's Lounge"
+// };
 
-static struct basic_venue estimoteGarage = {
-  .country = 826,
-	.state = 4,
-	.code = 666,
-	.name = "Estimote Herald"
-};
+// static struct basic_venue estimoteGarage = {
+//   .country = 826,
+// 	.state = 4,
+// 	.code = 666,
+// 	.name = "Estimote Herald"
+// };
 
-static struct basic_venue beaconBasic1 = {
-  .country = 1,
-	.state = 1,
-	.code = 1,
-	.name = "Herald-01"
-};
-static struct basic_venue beaconBasic2 = {
-  .country = 2,
-	.state = 2,
-	.code = 2,
-	.name = "Herald-02"
-};
-static struct basic_venue beaconBasic3 = {
-  .country = 3,
-	.state = 3,
-	.code = 3,
-	.name = "Herald-03"
-};
-static struct basic_venue beaconBasic4 = {
-  .country = 4,
-	.state = 4,
-	.code = 4,
-	.name = "Herald-04"
+// static struct basic_venue beaconBasic1 = {
+//   .country = 1,
+// 	.state = 1,
+// 	.code = 1,
+// 	.name = "Herald-01"
+// };
+// static struct basic_venue beaconBasic2 = {
+//   .country = 2,
+// 	.state = 2,
+// 	.code = 2,
+// 	.name = "Herald-02"
+// };
+// static struct basic_venue beaconBasic3 = {
+//   .country = 3,
+// 	.state = 3,
+// 	.code = 3,
+// 	.name = "Herald-03"
+// };
+// static struct basic_venue beaconBasic4 = {
+//   .country = 4,
+// 	.state = 4,
+// 	.code = 4,
+// 	.name = "Herald-04"
+// };
+
+static struct basic_venue noVenue = {
+    .country = 0,
+	.state = 0,
+	.code = 0,
+	.name = "UnconfiguredHeraldBeacon"
 };
 
 void herald_entry() {
@@ -200,19 +211,77 @@ void herald_entry() {
 	// config.advertisingEnabled = true; // default
 	ctx.setSensorConfiguration(config);
 
+	// Sun 02 July 2023 - ADDED DYNAMIC BEACON CONFIGURATION FROM FLASH STORAGE
+	// Attempt to read Beacon configuration from raw flash
+	// If it works, use that for our beacon information
+	// If it fails, default to an empty configuration
+	std::uint16_t country = noVenue.country;
+	std::uint16_t state = noVenue.state;
+	std::uint32_t code = noVenue.code;
+	std::string name = std::string(noVenue.name); // force copy
+
+	const struct flash_area *storageArea;
+	int err = flash_area_open(FIXED_PARTITION_ID(storage_partition), &storageArea);
+
+	if (err != 0) {
+		APP_DBG("Error opening storage flash area");
+	} else {
+		APP_DBG("Attempting to read flash storage...");
+		// 8 bytes for numeric data, 32 max for venue name
+		uint8_t buffer[MAX_NAME_LENGTH];
+		int readRet = flash_area_read(storageArea, 0, buffer, MAX_NAME_LENGTH);
+		if (0 == readRet) {
+			// Read OK
+			// Check values are not all FF or 00
+			size_t nonEmptyCount = 0;
+			size_t terminationCharPosition = 0;
+			for (size_t pos = 0;pos < MAX_NAME_LENGTH;++pos) {
+				if (buffer[pos] != 0 && buffer[pos] != 0xff) {
+					++nonEmptyCount;
+				}
+				if (pos >= 8 && 0 == terminationCharPosition && buffer[pos] == (uint8_t)'\0') {
+					// found the first char termination character
+					terminationCharPosition = pos;
+				}
+			}
+			if (0 == nonEmptyCount) {
+				APP_DBG("Read flash configuration area is empty. Using default configuration.");
+			} else {
+				APP_DBG("Found configuration");
+				country = (uint16_t)(*buffer);
+				state = (uint16_t)(*(buffer + 2));
+				code = (std::uint32_t)(*(buffer + 4));
+				if (0 == terminationCharPosition) {
+					terminationCharPosition = MAX_NAME_LENGTH;
+				}
+				size_t strLength = terminationCharPosition - 8;
+				char cbuffer[MAX_NAME_LENGTH - 8 + 1];
+				cbuffer[strLength] = '\0';
+				// Read the title string
+				for (size_t strPos = 8;strPos < terminationCharPosition;++strPos) {
+					cbuffer[strPos - 8] = (char)(*(buffer + strPos));
+				}
+				name = std::string(cbuffer);
+				APP_DBG("Configuration successfully read from flash storage");
+			}
+		} else {
+			APP_DBG("Error reading flash storage area");
+		}
+	}
+
 	ConcreteExtendedDataV1 extendedData;
-	extendedData.addSection(ExtendedDataSegmentCodesV1::TextPremises, beaconBasic3.name);
+	extendedData.addSection(ExtendedDataSegmentCodesV1::TextPremises, name);
 
 	payload::beacon::ConcreteBeaconPayloadDataSupplierV1 pds(
-		beaconBasic3.country,
-		beaconBasic3.state,
-		beaconBasic3.code,
+		country,
+		state,
+		code,
 		extendedData
 	);
 	
 	herald::ble::nordic_uart::NordicUartSensorDelegate nus(ctx);
 
-  // this is unusual, but required. Really we should log activity to serial BLE or similar
+	// this is unusual, but required. Really we should log activity to serial BLE or similar
 	DummyDelegate appDelegate;
 	SensorDelegateSet sensorDelegates(appDelegate, nus);
 	
@@ -275,8 +344,8 @@ int main(void)
 			-1, K_USER,
 			K_NO_WAIT);
 
-  // herald_entry();
-  // NOTE Above only works if CONFIG_MAIN_STACK_SIZE=2048 is set in prj.conf
+	// herald_entry();
+	// NOTE Above only works if CONFIG_MAIN_STACK_SIZE=2048 is set in prj.conf
 
 	/* Implement notification. At the moment there is no suitable way
 	 * of starting delayed work so we do it here
