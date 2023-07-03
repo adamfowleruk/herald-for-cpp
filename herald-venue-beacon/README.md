@@ -118,7 +118,7 @@ Note that this file is an example for the nrf52dk_nrf52832 board with its defaul
 This files content with explanation is below. Note: I've added spaces for ease of explanation:-
 
 ```txt
-:02 0000 02 7A0082
+:02 0000 02 7A00 82
 # The above specified an initial memory address, divided by 16. The above is 0007a000 - the start of the nrf52832 storage partition.
 :11 0001 00 0001 0002 00000004 544553545445535400 67
 The above writes 11 data bytes - country uint16_t, state uint16_t, beacon ID code uint32_t, then text (TESTTEST) ended with the termination character (00 or \0 in C).
