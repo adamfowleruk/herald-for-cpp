@@ -218,6 +218,10 @@ void herald_entry() {
 	std::uint16_t country = noVenue.country;
 	std::uint16_t state = noVenue.state;
 	std::uint32_t code = noVenue.code;
+	// X, Y, Z positions in CM from a common origin
+	std::uint16_t x = 0;
+	std::uint16_t y = 0;
+	std::uint16_t z = 0;
 	std::string name = std::string(noVenue.name); // force copy
 
 	const struct flash_area *storageArea;
@@ -251,15 +255,21 @@ void herald_entry() {
 				country = (uint16_t)(*buffer);
 				state = (uint16_t)(*(buffer + 2));
 				code = (std::uint32_t)(*(buffer + 4));
+
+				// Read the X, Y, Z position of the beacon (in cm, max 655.35m from origin)
+				x = (uint16_t)(*(buffer + 8));
+				y = (uint16_t)(*(buffer + 10));
+				z = (uint16_t)(*(buffer + 12));
+
 				if (0 == terminationCharPosition) {
 					terminationCharPosition = MAX_NAME_LENGTH;
 				}
-				size_t strLength = terminationCharPosition - 8;
-				char cbuffer[MAX_NAME_LENGTH - 8 + 1];
+				size_t strLength = terminationCharPosition - 14;
+				char cbuffer[MAX_NAME_LENGTH - 14 + 1];
 				cbuffer[strLength] = '\0';
 				// Read the title string
-				for (size_t strPos = 8;strPos < terminationCharPosition;++strPos) {
-					cbuffer[strPos - 8] = (char)(*(buffer + strPos));
+				for (size_t strPos = 14;strPos < terminationCharPosition;++strPos) {
+					cbuffer[strPos - 14] = (char)(*(buffer + strPos));
 				}
 				name = std::string(cbuffer);
 				APP_DBG("Configuration successfully read from flash storage");
@@ -271,6 +281,11 @@ void herald_entry() {
 
 	ConcreteExtendedDataV1 extendedData;
 	extendedData.addSection(ExtendedDataSegmentCodesV1::TextPremises, name);
+	Data xyz;
+	xyz.append(x);
+	xyz.append(y);
+	xyz.append(z);
+	extendedData.addSection(ExtendedDataSegmentCodesV1::LocalGridPosition, xyz);
 
 	payload::beacon::ConcreteBeaconPayloadDataSupplierV1 pds(
 		country,

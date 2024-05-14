@@ -120,8 +120,8 @@ This files content with explanation is below. Note: I've added spaces for ease o
 ```txt
 :02 0000 02 7A00 82
 # The above specified an initial memory address, divided by 16. The above is 0007a000 - the start of the nrf52832 storage partition.
-:11 0001 00 0001 0002 00000004 544553545445535400 67
-The above writes 11 data bytes - country uint16_t, state uint16_t, beacon ID code uint32_t, then text (TESTTEST) ended with the termination character (00 or \0 in C).
+:17 0001 00 0001 0002 00000004 03E8 01F4 0078 544553545445535400 09
+The above writes 17 data bytes - country uint16_t, state uint16_t, beacon ID code uint32_t, X-Y-Z position in cm (each uint16_t - x=10m, y=5m, z=1.2m), then text (TESTTEST) ended with the termination character (00 or \0 in C).
 :00 0000 01 FF
 # The above says that this is the end of the hex file
 ```

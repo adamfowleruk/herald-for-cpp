@@ -24,11 +24,14 @@ def main():
     # 1. Get command line parameters
     parser = argparse.ArgumentParser(
                     prog='venuehex',
-                    description='Creates a Venu Beacon hex file.',
+                    description='Creates a Venue Beacon hex file.',
                     epilog='Creates a Herald Venue Beacon configuration hex file and merges it with your zephyr hex file.')
     parser.add_argument("-c","--country",type=int,default=0,help="ISO8266 Country Code for Beacon (uint16)")
     parser.add_argument("-s","--state",type=int,default=0,help="A Country's internal State Code for Beacon (uint16)")
     parser.add_argument("-i","--idcode",type=int,default=0,help="Beacon instance identifier Code allocated (uint32)")
+    parser.add_argument("-x","--x",type=int,default=0,help="A Beacon X position in cm (uint16)")
+    parser.add_argument("-y","--y",type=int,default=0,help="A Beacon Y position in cm (uint16)")
+    parser.add_argument("-z","--z",type=int,default=0,help="A Beacon Z position in cm (uint16)")
     parser.add_argument("-n","--name",default="UnconfiguredHeraldBeacon",help="Beacon instance text name (max: 32 characters. ASCII)")
     parser.add_argument("-b","--base",default="7A00",help="The base address for this device's storage partition (divided by 16. Hex)")
     parser.add_argument("-o","--output",default="venue.hex",help="The output file (default: venue.hex)")
@@ -51,6 +54,9 @@ def main():
     hexline2data = ("%02X" % (args["country"])).zfill(4) + \
                    ("%02X" % (args["state"])).zfill(4) + \
                    ("%02X" % (args["idcode"])).zfill(8) + \
+                   ("%02X" % (args["x"])).zfill(4) + \
+                   ("%02X" % (args["y"])).zfill(4) + \
+                   ("%02X" % (args["z"])).zfill(4) + \
                    namestring + "00" # Nul termination character (\0 in C)
     # print(hexline2data)
     hexline2 = ("%02X" % int(len(hexline2data)/2)).zfill(2) + '000100' + hexline2data
