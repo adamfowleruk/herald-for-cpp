@@ -47,12 +47,13 @@ static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 /* The maximum name length allowed in Flash storage */
 #define MAX_NAME_LENGTH 40
 
-void k_sys_fatal_error_handler(unsigned int reason, const z_arch_esf_t *esf) {
-	// LOG_PANIC();
-	while (1) {
-		// do nothing
-	}
-}
+// The below fails with nRF SDK 2.6.1 as its defined in an nrf log include - so we leave commented out now
+// void k_sys_fatal_error_handler(unsigned int reason, const z_arch_esf_t *esf) {
+// 	// LOG_PANIC();
+// 	while (1) {
+// 		// do nothing
+// 	}
+// }
 
 struct k_thread herald_thread;
 constexpr int stackMaxSize = 

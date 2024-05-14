@@ -53,7 +53,7 @@ struct ExtendedDataSegmentCodesV1 {
   constexpr ExtendedDataSegmentCodesV1(uint8_t v = 0) : value(v) {}
   constexpr operator uint8_t() const { return value; }
 
-  static const ExtendedDataSegmentCodesV1 TextPremises, TextLocation, TextArea, LocationUrl;
+  static const ExtendedDataSegmentCodesV1 LocalGridPosition, TextPremises, TextLocation, TextArea, LocationUrl;
 };
 
 constexpr const ExtendedDataSegmentCodesV1

@@ -141,9 +141,7 @@ Then be sure to flash `combined.hex` to your device and NOT the zephyr.hex file 
 
 When you reboot your device you will see the correct data exposed in the Herald Venue Beacon in its Herald Payload area.
 
-TODO: I shall create a python helper script to create the hex file in future.
-
-
+Use the `venuehex.py` file in this folder to generate the metadata hex file(s) you need.
 
 ## Ancillary instructions / extensions
 
