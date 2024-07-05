@@ -131,17 +131,37 @@ A good modulo calculator is here (Use the `CheckSum8 2s Complement` value): http
 
 Note: See your DTS file for your board for the named `storage_partition` base address. E.g. for the nrf52dk_nrf52832: https://github.com/zephyrproject-rtos/zephyr/blob/db1a718341a3724b82c052e6e6b7db19251f7a22/boards/arm/nrf52dk_nrf52832/nrf52dk_nrf52832.dts#L222
 
+### Generating position hex file
+
+Use the `venuehex.py` file in this folder to generate the metadata hex file(s) you need.
+
+Here is an example of programming 4 boards in a 2x2 beacon grid square with 2m sides with beacons at shoulder height (1.5m).
+
+```sh
+python venuehex.py -c 1 -s 1 -i 5 -x 0 -y 0 -z 150 -n B05 -o venue-b05-0-0-150.hex  
+python venuehex.py -c 1 -s 1 -i 6 -x 200 -y 0 -z 150 -n B06 -o venue-b06-200-0-150.hex  
+python venuehex.py -c 1 -s 1 -i 7 -x 200 -y 200 -z 150 -n B07 -o venue-b07-200-200-150.hex
+python venuehex.py -c 1 -s 1 -i 8 -x 0 -y 200 -z 150 -n B08 -o venue-b08-0-200-150.hex   
+```
+
+Note: The instance (-i) flag must change for each device so the Herald demo app correctly identifies the beacons as unique, separate devices.
+
+Note: The base memory address (-b) flag defaults to the base address for Nordic's own nRF52840 dongle (0x7A000 - or `-b 7A00`). For the Maker Diary nRF52840 USB dongle this should be specified as `-b CC00` (I.e. 0xCC000) as per the Zephyr.dts file in the build folder (search for storage_partition in here to find the value needed for your board). Note that the trailing `0` is removed when using the `-b` flag.
+
+### Merging hex files
+
 To merge your built Herald venue beacon programme with this configuration file, execute:-
 
 ```sh
-mergehex -m build/zephyr/zephyr.hex test-flash-storage.hex -o combined.hex
+mergehex -m build/zephyr/zephyr.hex venue-b05-200-0-0.hex   -o combined-b05.hex
 ```
 
-Then be sure to flash `combined.hex` to your device and NOT the zephyr.hex file as usual.
+Then be sure to flash `combined-b05.hex` to your device and NOT the zephyr.hex file as usual.
 
 When you reboot your device you will see the correct data exposed in the Herald Venue Beacon in its Herald Payload area.
 
-Use the `venuehex.py` file in this folder to generate the metadata hex file(s) you need.
+Note: If using the UF2 bootloader, read the section at the end of this readme to conver the hex file to a UF2 bootloader image.
+
 
 ## Ancillary instructions / extensions
 
@@ -183,3 +203,33 @@ Once this is done the board will program itself, disconnect, and reconnect.
 **NOTE**: Be sure to hit the 'reset' button to launch the newly programmed app - it doesn't start automatically.
 
 **NOTE**: Also the DAPLINK drive will automatically reconnect. This doesn't mean the beacon app isn't running.
+
+### Maker Diary nRF52832 USB Dongle board
+
+If using this board and the UF2 bootloader, you need to follow these programming instructions to convert the hex to a UF2. You can then simply drag/drop the file to programme the board:-
+
+https://wiki.makerdiary.com/nrf52840-mdk-usb-dongle/programming/uf2boot/#flash-memory-layout
+
+Once initially programmed - DOUBLE click the reset button to enter UF2 mode.
+
+To install UF2 tools:-
+
+```sh
+cd c:\\ncs\\v2.6.1
+pip3 install -r zephyr/scripts/requirements.txt     
+pip3 install -r nrf/scripts/requirements.txt    
+pip3 install -r bootloader/mcuboot/scripts/requirements.txt
+py -3 -m pip install --pre -U git+https://github.com/makerdiary/uf2utils.git@main
+```
+
+To create a UF2 image:-
+
+```sh
+uf2conv -f 0xADA52840 -c -o app-b08.uf2 .\combined-b08.hex
+```
+
+Now drag and drop the image to the device.
+
+Note: You may need to hit the reset button TWICE on the device to enter bootloader mode.
+
+The device will reboot and start the application automatically.

@@ -228,7 +228,7 @@ void herald_entry() {
 	const struct flash_area *storageArea;
 	int err = flash_area_open(FIXED_PARTITION_ID(storage_partition), &storageArea);
 
-	if (err != 0) {
+	if (err < 0) {
 		APP_DBG("Error opening storage flash area");
 	} else {
 		APP_DBG("Attempting to read flash storage...");
@@ -278,6 +278,7 @@ void herald_entry() {
 		} else {
 			APP_DBG("Error reading flash storage area");
 		}
+		flash_area_close(storageArea);
 	}
 
 	ConcreteExtendedDataV1 extendedData;
