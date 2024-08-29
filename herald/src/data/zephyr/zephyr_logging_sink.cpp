@@ -4,7 +4,7 @@
 
 #include "herald/data/zephyr/zephyr_logging_sink.h"
 
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 
 #include <string>
 

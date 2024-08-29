@@ -8,11 +8,11 @@ namespace herald {
 namespace ble {
 
 BLESensorConfiguration::BLESensorConfiguration()
-  : serviceUUID(UUID::fromString("428132af-4746-42d3-801e-4572d65bfd9b")),
+  : serviceUUID(UUID::fromString("0000FCF6-0000-1000-8000-00805F9B34FB")),
     androidSignalCharacteristicUUID(UUID::fromString("f617b813-092e-437a-8324-e09a80821a11")),
     iosSignalCharacteristicUUID(UUID::fromString("0eb0d5f2-eae4-4a9a-8af3-a4adb02d4363")),
     payloadCharacteristicUUID(UUID::fromString("3e98c0f8-8f05-4829-a121-43e38f8933e7")),
-    manufacturerIdForSensor(65530),
+    manufacturerIdForSensor(1521), // aka 0x05F1
     manufacturerIdForApple(76),
     signalCharacteristicActionWritePayload(std::byte(1)),
     signalCharacteristicActionWriteRSSI(std::byte(2)),

@@ -53,14 +53,16 @@ struct ExtendedDataSegmentCodesV1 {
   constexpr ExtendedDataSegmentCodesV1(uint8_t v = 0) : value(v) {}
   constexpr operator uint8_t() const { return value; }
 
-  static const ExtendedDataSegmentCodesV1 TextPremises, TextLocation, TextArea, LocationUrl;
+  static const ExtendedDataSegmentCodesV1 LocalGridPosition, TextPremises, TextLocation, TextArea, LocationUrl;
 };
 
-constexpr const ExtendedDataSegmentCodesV1 
+constexpr const ExtendedDataSegmentCodesV1
+ExtendedDataSegmentCodesV1::LocalGridPosition(0x09), // X, Y, Z position as uint16_t centimetres from a common origin (for the given TextPremises) 
 ExtendedDataSegmentCodesV1::TextPremises(0x10),
 ExtendedDataSegmentCodesV1::TextLocation(0x11),
 ExtendedDataSegmentCodesV1::TextArea(0x12),
 ExtendedDataSegmentCodesV1::LocationUrl(0x13)
+
 ;
 
 struct ConcreteExtendedDataSectionV1 {

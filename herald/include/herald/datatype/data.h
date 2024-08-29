@@ -7,6 +7,7 @@
 
 #include <string>
 #include <iostream>
+#include <cstddef>
 
 #include "memory_arena.h"
 

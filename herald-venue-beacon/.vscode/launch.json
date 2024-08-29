@@ -14,7 +14,7 @@
       "servertype": "jlink",
       "interface": "swd",
       "device": "NRF5340_XXAA_APP",
-      "serverpath": "C:/Program Files (x86)/SEGGER/JLink/JLinkGDBServerCL.exe",
+      "serverpath": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe",
       // "armToolchainPath": "${config:armToolchainPath}/bin", // Only works if you have installed GNU Arm embeeded toolchain external to NCS
       "armToolchainPath": "${env:ZEPHYR_BASE}/../toolchain/opt/bin", // Works if ZEPHYR_BASE set (which needs to be for our CMake to run)
       "rttConfig": {
@@ -38,7 +38,7 @@
       "servertype": "jlink",
       "interface": "swd",
       "device": "NRF52840_XXAA",
-      "serverpath": "C:/Program Files (x86)/SEGGER/JLink/JLinkGDBServerCL.exe",
+      "serverpath": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe",
       // "armToolchainPath": "${config:armToolchainPath}/bin", // Only works if you have installed GNU Arm embeeded toolchain external to NCS
       "armToolchainPath": "${env:ZEPHYR_BASE}/../toolchain/opt/bin", // Works if ZEPHYR_BASE set (which needs to be for our CMake to run)
       "rttConfig": {
@@ -62,7 +62,7 @@
       "servertype": "jlink",
       "interface": "swd",
       "device": "NRF52833_XXAA",
-      "serverpath": "C:/Program Files (x86)/SEGGER/JLink/JLinkGDBServerCL.exe",
+      "serverpath": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe",
       // "armToolchainPath": "${config:armToolchainPath}/bin", // Only works if you have installed GNU Arm embeeded toolchain external to NCS
       "armToolchainPath": "${env:ZEPHYR_BASE}/../toolchain/opt/bin", // Works if ZEPHYR_BASE set (which needs to be for our CMake to run)
       "rttConfig": {
@@ -86,7 +86,7 @@
       "servertype": "jlink",
       "interface": "swd",
       "device": "NRF52832_XXAA",
-      "serverpath": "C:/Program Files (x86)/SEGGER/JLink/JLinkGDBServerCL.exe",
+      "serverpath": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe",
       // "armToolchainPath": "${config:armToolchainPath}/bin", // Only works if you have installed GNU Arm embeeded toolchain external to NCS
       "armToolchainPath": "${env:ZEPHYR_BASE}/../toolchain/opt/bin", // Works if ZEPHYR_BASE set (which needs to be for our CMake to run)
       "rttConfig": {
@@ -116,7 +116,7 @@
       "client": "arm-none-eabi-gdb.exe",
       "server": "JLinkGDBServer",
       "windows": {
-        "server": "C:/Program Files (x86)/SEGGER/JLink/JLinkGDBServerCL.exe",
+        "server": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe",
       },
       "serverArgs": [
         "-device", "NRF5340_XXAA_APP",
@@ -145,7 +145,7 @@
       "client": "arm-none-eabi-gdb.exe",
       "server": "JLinkGDBServer",
       "windows": {
-        "server": "C:/Program Files (x86)/SEGGER/JLink/JLinkGDBServerCL.exe",
+        "server": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe",
       },
       "serverArgs": [
         "-device", "NRF52840_XXAA",
@@ -174,7 +174,7 @@
       "client": "arm-none-eabi-gdb.exe",
       "server": "JLinkGDBServer",
       "windows": {
-        "server": "C:/Program Files (x86)/SEGGER/JLink/JLinkGDBServerCL.exe",
+        "server": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe",
       },
       "serverArgs": [
         "-device", "NRF52833_XXAA",
@@ -203,7 +203,7 @@
       "client": "arm-none-eabi-gdb.exe",
       "server": "JLinkGDBServer",
       "windows": {
-        "server": "C:/Program Files (x86)/SEGGER/JLink/JLinkGDBServerCL.exe",
+        "server": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe",
       },
       "serverArgs": [
         "-device", "NRF52832_XXAA",

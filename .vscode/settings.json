@@ -113,5 +113,8 @@
   "C_Cpp.intelliSenseMemoryLimit": 16384,
   "editor.quickSuggestions": {
     "other": true
-  }
+  },
+  "nrf-connect.topdir": "${nrf-connect.sdk:2.6.1}",
+  "cmake.configureOnOpen": false,
+  "nrf-connect.toolchain.path": "${nrf-connect.toolchain:2.6.1}"
 }

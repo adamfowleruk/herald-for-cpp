@@ -7,6 +7,8 @@
 
 #include "../sensor_logger.h"
 
+#define log_strdup(...) __VA_ARGS__
+
 // NOTE: Link Herald to the Zephyr logging system
 // Set HERALD_LOG_LEVEL=4 for debug in CMake using add_definitions(-DHERALD_LOG_LEVEL=4 )
 //   Defaults to 0 (OFF) - see herald/data/zephyr/zephyr_logging_sink.h

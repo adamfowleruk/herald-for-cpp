@@ -23,9 +23,9 @@
 #include <functional>
 #include <optional>
 
-#include <bluetooth/bluetooth.h>
-#include <bluetooth/gatt.h>
-#include <bluetooth/gatt_dm.h>
+#include <zephyr/bluetooth/bluetooth.h>
+#include <zephyr/bluetooth/gatt.h>
+// #include <zephyr/bluetooth/gatt_dm.h>
 
 namespace herald {
 

@@ -12,8 +12,8 @@
 #include "herald/datatype/bluetooth_state.h"
 #include "herald/datatype/date.h"
 
-#include <settings/settings.h>
-#include <bluetooth/bluetooth.h>
+#include <zephyr/settings/settings.h>
+#include <zephyr/bluetooth/bluetooth.h>
 
 namespace herald {
 
@@ -267,7 +267,7 @@ ZephyrContextProvider::getNow() noexcept {
 bool
 ZephyrContextProvider::addCustomService(const herald::ble::BluetoothUUID& serviceId)
 {
-  advertiser.customServices.add(BLEService{.uuid=serviceId,.characteristics={}});
+  advertiser.customServices.add(BLEService(serviceId,BLECharacteristicList()));
   advertiser.markAdvertAsDirty();
   return true;
 }
