@@ -74,7 +74,8 @@ struct BLEScanResponseData {
 enum class BLEAdvertManufacturers : uint16_t {
   // NOTE: Little endian actual values at this point
   apple = 0x004c, // TODO patch the Android extractAppleManuSegment function too
-  heraldUnregistered = 0xfaff
+  heraldUnregistered = 0xfaff,
+  linuxFoundation = 0x05f1
 };
 
 // low level types
@@ -92,6 +93,14 @@ struct BLEAdvertAppleManufacturerSegment {
   BLEAdvertAppleManufacturerSegment(std::uint8_t t, Data&& d) : type(t), data(d) {};
   BLEAdvertAppleManufacturerSegment(const BLEAdvertAppleManufacturerSegment&) = default;
   BLEAdvertAppleManufacturerSegment(BLEAdvertAppleManufacturerSegment&&) = default;
+};
+
+struct BLEAdvertServiceData {
+  std::uint16_t service;
+  Data data;
+  BLEAdvertServiceData(std::uint16_t uuid, Data&& d) : service(uuid), data(d) {};
+  BLEAdvertServiceData(const BLEAdvertServiceData&) = default;
+  BLEAdvertServiceData(BLEAdvertServiceData&&) = default;
 };
 
 }

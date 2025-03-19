@@ -223,6 +223,8 @@ namespace zephyrinternal {
     void *context);
 
   const struct bt_gatt_dm_cb* getDiscoveryCallbacks();
+
+  int write_message(struct bt_conn *conn, Data& message);
 }
 
 template <typename ContextT, typename PayloadDataSupplierT, typename BLEDatabaseT, typename SensorDelegateSetT>
@@ -777,6 +779,41 @@ public:
     // }
     return {};
   }
+  
+  std::optional<Activity> writeMessage(Activity activity) override
+  {
+    // TODO send a message
+    // Find the BLEDevice
+    // Check the messages on the queue
+    // Send a single message and remove from the queue
+    HTDBG("Entered writeMessage activity");
+    auto currentTargetOpt = std::get<1>(activity.prerequisites.front());
+    if (!currentTargetOpt.has_value()) {
+      HTDBG("No target specified for write message activity. Returning.");
+      return {}; // We've been asked to connect to no specific target - not valid for Bluetooth
+    }
+    // Ensure we have a cached state (i.e. we are connected)
+    auto& state = findOrCreateState(currentTargetOpt.value());
+    if (state.state != BLEDeviceState::connected) {
+      HTDBG("Not connected to target of write activity. Returning.");
+      return {};
+    }
+    if (NULL == state.connection) {
+      HTDBG("State for activity does not have a connection. Returning.");
+      return {};
+    }
+    // Lookup BLEDevice
+    auto& device = bledb.device(currentTargetOpt.value());
+    // Get message data from Device
+    auto& messages = device.messageQueue();
+    if (messages.size() > 0) {
+      Data& message = messages[0];
+      // Now send the message!
+      write_message(state.connection, message);
+      messages.remove(message);
+    }
+    return {};
+  }
 
   // std::optional<Activity> immediateSend(Activity activity) override
   // {
@@ -972,6 +1009,11 @@ private:
 
           continue; // check for other characteristics too
         }
+        
+        
+        // TODO Add Herald Protocol V2 write characteristic here too, incase it's not detected in the manufacturer data area
+
+
         matches = bt_uuid_cmp(chrc->uuid, &zephyrinternal::getHeraldSignalAndroidCharUUID()->uuid);
         if (0 == matches) {
           HTDBG("    - FOUND Herald android signal characteristic. logging.");

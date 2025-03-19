@@ -103,7 +103,8 @@
     "${workspaceFolder}/herald-wearable",
     "${workspaceFolder}/herald-wearable-c",
     "${workspaceFolder}/herald-venue-beacon",
-    "${workspaceFolder}/herald-tests-zephyr"
+    "${workspaceFolder}/herald-tests-zephyr",
+    "${workspaceFolder}\\herald-mesh-relay"
   ],
   "kconfig.zephyr.board": {
     "board": "nrf52840dk_nrf52840",

@@ -109,10 +109,18 @@ public:
   bool hasEverConnected() const;
   void hasEverConnected(bool newValue);
 
+  // Herald Protocol V2 flags
+  bool supportsProtocolV2() const;
+  void supportsProtocolV2(bool supported);
+
+  // Herald mesh as opposed to Bluetooth SIG Mesh
+  bool supportsHeraldMesh() const;
+  void supportsHeraldMesh(bool supported);
+
 private:
   // Note: Bit fields merged into a single class
   //unsigned short int bitfields; // at least 16 bits (usually always 16 bits)
-  std::bitset<16> bitFields; // will always consume sets of 8 bits, so round up
+  std::bitset<24> bitFields; // will always consume sets of 8 bits, so round up
   // 0 = BLEInternalState field 1
   // 1 = BLEInternalState field 2
   // 2 = BLEInternalState field 3
@@ -129,6 +137,8 @@ private:
   // 13 = hasSignalChar
   // 14 = hasSecureChar
   // 15 = hasEverConnected
+  // 16 = protocolV2Supported (write characteristic)
+  // 17 = heraldMeshSupported (via V2 write)
 };
 
 struct DiscoveredState {
@@ -217,8 +227,8 @@ public:
   // TODO add in generic Advert and GATT handle number information caching here
 
   // bool hasAdvertData() const; // TODO unused, consider removing
-  void advertData(std::vector<BLEAdvertSegment> segments); // TODO getter unused, so consider removing
-  // const std::vector<BLEAdvertSegment>& advertData() const; // TODO unused, consider removing
+  void advertData(std::vector<BLEAdvertSegment> segments);
+  const std::vector<BLEAdvertSegment>& advertData() const; 
 
   /** Have we set the service list for this device yet? (i.e. done GATT service discover) **/
   // bool hasServicesSet() const; // TODO unused, consider removing
@@ -282,6 +292,19 @@ public:
   // void registerWritePayload(Date at); // ALWAYS externalise time (now())
   // void registerWritePayloadSharing(Date at); // ALWAYS externalise time (now())
   // void registerWriteRssi(Date at); // ALWAYS externalise time (now())
+
+  // HERALD PROTOCOL V2 STATES
+  bool supportsProtocolV2() const;
+  void supportsProtocolV2(bool supported);
+
+  // Herald mesh as opposed to Bluetooth SIG Mesh
+  bool supportsHeraldMesh() const;
+  void supportsHeraldMesh(bool supported);
+
+  void writeMessage(Data message);
+  std::size_t getQueueSize() const;
+  AllocatableArray<Data,20>& messageQueue();
+  
   
 private:
   static BLESensorConfiguration staticConfig; // Used by empty constructor for array construction ONLY
@@ -338,6 +361,8 @@ private:
 
   // bool hasEverConnected; // hasPotential, relevant
   // int connectRepeatedFailures; // hasPotential, relevant
+
+  AllocatableArray<Data, 20> writeMessageQueue;
 };
 
 using BLEDeviceList = ReferenceArray<BLEDevice, 150, true>;

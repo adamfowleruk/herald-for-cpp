@@ -68,6 +68,9 @@ namespace zephyrinternal {
   struct bt_uuid_128 herald_char_payload_uuid = BT_UUID_INIT_128(
     0xe7, 0x33, 0x89, 0x8f, 0xe3, 0x43, 0x21, 0xa1, 0x29, 0x48, 0x05, 0x8f, 0xf8, 0xc0, 0x98, 0x3e
   );
+  struct bt_uuid_128 herald_char_protocol_v2 = BT_UUID_INIT_128(
+    0xc0, 0x5b, 0x67, 0xed, 0x04, 0x61, 0xfc, 0x85, 0x7a, 0x43, 0x72, 0x70, 0xa2, 0x8a, 0x6d, 0x13
+  );
   struct bt_uuid_128* getHeraldUUID() {
     return &herald_uuid;
   }
@@ -79,6 +82,9 @@ namespace zephyrinternal {
   }
   struct bt_uuid_128* getHeraldPayloadCharUUID() {
     return &herald_char_payload_uuid;
+  }
+  struct bt_uuid_128* getHeraldProtocolV2CharUUID() {
+    return &herald_char_protocol_v2;
   }
   
 
@@ -287,6 +293,99 @@ namespace zephyrinternal {
       concreteReceiverInstance.value().get().scan_cb(addr,rssi,adv_type,buf);
     }
   }
+
+
+  static uint32_t write_count;
+  static uint32_t write_len;
+  static uint32_t write_rate;
+  uint32_t last_write_rate;
+
+  static void write_message_cb(struct bt_conn *conn, void *user_data)
+  {
+    static uint32_t cycle_stamp;
+    uint64_t delta;
+
+    delta = k_cycle_get_32() - cycle_stamp;
+    delta = k_cyc_to_ns_floor64(delta);
+
+    /* if last data rx-ed was greater than 1 second in the past,
+    * reset the metrics.
+    */
+    if (delta > (1U * NSEC_PER_SEC)) {
+      printk("%s: count= %u, len= %u, rate= %u bps.\n", __func__,
+            write_count, write_len, write_rate);
+
+      last_write_rate = write_rate;
+
+      write_count = 0U;
+      write_len = 0U;
+      write_rate = 0U;
+      cycle_stamp = k_cycle_get_32();
+    } else {
+      uint16_t len;
+
+      write_count++;
+
+      /* Extract the 16-bit data length stored in user_data */
+      len = (uint32_t)user_data & 0xFFFF;
+
+      write_len += len;
+      write_rate = ((uint64_t)write_len << 3) * (1U * NSEC_PER_SEC) /
+            delta;
+    }
+  }
+
+  /* Writes the actual message over Bluetooth */
+  int write_message(struct bt_conn *conn, Data& message)
+  {
+    static uint8_t data[BT_ATT_MAX_ATTRIBUTE_LEN] = {0, };
+    static uint16_t data_len;
+    uint16_t data_len_max;
+    int err;
+
+    data_len_max = bt_gatt_get_mtu(conn) - 3;
+    if (data_len_max > BT_ATT_MAX_ATTRIBUTE_LEN) {
+      data_len_max = BT_ATT_MAX_ATTRIBUTE_LEN;
+    }
+
+  // #if TEST_FRAGMENTATION_WITH_VARIABLE_LENGTH_DATA
+  //   /* Use incremental length data for every write command */
+  //   /* TODO: Include test case in BabbleSim tests */
+  //   static bool decrement;
+
+  //   if (decrement) {
+  //     data_len--;
+  //     if (data_len <= 1) {
+  //       data_len = 1;
+  //       decrement = false;
+  //     }
+  //   } else {
+  //     data_len++;
+  //     if (data_len >= data_len_max) {
+  //       data_len = data_len_max;
+  //       decrement = true;
+  //     }
+  //   }
+  // #else
+    /* Use fixed length data for every write command */
+    data_len = data_len_max;
+  // #endif
+
+    /* Pass the 16-bit data length value (instead of reference) in
+    * user_data so that unique value is pass for each write callback.
+    * Using handle 0x0001, we do not care if it is writable, we just want
+    * to transmit the data across.
+    */
+    err = bt_gatt_write_without_response_cb(conn, 0x0001, data, data_len,
+              false, write_message_cb,
+              (void *)((uint32_t)data_len));
+    if (err) {
+      printk("%s: Write cmd failed (%d).\n", __func__, err);
+    }
+
+    return err;
+  }
+
 
 
 }

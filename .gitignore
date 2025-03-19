@@ -5,5 +5,8 @@ Output
 *.so
 *.a
 **/.DS_Store
-**/build-*
+**/build_*
 */.vscode/.cortex-debug.*.json
+**/*.hex
+**/*.zip
+**/*.uf2

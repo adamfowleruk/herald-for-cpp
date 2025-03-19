@@ -28,8 +28,8 @@ bool extractTxPower(const std::vector<BLEAdvertSegment>& segments, std::uint8_t&
 std::vector<Data> extractHeraldManufacturerData(const std::vector<BLEAdvertManufacturerData>& manuData) noexcept;
 std::vector<BLEAdvertManufacturerData> extractManufacturerData(const std::vector<BLEAdvertSegment>& segments) noexcept;
 std::vector<BLEAdvertAppleManufacturerSegment> extractAppleManufacturerSegments(const std::vector<BLEAdvertManufacturerData>& manuData) noexcept;
-
-// std::vector<BLEAdvertServiceData> extractServiceUUID128Data(std::vector<BLEAdvertSegment> segments) noexcept;
+std::vector<BLEAdvertManufacturerData> extractHeraldManufacturerSegments(const std::vector<BLEAdvertSegment>& segments) noexcept;
+std::vector<BLEAdvertServiceData> extractServiceUUID128Data(std::vector<BLEAdvertSegment> segments) noexcept;
 
 // Low level utility functions
 // Exposed in API to allow others to use them

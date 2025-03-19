@@ -108,25 +108,43 @@ public:
     //     device->operatingSystem(BLEDeviceOperatingSystem::android);
     //   }
     // }
+
+    // Check for Herald Protocol V2 characteristic, if supported - DO VIA MANU DATA AREA FOR NOW
+// #ifdef CONFIG_HERALD_PROTOCOL_V2
+//     auto serviceData128 = BLEAdvertParser::extractServiceUUID128Data(segments);
+//     bool hasHeraldService = false;
+//     for (auto& service : serviceData128) {
+//       if (service.uuid == heraldUuidData) {
+//         hasHeraldService = true;
+//         HTDBG("FOUND DEVICE ADVERTISING HERALD SERVICE");
+//         // Now check to see if the Herald Protocol V2 write characteristic is present
+
+//       }
+//     }
+// #endif
     
 
     if (0 != heraldDataSegments.size()) {
       // HTDBG("Found Herald Android pseudo device address in advert");
       // Try to FIND by pseudo first
-      BLEMacAddress pseudo(heraldDataSegments.front());
-      auto samePseudo = matches([&pseudo](const BLEDevice& d) {
-        return d.pseudoDeviceAddress() == pseudo;
-      });
-      if (0 != samePseudo.size() && samePseudo[0].has_value()) {
-        // HTDBG("FOUND EXISTING DEVICE BY PSEUDO");
-        return samePseudo[0].value().get();
+      auto segmentData = heraldDataSegments.front();
+      // Use only first 6 bytes for Pseudo Mac address
+      if (segmentData.size() >= 6) {
+        BLEMacAddress pseudo(segmentData.subdata(0,6)); // Leave remaining datas for assignAdvertData to deal with
+        auto samePseudo = matches([&pseudo](const BLEDevice& d) {
+          return d.pseudoDeviceAddress() == pseudo;
+        });
+        if (0 != samePseudo.size() && samePseudo[0].has_value()) {
+          // HTDBG("FOUND EXISTING DEVICE BY PSEUDO");
+          return samePseudo[0].value().get();
+        }
+        // HTDBG("CREATING NEW DEVICE BY MAC AND PSEUDO ONLY");
+        // Now create new device with mac and pseudo
+        auto& newDevice = device(mac,pseudo);
+        assignAdvertData(newDevice,std::move(segments), manuData);
+        // newDevice->rssi(rssi);
+        return newDevice;
       }
-      // HTDBG("CREATING NEW DEVICE BY MAC AND PSEUDO ONLY");
-      // Now create new device with mac and pseudo
-      auto& newDevice = device(mac,pseudo);
-      assignAdvertData(newDevice,std::move(segments), manuData);
-      // newDevice->rssi(rssi);
-      return newDevice;
     }
 
     // HTDBG("CREATING NEW DEVICE BY MAC ONLY");
@@ -370,6 +388,34 @@ private:
       HTDBG("Unknown non Herald device - inspecting (might be a venue beacon or wearable)");
       // HTDBG((std::string)mac);
     }
+
+    // Herald Protocol V2 manufacturer data area check - Check for protocol and mesh enabled flags in flags byte
+    // auto heraldDataSegments = BLEAdvertParser::extractHeraldManufacturerSegments(newDevice.advertData());
+    // if (0 != heraldDataSegments.size()) {
+    //   HTDBG("Found herald device");
+    //   auto firstSegment = heraldDataSegments.front();
+    //   int bytePos = -1;
+    //   if (firstSegment.data.size() > 6) {
+    //     bytePos = 6;
+    //   } else if (firstSegment.data.size() > 0) {
+    //     bytePos = 0;
+    //   }
+    //   if (-1 != bytePos) {
+    //     // We have a V2 protocol flag byte
+    //     std::uint8_t flagByte = 0x00;
+    //     if (firstSegment.data.uint8(bytePos,flagByte)) {
+    //       // Read OK
+    //       if (0x01 == (0x01 & flagByte)) {
+    //         // Herald Protocol V2 enabled
+    //         newDevice.supportsProtocolV2(true);
+    //       }
+    //       if (0x02 == (0x02 & flagByte)) {
+    //         // Herald Mesh enabled
+    //         newDevice.supportsHeraldMesh(true);
+    //       }
+    //     }
+    //   }
+    // }
   }
 
   void remove(BLEDevice& toRemove) noexcept {

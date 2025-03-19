@@ -261,6 +261,7 @@ public:
     // State 0 - New device -> Read full advert data to see if DCT/Herald -> State Z, 1 or State 3
     // State 1 - Discover services for DCT/Herald on this device -> State Z, or 2
     // State 2 - New Herald BLE device -> Read payload -> State 3
+    //         - Or if a V2 protocol device -> Write our payload to them -> State 3
     // State 3 - Steady state - do nothing
     // State 4 - Has immediateSend data -> Send immediate -> State 3
     // TODO check for nearby payloads
@@ -280,12 +281,30 @@ public:
             // !device.receiveOnly() &&
             !device.hasService(context.getSensorConfiguration().serviceUUID);
     });
-    auto state2Devices = db.matches([this](const BLEDevice& device) -> bool {
+#ifdef CONFIG_HERALD_PROTOCOL_V2
+    auto state2DevicesRead = db.matches([this](const BLEDevice& device) -> bool {
+      return !device.ignore() && 
+            // !device.receiveOnly() &&
+              device.hasService(context.getSensorConfiguration().serviceUUID) &&
+              !device.supportsProtocolV2() &&
+              device.payloadData().size() == 0; // TODO check for Herald transferred payload data (not legacy)
+    });
+    // TODO replace the below with generating a payload to enqueue on the message queue activity
+    auto state2DevicesWrite = db.matches([this](const BLEDevice& device) -> bool {
+      return !device.ignore() && 
+            // !device.receiveOnly() &&
+              device.hasService(context.getSensorConfiguration().serviceUUID) &&
+              device.supportsProtocolV2() &&
+              device.getQueueSize() != 0;
+    });
+#else
+    auto state2DevicesRead = db.matches([this](const BLEDevice& device) -> bool {
       return !device.ignore() && 
             // !device.receiveOnly() &&
               device.hasService(context.getSensorConfiguration().serviceUUID) &&
               device.payloadData().size() == 0; // TODO check for Herald transferred payload data (not legacy)
     });
+#endif
     // auto state4Devices = db.matches([this](const BLEDevice& device) -> bool {
     //   return !device.ignore() && 
     //         // !device.receiveOnly() &&
@@ -325,7 +344,7 @@ public:
     }
 
     // State 2 - read herald payload(s)
-    for (auto& device : state2Devices) {
+    for (auto& device : state2DevicesRead) {
       if (!device.has_value()) {
         continue;
       }
@@ -345,11 +364,34 @@ public:
         // }
         .executor = [this](const Activity activity) -> std::optional<Activity> {
           // fill this out
-        pp.readPayload(activity);
-        return {};
+          pp.readPayload(activity);
+          return {};
         }
       });
     }
+    // State 2 - write herald pending messages
+#ifdef CONFIG_HERALD_PROTOCOL_V2
+    for (auto& device : state2DevicesWrite) {
+      if (!device.has_value()) {
+        continue;
+      }
+      results.emplace_back(Activity{
+        .priority = Priorities::High + 9,
+        .name = "herald-write-message",
+        .prerequisites =  std::vector<std::tuple<FeatureTag,std::optional<TargetIdentifier>>>{
+          1,
+          std::tuple<FeatureTag,std::optional<TargetIdentifier>>{
+            herald::engine::Features::HeraldBluetoothProtocolConnection,
+            device.value().get().identifier()
+          }
+        },
+        .executor = [this](const Activity activity) -> std::optional<Activity> {
+          pp.writeMessage(activity);
+          return {};
+        }
+      });
+    }
+#endif
     // TODO add check for sensor config payload timeout in above IF
     // TODO add BLESensorConfiguration.deviceIntrospectionEnabled && device.supportsModelCharacteristic() && device.model() == null
     // TODO add BLESensorConfiguration.deviceIntrospectionEnabled && device.supportsDeviceNameCharacteristic() && device.deviceName() == null

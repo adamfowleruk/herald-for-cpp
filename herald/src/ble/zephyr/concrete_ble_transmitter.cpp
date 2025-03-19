@@ -14,6 +14,7 @@
 #include <zephyr/bluetooth/conn.h>
 #include <zephyr/bluetooth/uuid.h>
 #include <zephyr/bluetooth/gatt.h>
+#include <zephyr/bluetooth/gap.h>
 
 // C++17 includes
 #include <cstring>
@@ -72,6 +73,9 @@ namespace zephyrinternal {
   struct bt_uuid_128 herald_char_payload_uuid_tx = BT_UUID_INIT_128(
     0xe7, 0x33, 0x89, 0x8f, 0xe3, 0x43, 0x21, 0xa1, 0x29, 0x48, 0x05, 0x8f, 0xf8, 0xc0, 0x98, 0x3e
   );
+  struct bt_uuid_128 herald_char_protocol_v2 = BT_UUID_INIT_128(
+    0xc0, 0x5b, 0x67, 0xed, 0x04, 0x61, 0xfc, 0x85, 0x7a, 0x43, 0x72, 0x70, 0xa2, 0x8a, 0x6d, 0x13
+  );
   BT_GATT_SERVICE_DEFINE(herald_svc,
     BT_GATT_PRIMARY_SERVICE(&herald_uuid_tx),
     BT_GATT_CHARACTERISTIC(&herald_char_signal_android_uuid_tx.uuid,
@@ -82,6 +86,13 @@ namespace zephyrinternal {
               BT_GATT_CHRC_READ,
               BT_GATT_PERM_READ,
               zephyrinternal::read_payload, zephyrinternal::write_payload, nullptr)
+#ifdef CONFIG_HERALD_PROTOCOL_V2
+    ,
+    BT_GATT_CHARACTERISTIC(&herald_char_protocol_v2.uuid,
+              BT_GATT_CHRC_WRITE_WITHOUT_RESP,
+              BT_GATT_PERM_WRITE,
+              zephyrinternal::read_v2, zephyrinternal::write_v2, nullptr)
+#endif
   );
 
 
@@ -96,6 +107,27 @@ namespace zephyrinternal {
   */
   struct bt_data ad[] = {
     BT_DATA_BYTES(BT_DATA_FLAGS, (BT_LE_AD_GENERAL | BT_LE_AD_NO_BREDR)),
+    // Manufacturer data added v2.3 September 2024 for Herald Protocol V2 and Herald Mesh support
+    BT_DATA_BYTES(BT_DATA_MANUFACTURER_DATA, 
+      // Linux Foundation manufacturer
+      0x05, 0xf1, 
+      // We're not using Pseudo Mac - so don't include it
+      // Finally, the one byte flag for Herald boolean flags
+#ifdef CONFIG_HERALD_PROTOCOL_V2
+  #ifdef CONFIG_HERALD_MESH
+    0x03
+  #else
+    0x01
+  #endif
+#else
+  #ifdef CONFIG_HERALD_MESH
+    0x02
+  #else
+    0x00
+  #endif
+#endif
+    ), // LSB of 1 = HeraldProtocolV2 enabled, next bit of 1 = HeraldMesh enabled device
+
     // BT_DATA_BYTES(BT_DATA_TX_POWER, 0x00 ), // See https://github.com/theheraldproject/herald-for-cpp/issues/26
     BT_DATA_BYTES(BT_DATA_UUID16_ALL, 
             //BT_UUID_16_ENCODE(BT_UUID_DIS_VAL),
@@ -105,7 +137,8 @@ namespace zephyrinternal {
     BT_DATA_BYTES(BT_DATA_UUID128_ALL,
             0x9b, 0xfd, 0x5b, 0xd6, 0x72, 0x45, 0x1e, 0x80, 
             0xd3, 0x42, 0x46, 0x47, 0xaf, 0x32, 0x81, 0x42
-    ),
+    )
+    
   };
 
   struct bt_data* getAdvertData() {
@@ -277,7 +310,95 @@ namespace zephyrinternal {
     return len;
   }
 
+
+  // Herald Protocol V2 characteristic read/write (only write is used)
+
+  ssize_t read_v2(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+        void *buf, uint16_t len, uint16_t offset)
+  {
+    const char *value = (const char*)attr->user_data;
+    if (NULL != latestPds) {
+      PayloadTimestamp pts; // now
+      auto payload = latestPds(pts);
+      if (payload.size() > 0) {
+        char* newvalue = new char[payload.size()]; // TODO replace this with maximal fixed payload char array that we re-use
+        std::size_t i;
+        for (i = 0;i < payload.size();i++) {
+          newvalue[i] = (char)payload.at(i);
+        }
+        value = newvalue;
+        auto res = bt_gatt_attr_read(conn, attr, buf, len, offset, value,
+          payload.size());
+        delete newvalue;
+        return res;
+      // } else {
+      //   value = "venue value"; // TODO replace with the use of PDS
+      }
+    }
+    return bt_gatt_attr_read(conn, attr, buf, len, offset, value,
+      strlen(value));
+  }
+  
+  ssize_t write_v2(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+        const void *buf, uint16_t len, uint16_t offset,
+        uint8_t flags)
+  {
+    uint8_t *value = (uint8_t*)attr->user_data;
+
+    if (offset + len > sizeof(vnd_value)) {
+      return BT_GATT_ERR(BT_ATT_ERR_INVALID_OFFSET);
+    }
+
+    memcpy(value + offset, buf, len);
+
+    // TODO raise this write as a message in the Herald Protocol V2 stack
+
+    return len;
+  }
+
+
+
+  static struct bt_gatt_exchange_params mtu_exchange_params;
+
+  static void mtu_exchange_cb(struct bt_conn *conn, uint8_t err,
+            struct bt_gatt_exchange_params *params)
+  {
+    printk("%s: MTU exchange %s (%u)\n", __func__,
+          err == 0U ? "successful" : "failed",
+          bt_gatt_get_mtu(conn));
+  }
+
+  static int mtu_exchange(struct bt_conn *conn)
+  {
+    int err;
+
+    printk("%s: Current MTU = %u\n", __func__, bt_gatt_get_mtu(conn));
+
+    mtu_exchange_params.func = mtu_exchange_cb;
+
+    printk("%s: Exchange MTU...\n", __func__);
+    err = bt_gatt_exchange_mtu(conn, &mtu_exchange_params);
+    if (err) {
+      printk("%s: MTU exchange failed (err %d)", __func__, err);
+    }
+
+    return err;
+  }
+  
+  void mtu_updated(struct bt_conn *conn, uint16_t tx, uint16_t rx)
+  {
+    printk("Updated MTU: TX: %d RX: %d bytes\n", tx, rx);
+  }
+  
+  static struct bt_gatt_cb gatt_callbacks = {
+    .att_mtu_updated = mtu_updated
+  };
+
+  void registerTransmitterCallbacks() {  
+  	bt_gatt_cb_register(&gatt_callbacks);
+  }
 }
+
 
 }
 }

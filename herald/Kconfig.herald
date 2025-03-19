@@ -1,0 +1,12 @@
+menu "Herald"
+
+config HERALD_PROTOCOL_V2
+    bool "Enable Herald Protocol V2"
+    default n
+
+config HERALD_MESH
+    bool "Enable Herald Mesh"
+    default n
+    select HERALD_PROTOCOL_V2
+
+endmenu

@@ -99,6 +99,23 @@ public:
     return receiver.immediateSendAll(data);
   }
 
+  void queueMessageForSending(Data data, const TargetIdentifier& targetIdentifier) {
+    // Get target from DB
+    BLEDevice& device = database.device(targetIdentifier);
+    // Enqueue message for sending
+    device.writeMessage(data);
+  }
+
+  void queueMessageForSending(Data data, const RSSI& minRSSI) {
+    auto results = database.matches([&minRSSI](const BLEDevice& d) {
+      return d.rssi() >= minRSSI;
+    });
+    
+    for (auto& match : results) {
+      match.value().get().writeMessage(data);
+    }
+  }
+
   // Sensor overrides
   void start() {
     if (!addedSelfAsDelegate) {

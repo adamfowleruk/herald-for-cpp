@@ -1,0 +1,16 @@
+# menu "Application"
+
+# config APP_FOO
+#     bool "Enable bar"
+#     default y
+
+# endmenu
+
+
+menu "Herald"
+rsource "../herald/Kconfig.herald"
+endmenu
+
+menu "Zephyr Kernel"
+source "Kconfig.zephyr"
+endmenu

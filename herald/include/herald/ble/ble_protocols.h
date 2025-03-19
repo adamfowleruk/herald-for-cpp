@@ -50,6 +50,9 @@ public:
   virtual std::optional<Activity> readPayload(Activity) = 0;
   // virtual std::optional<Activity> immediateSend(Activity) = 0;
   // virtual std::optional<Activity> immediateSendAll(Activity) = 0;
+
+  // TODO consider creating a special Herald Protocol V2 provider
+  virtual std::optional<Activity> writeMessage(Activity) = 0; // All write messages, not just payloads
 };
 
 }

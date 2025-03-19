@@ -74,6 +74,10 @@ public:
   //   return {};
   // }
   
+  std::optional<Activity> writeMessage(Activity) override {
+    return {};
+  }
+  
 };
 
 }

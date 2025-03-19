@@ -45,6 +45,9 @@ struct BLESensorConfiguration {
   /// \brief Primary payload characteristic (read) for distributing payload data from peripheral to central, e.g. identity data
   /// - Characteristic UUID is randomly generated V4 UUIDs that has been tested for uniqueness by conducting web searches to ensure it returns no results.
   UUID payloadCharacteristicUUID;
+  /// \brief V2 Herald Protocol primary payload characteristic (write) for distributing payload data
+  /// \since v2.3 September 2024
+  UUID heraldProtocolV2CharacteristicUUID;
   
   /// \brief Manufacturer data is being used on Android to store pseudo device address
   /// - Pending update to dedicated ID
@@ -99,6 +102,14 @@ struct BLESensorConfiguration {
   bool advertisingEnabled;
   /// \brief Does this Herald application support scanning? (Simple Venue Beacons don't)
   bool scanningEnabled;
+
+  /// \brief Enables the V2 (write based) protocol. Required for MESH
+  /// \since v2.3 September 2024
+  bool heraldProtocolV2Enabled;
+
+  /// \brief Enables the Herald Mesh over the V2 (write based) protocol.
+  /// \since v2.3 September 2024
+  bool heraldMeshEnabled;
 
 
 }; // end struct

@@ -42,11 +42,7 @@ LOG_MODULE_REGISTER(app, CONFIG_APP_LOG_LEVEL);
 
 /* The devicetree node identifier for the "led0" alias. */
 #define LED0_NODE DT_ALIAS(led0)
-#define LED1_NODE DT_ALIAS(led1)
-#define LED2_NODE DT_ALIAS(led2)
 static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
-static const struct gpio_dt_spec led_green = GPIO_DT_SPEC_GET(LED1_NODE, gpios);
-static const struct gpio_dt_spec led_blue = GPIO_DT_SPEC_GET(LED2_NODE, gpios);
 
 /* The maximum name length allowed in Flash storage */
 #define MAX_NAME_LENGTH 40
@@ -188,30 +184,14 @@ struct basic_venue {
 // 	.name = "Herald-04"
 // };
 
+// A Herald Mesh Beacon will advertise just like a Herald Venue Beacon, but with a name becoming the Mesh Node ID
+
 static struct basic_venue noVenue = {
     .country = 0,
 	.state = 0,
 	.code = 0,
-	.name = "UnconfiguredHeraldBeacon"
+	.name = "UnconfiguredHeraldMeshRelay"
 };
-
-static int reducer = 4;
-
-void green_on() {
-	gpio_pin_configure_dt(&led_green, GPIO_OUTPUT_ACTIVE);
-}
-
-void green_off() {
-	gpio_pin_configure_dt(&led_green, GPIO_OUTPUT_INACTIVE);
-}
-
-void blue_on() {
-	gpio_pin_configure_dt(&led_blue, GPIO_OUTPUT_ACTIVE);
-}
-
-void blue_off() {
-	gpio_pin_configure_dt(&led_blue, GPIO_OUTPUT_INACTIVE);
-}
 
 void herald_entry() {
 	APP_DBG("Herald entry");
@@ -230,7 +210,10 @@ void herald_entry() {
 	
 	// Disable receiver / scanning mode - we're just transmitting our value
 	BLESensorConfiguration config = ctx.getSensorConfiguration(); // copy ctor
-	config.scanningEnabled = false;
+    // config.heraldProtocolV2Enabled = true; // Enable Herald V2 mesh underlying protocol
+    // config.heraldMeshEnabled true; // Enable the mesh
+    // The above two are set via Kconfig now. See bottom of ../prj.conf for details
+	config.scanningEnabled = true; // Required to find other mesh devices
 	// config.advertisingEnabled = true; // default
 	ctx.setSensorConfiguration(config);
 
@@ -241,6 +224,9 @@ void herald_entry() {
 	std::uint16_t country = noVenue.country;
 	std::uint16_t state = noVenue.state;
 	std::uint32_t code = noVenue.code;
+
+    // TODO lon lat for Mesh Relay BUT only over encrypted channel, not in advertisement (TBD)
+
 	// X, Y, Z positions in CM from a common origin
 	std::uint16_t x = 0;
 	std::uint16_t y = 0;
@@ -253,13 +239,11 @@ void herald_entry() {
 	if (err < 0) {
 		APP_DBG("Error opening storage flash area");
 	} else {
-		reducer = 2;
 		APP_DBG("Attempting to read flash storage...");
 		// 8 bytes for numeric data, 32 max for venue name
 		uint8_t buffer[MAX_NAME_LENGTH];
 		int readRet = flash_area_read(storageArea, 0, buffer, MAX_NAME_LENGTH);
 		if (0 == readRet) {
-			blue_on();
 			// Read OK
 			// Check values are not all FF or 00
 			size_t nonEmptyCount = 0;
@@ -276,8 +260,6 @@ void herald_entry() {
 			if (0 == nonEmptyCount) {
 				APP_DBG("Read flash configuration area is empty. Using default configuration.");
 			} else {
-				blue_off();
-				green_on();
 				APP_DBG("Found configuration");
 				country = (uint16_t)(*buffer);
 				state = (uint16_t)(*(buffer + 2));
@@ -300,14 +282,9 @@ void herald_entry() {
 				}
 				name = std::string(cbuffer);
 				APP_DBG("Configuration successfully read from flash storage");
-				reducer = 1;
-				green_on();
-				blue_on();
 			}
-			reducer = 1;
 		} else {
 			APP_DBG("Error reading flash storage area");
-			reducer = 8;
 		}
 		flash_area_close(storageArea);
 	}
@@ -339,7 +316,7 @@ void herald_entry() {
 	// Start array (and thus start advertising)
 	sa.start();
 
-	int iter = 0;
+	std::uint64_t iter = 0;
 	// APP_DBG("got iter!");
 	// k_sleep(K_SECONDS(2));
 	Date last;
@@ -360,9 +337,16 @@ void herald_entry() {
 		}
 		
 		if (0 == iter % (5000 / delay)) {
-			APP_DBG("herald thread still running. Iteration: %d", iter);
+			APP_DBG("herald thread still running. Iteration: %lld", iter);
 			// runner.run(Date()); // Note: You may want to do this less or more regularly depending on your requirements
 			APP_ERR("Memory pages free in Data Arena: %d", herald::datatype::Data::getArena().pagesFree());
+
+			// Send routine message - just our node name and iteration tick for now
+			// TODO make this a better status message
+			Data toSend;
+			toSend.append(extendedData.payload());
+			toSend.append(iter);
+			ble.queueMessageForSending(toSend,RSSI(-99));
 		}
 
 		last = now;
@@ -399,7 +383,7 @@ int main(void)
 	 * of starting delayed work so we do it here
 	 */
 	while (1) {
-		k_sleep(K_MSEC(2000 / reducer));
+		k_sleep(K_SECONDS(2));
 		
 		ret = gpio_pin_toggle_dt(&led);
 		if (ret < 0) {

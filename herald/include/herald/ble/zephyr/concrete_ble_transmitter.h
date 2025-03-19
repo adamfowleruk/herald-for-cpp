@@ -74,6 +74,15 @@ namespace zephyrinternal {
   ssize_t write_payload(struct bt_conn *conn, const struct bt_gatt_attr *attr,
     const void *buf, uint16_t len, uint16_t offset,
     uint8_t flags);
+
+  // Herald Protocol V2 characteristic read/write (only write is used)
+  ssize_t read_v2(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+    void *buf, uint16_t len, uint16_t offset);
+  ssize_t write_v2(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+    const void *buf, uint16_t len, uint16_t offset,
+    uint8_t flags);
+
+  void registerTransmitterCallbacks();
 }
 
 
@@ -136,7 +145,9 @@ public:
     // Ensure our zephyr context has bluetooth ready
     m_context.getPlatform().startBluetooth();
 
-    HTDBG("Bluetooth started. Requesting start of adverts");
+    HTDBG("Bluetooth started. Registering callbacks. Requesting start of adverts");
+
+    zephyrinternal::registerTransmitterCallbacks();
 
     // Ensures the latest customServices are passed
     m_context.getPlatform().getAdvertiser().startAdvertising();

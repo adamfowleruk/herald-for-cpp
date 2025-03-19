@@ -379,6 +379,30 @@ BLEDeviceFlags::hasEverConnected(bool newValue)
   bitFields.set(15,newValue);
 }
 
+bool
+BLEDeviceFlags::supportsProtocolV2() const
+{
+  return bitFields.test(16);
+}
+
+void
+BLEDeviceFlags::supportsProtocolV2(bool supported)
+{
+  bitFields.set(16,supported);
+}
+
+bool
+BLEDeviceFlags::supportsHeraldMesh() const
+{
+  return bitFields.test(17);
+}
+
+void
+BLEDeviceFlags::supportsHeraldMesh(bool supported)
+{
+  bitFields.set(17,supported);
+}
+
 
 BLEDevice::BLEDevice()
   : Device(),
@@ -389,7 +413,8 @@ BLEDevice::BLEDevice()
     lastUpdated(Date(0)),
     stateData(std::monostate()),
     payload(),
-    mRssi(0)
+    mRssi(0),
+    writeMessageQueue()
 {
   ;
 }
@@ -405,7 +430,8 @@ BLEDevice::BLEDevice(BLESensorConfiguration& config)
     lastUpdated(Date(0)),
     stateData(std::monostate()),
     payload(),
-    mRssi(0)
+    mRssi(0),
+    writeMessageQueue()
 {
   ;
 }
@@ -420,7 +446,8 @@ BLEDevice::BLEDevice(BLESensorConfiguration& config, TargetIdentifier identifier
     lastUpdated(createdAt),
     stateData(DiscoveredState()),
     payload(),
-    mRssi(0)
+    mRssi(0),
+    writeMessageQueue()
 {
   flags.internalState(BLEInternalState::discovered);
   flags.state(BLEDeviceState::disconnected);
@@ -440,7 +467,8 @@ BLEDevice::BLEDevice(const BLEDevice& other)
     lastUpdated(other.lastUpdated),
     stateData(other.stateData),
     payload(other.payload),
-    mRssi(other.mRssi)
+    mRssi(other.mRssi),
+    writeMessageQueue(other.writeMessageQueue)
 {
   ;
 }
@@ -459,6 +487,7 @@ BLEDevice::reset(const TargetIdentifier& newID, BLEDeviceDelegate& newDelegate)
   flags.state(BLEDeviceState::disconnected); // allows action from protocol providers (i.e. no longer uninitialised)
   payload.clear();
   mRssi = 0;
+  writeMessageQueue.clear();
 }
 
 BLEDevice&
@@ -472,6 +501,7 @@ BLEDevice::operator=(const BLEDevice& other)
   stateData = other.stateData;
   payload = other.payload;
   mRssi = other.mRssi;
+  writeMessageQueue = other.writeMessageQueue;
   return *this;
 }
 
@@ -911,6 +941,48 @@ BLEDevice::payloadCharacteristic(UUID newChar)
     flags.hasPayloadCharacteristic(true);
   }
   lastUpdated.setToNow();
+}
+
+bool
+BLEDevice::supportsProtocolV2() const
+{
+  return flags.supportsProtocolV2();
+}
+
+void
+BLEDevice::supportsProtocolV2(bool supported)
+{
+  flags.supportsProtocolV2(supported);
+}
+
+bool
+BLEDevice::supportsHeraldMesh() const
+{
+  return flags.supportsHeraldMesh();
+}
+
+void
+BLEDevice::supportsHeraldMesh(bool supported)
+{
+  flags.supportsHeraldMesh(supported);
+}
+
+void
+BLEDevice::writeMessage(Data message)
+{
+  writeMessageQueue.add(message);
+}
+
+std::size_t
+BLEDevice::getQueueSize() const
+{
+  return writeMessageQueue.size();
+}
+
+AllocatableArray<Data,20>&
+BLEDevice::messageQueue()
+{
+  return writeMessageQueue;
 }
 
 // State engine methods
